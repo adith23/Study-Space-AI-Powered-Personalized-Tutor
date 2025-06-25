@@ -120,4 +120,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - OpenAI for GPT models
 - Anthropic for Claude models
-- The open-source community for various tools and libraries
