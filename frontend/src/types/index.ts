@@ -28,4 +28,12 @@ export interface UploadResponse {
   stored_path?: string;
   url?: string; 
   file_type: string;
+  status: string;
+}
+
+export interface StatusResponse {
+  id: number;
+  name: string;
+  status: "pending" | "processing" | "success" | "failed";
+  error_message?: string;
 }

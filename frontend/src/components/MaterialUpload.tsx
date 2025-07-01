@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import {
   ChevronDown,
   BrainCircuit,
@@ -8,7 +8,6 @@ import {
   ArrowUp,
   XCircle,
 } from "lucide-react";
-import type { UploadResponse } from "../types";
 
 // Define the file types for the dropdown
 const fileTypes = [
@@ -57,15 +56,11 @@ export default function MaterialUpload() {
     setIsError(false);
 
     try {
-      await axios.post<UploadResponse>(
-        "http://127.0.0.1:8000/api/v1/materials/file",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      await api.post("/materials/file", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       setStatusMessage(`Successfully uploaded!`);
       setIsError(false);

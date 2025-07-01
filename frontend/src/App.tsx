@@ -5,7 +5,12 @@ import { setAuthToken } from "./lib/api";
 import LoginForm from "./components/LoginForm";
 import SignupForm from "./components/SignupForm";
 import Home from "./pages/home";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 function AppContent() {
   const { token } = useAuth();
@@ -19,9 +24,18 @@ function AppContent() {
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-8">Study Space</h1>
         <Routes>
-          <Route path="/" element={token ? <Home /> : <Navigate to="/login" />} />
-          <Route path="/login" element={!token ? <LoginForm /> : <Navigate to="/" />} />
-          <Route path="/signup" element={!token ? <SignupForm /> : <Navigate to="/" />} />
+          <Route
+            path="/"
+            element={token ? <Home /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/login"
+            element={!token ? <LoginForm /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/signup"
+            element={!token ? <SignupForm /> : <Navigate to="/" />}
+          />
         </Routes>
       </div>
     </Router>
@@ -31,7 +45,7 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-        <AppContent />
+      <AppContent />
     </AuthProvider>
   );
 }

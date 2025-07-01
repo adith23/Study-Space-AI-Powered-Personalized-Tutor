@@ -20,6 +20,7 @@ class UploadedFileResponse(BaseModel):
     stored_path: Optional[str] = None
     url: Optional[HttpUrl] = None
     file_type: FileType
+    name: Optional[str] = None
 
     class Config:
         orm_mode = True
