@@ -19,13 +19,15 @@ class Settings(BaseSettings):
 
     # NEW: AI Model Configuration
     EMBEDDING_MODEL_NAME: str = "all-MiniLM-L6-v2"
-    OPENAI_API_KEY: str = "your-openai-api-key-here"  # IMPORTANT: Add your key
+
+    # NEW: Switched to Google Gemini
+    GEMINI_API_KEY: str = "AIzaSyCNs4jA-oCgdU55gjMtrIGuGCqiVy99KH0"
 
     # NEW: Pinecone Configuration
     PINECONE_API_KEY: str = (
         "pcsk_2hbFSb_6QL7j82EkvfPKSSgrp13H35ApaY5hkxVh1Mu56RRBtnvZehGRwAi8byZMKZLpmH"
     )
-    PINECONE_ENVIRONMENT: str = "your-pinecone-environment-here"  # e.g., "gcp-starter"
+    PINECONE_ENVIRONMENT: str = "gcp-starter"  # e.g., "gcp-starter"
     PINECONE_INDEX_NAME: str = "study-space-index"
 
     # JWT Configuration
@@ -50,6 +52,7 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"  # This will load environment variables from .env file
+        case_sensitive = True
 
 
 settings = Settings()

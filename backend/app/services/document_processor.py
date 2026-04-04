@@ -1,6 +1,6 @@
 import logging
 from langchain_community.document_loaders import UnstructuredFileLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from pinecone import Pinecone as PineconeClient, ServerlessSpec
 from langchain_pinecone import PineconeVectorStore

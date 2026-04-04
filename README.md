@@ -16,6 +16,7 @@ An intelligent learning platform that provides personalized study materials, int
 ## Tech Stack
 
 ### Backend
+
 - FastAPI (Python)
 - PostgreSQL
 - Redis
@@ -25,6 +26,7 @@ An intelligent learning platform that provides personalized study materials, int
 - Alembic
 
 ### Frontend
+
 - Next.js
 - React
 - TypeScript
@@ -33,6 +35,7 @@ An intelligent learning platform that provides personalized study materials, int
 - WebSocket
 
 ### AI/ML
+
 - OpenAI GPT
 - Anthropic Claude
 - Custom ML models
@@ -42,6 +45,7 @@ An intelligent learning platform that provides personalized study materials, int
 ## Getting Started
 
 ### Prerequisites
+
 - Docker and Docker Compose
 - Python 3.9+
 - Node.js 18+
@@ -51,23 +55,27 @@ An intelligent learning platform that provides personalized study materials, int
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/yourusername/study-space.git
 cd study-space
 ```
 
 2. Set up environment variables:
+
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
 3. Start the development environment:
+
 ```bash
 docker-compose up -d
 ```
 
 4. Access the applications:
+
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8000
 - API Documentation: http://localhost:8000/docs
@@ -75,15 +83,26 @@ docker-compose up -d
 ## Development
 
 ### Backend Development
+
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # or `venv\Scripts\activate` on Windows
+source venv/bin/activate or venv\Scripts\activate
 pip install -r requirements/dev.txt
+pip install -r requirements.txt
 uvicorn app.main:app --reload
+
+cd backend
+uvicorn app.main:app --reload
+uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+cd backend
+venv\Scripts\activate
+celery -A app.core.celery_worker.celery_app worker --loglevel=info --pool=threads
 ```
 
 ### Frontend Development
+
 ```bash
 cd frontend
 npm install
@@ -93,12 +112,14 @@ npm run dev
 ## Testing
 
 ### Backend Tests
+
 ```bash
 cd backend
 pytest
 ```
 
 ### Frontend Tests
+
 ```bash
 cd frontend
 npm test
