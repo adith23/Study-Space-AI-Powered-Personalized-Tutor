@@ -1,107 +1,127 @@
 # Study Space - AI-Powered Personalized Tutor
 
-An intelligent learning platform that provides personalized study materials, interactive quizzes, and adaptive learning experiences powered by AI.
-
-## Features
-
-- AI-powered content processing and analysis
-- Personalized learning paths
-- Interactive quizzes and flashcards
-- Real-time study sessions
-- Progress tracking and analytics
-- Multi-format content support (PDF, Video, Text)
-- Adaptive difficulty adjustment
-- Visual learning aids and mind maps
+An AI-powered learning platform with:
+- FastAPI backend for auth, materials, and chat APIs
+- React + TypeScript + Vite frontend
+- Async document processing with Celery + Redis
+- PostgreSQL for application data
+- Pinecone + embeddings for retrieval
 
 ## Tech Stack
 
 ### Backend
-
-- FastAPI (Python)
-- PostgreSQL
-- Redis
-- Celery
+- FastAPI
 - SQLAlchemy
-- Pydantic
-- Alembic
+- PostgreSQL
+- Celery
+- Redis
+- LangChain + Google Gemini + Pinecone
 
 ### Frontend
-
-- Next.js
 - React
 - TypeScript
+- Vite
 - Tailwind CSS
-- Redux Toolkit
-- WebSocket
 
-### AI/ML
+## Prerequisites
 
-- OpenAI GPT
-- Anthropic Claude
-- Custom ML models
-- Embedding models
-- Vision models
-
-## Getting Started
-
-### Prerequisites
-
-- Docker and Docker Compose
-- Python 3.9+
+- Python 3.10+
 - Node.js 18+
-- PostgreSQL 14+
-- Redis 6+
+- PostgreSQL
+- Redis
 
-### Installation
+## Project Structure
 
-1. Clone the repository:
-
-```bash
-git clone https://github.com/yourusername/study-space.git
-cd study-space
+```text
+backend/   FastAPI app, Celery tasks, DB models
+frontend/  React + Vite app
 ```
 
-2. Set up environment variables:
+## Environment Configuration
 
-```bash
-cp .env.example .env
-# Edit .env with your configuration
+Backend settings are loaded from `backend/.env` (see `backend/app/core/config.py`).
+
+Create `backend/.env` with at least:
+
+```env
+DATABASE_URL=postgresql://postgres:password@localhost:5432/StudySpace
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
+
+JWT_SECRET_KEY=change-me
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+
+GEMINI_API_KEY=your_gemini_key
+PINECONE_API_KEY=your_pinecone_key
+PINECONE_INDEX_NAME=study-space-index
+PINECONE_ENVIRONMENT=gcp-starter
 ```
 
-3. Start the development environment:
+## Backend Setup and Run
 
-```bash
-docker-compose up -d
+From the repository root:
+
+### Windows (CMD)
+
+```bat
+cd backend
+python -m venv venv
+venv\Scripts\activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+python -m uvicorn app.main:app --reload
 ```
 
-4. Access the applications:
+### Windows (PowerShell)
 
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8000
-- API Documentation: http://localhost:8000/docs
+```powershell
+cd backend
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+python -m uvicorn app.main:app --reload
+```
 
-## Development
-
-### Backend Development
+### Linux/macOS
 
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate or venv\Scripts\activate
-pip install -r requirements/dev.txt
+source venv/bin/activate
+python -m pip install --upgrade pip
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload
+```
 
-cd backend
-uvicorn app.main:app --reload
-uvicorn app.main:app --host 127.0.0.1 --port 8000
+Backend API:
+- Base URL: `http://127.0.0.1:8000`
+- Docs: `http://127.0.0.1:8000/api/v1/docs`
 
+## Celery Worker (Required for file processing)
+
+Run Redis first, then in a new terminal:
+
+### Windows (CMD / PowerShell)
+
+```bat
 cd backend
 venv\Scripts\activate
 celery -A app.core.celery_worker.celery_app worker --loglevel=info --pool=threads
 ```
 
-### Frontend Development
+### Linux/macOS
+
+```bash
+cd backend
+source venv/bin/activate
+celery -A app.core.celery_worker.celery_app worker --loglevel=info
+```
+
+## Frontend Setup and Run
+
+From the repository root:
 
 ```bash
 cd frontend
@@ -109,35 +129,21 @@ npm install
 npm run dev
 ```
 
-## Testing
+Frontend URL:
+- `http://localhost:5173`
 
-### Backend Tests
+## Common Dev Commands
+
+### Backend tests
 
 ```bash
 cd backend
 pytest
 ```
 
-### Frontend Tests
+### Frontend build
 
 ```bash
 cd frontend
-npm test
+npm run build
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- OpenAI for GPT models
-- Anthropic for Claude models
