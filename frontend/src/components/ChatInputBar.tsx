@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Paperclip, ArrowUp, XCircle, Loader2 } from "lucide-react";
-import type { UploadedFileState } from "../components/MaterialUpload";
+import type { UploadedFileState } from "./StudySpaceChat";
 
 interface ChatInputBarProps {
   onChatSubmit: (query: string) => Promise<void>;
@@ -128,7 +128,7 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
           ref={fileInputRef}
           onChange={handleFileSelect}
           className="hidden"
-          accept=".pdf,.txt,.md" // Example file types
+          accept=".pdf,.txt,.md" 
         />
         <textarea
           value={query}

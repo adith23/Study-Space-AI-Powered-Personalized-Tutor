@@ -103,6 +103,9 @@ Backend API:
 
 Run Redis first, then in a new terminal:
 
+sudo service redis-server start
+
+
 ### Windows (CMD / PowerShell)
 
 ```bat
@@ -126,6 +129,8 @@ From the repository root:
 ```bash
 cd frontend
 npm install
+
+cd frontend
 npm run dev
 ```
 

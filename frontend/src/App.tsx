@@ -1,4 +1,3 @@
-import { AuthProvider } from "./contexts/AuthContext";
 import { useAuth } from "./contexts/AuthContext";
 import { useEffect } from "react";
 import { setAuthToken } from "./lib/api";
@@ -43,11 +42,8 @@ function AppContent() {
 }
 
 function App() {
-  return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
-  );
+  // AuthProvider is mounted in main.tsx
+  return <AppContent />;
 }
 
 export default App;

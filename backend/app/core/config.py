@@ -1,8 +1,7 @@
 from typing import List
 from pydantic_settings import BaseSettings
-from pydantic import AnyHttpUrl, validator
-from pinecone import Pinecone
-
+from pydantic import validator
+import os
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Study Space API"
@@ -11,29 +10,33 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
 
     # Database Configuration
-    DATABASE_URL: str = "postgresql://postgres:password1234@localhost:5432/StudySpace"
+    DATABASE_URL: str = os.getenv("DATABASE_URL")
 
     # NEW: Redis/Celery Configuration
-    CELERY_BROKER_URL: str = "redis://localhost:6379/0"
-    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/0"
+    CELERY_BROKER_URL: str = os.getenv("CELERY_BROKER_URL")
+    CELERY_RESULT_BACKEND: str = os.getenv("CELERY_RESULT_BACKEND")
 
     # NEW: AI Model Configuration
-    EMBEDDING_MODEL_NAME: str = "all-MiniLM-L6-v2"
+    EMBEDDING_MODEL_NAME: str = os.getenv("EMBEDDING_MODEL_NAME")
 
     # NEW: Switched to Google Gemini
-    GEMINI_API_KEY: str = "AIzaSyCNs4jA-oCgdU55gjMtrIGuGCqiVy99KH0"
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY")
+    GEMINI_CHAT_MODEL: str = "gemini-2.5-flash"
 
     # NEW: Pinecone Configuration
-    PINECONE_API_KEY: str = (
-        "pcsk_2hbFSb_6QL7j82EkvfPKSSgrp13H35ApaY5hkxVh1Mu56RRBtnvZehGRwAi8byZMKZLpmH"
+    PINECONE_API_KEY: str = os.getenv("PINECONE_API_KEY")
+    PINECONE_ENVIRONMENT: str = os.getenv("PINECONE_ENVIRONMENT")
+    PINECONE_INDEX_NAME: str = os.getenv("PINECONE_INDEX_NAME")
+    PINECONE_INDEX_HOST: str = os.getenv("PINECONE_INDEX_HOST", "")
+    PINECONE_NAMESPACE: str = os.getenv("PINECONE_NAMESPACE", "__default__")
+    PINECONE_INTEGRATED_TEXT_FIELD: str = os.getenv(
+        "PINECONE_INTEGRATED_TEXT_FIELD", "text"
     )
-    PINECONE_ENVIRONMENT: str = "gcp-starter"  # e.g., "gcp-starter"
-    PINECONE_INDEX_NAME: str = "study-space-index"
 
     # JWT Configuration
-    JWT_SECRET_KEY: str = "your-secret-key-here"  # Change this to a secure secret key
-    JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 300000
+    JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "")
+    JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
 
     # CORS Configuration
     CORS_ORIGINS: List[str] = [

@@ -1,10 +1,10 @@
-import json
 from typing import List
+
 from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_core.messages import BaseMessage, messages_to_dict, messages_from_dict
+from langchain_core.messages import BaseMessage, messages_from_dict, messages_to_dict
 from sqlalchemy.orm import Session
 
-from app.models.chat import ChatMessage
+from app.models.chat_model import ChatMessage
 
 
 class PostgresChatMessageHistory(BaseChatMessageHistory):
@@ -26,12 +26,10 @@ class PostgresChatMessageHistory(BaseChatMessageHistory):
             .all()
         )
 
-        # The 'data' field in LangChain messages is a dict, so we convert it
         items = [
             {"type": msg.role, "data": {"content": msg.content}} for msg in db_messages
         ]
 
-        # Use LangChain's utility to convert dicts to message objects
         return messages_from_dict(items)
 
     def add_message(self, message: BaseMessage) -> None:

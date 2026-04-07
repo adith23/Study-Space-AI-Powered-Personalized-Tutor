@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import api from "../lib/api";
 import { Loader2 } from "lucide-react";
-import ChatInputBar from "./ChatInputBar"; // New
+import ChatInputBar from "./ChatInputBar";
 import type {
   ChatMessage,
   UploadedFileState,
-} from "../components/MaterialUpload";
+} from "./StudySpaceChat";
 
 interface ChatInterfaceProps {
   sessionId: string;

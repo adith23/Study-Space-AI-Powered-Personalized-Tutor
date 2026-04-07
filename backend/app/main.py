@@ -3,10 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import Base, engine
 
 from app.core.config import settings
-from app.api.v1.api import api_router
+from app.api.v1.api_routes import api_router
 
 # Import models to register them with SQLAlchemy
-from app.models import user, material
+from app.models import user_model, material_model, chat_model  # register ORM metadata
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

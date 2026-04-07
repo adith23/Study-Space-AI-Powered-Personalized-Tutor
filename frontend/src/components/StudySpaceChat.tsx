@@ -1,14 +1,24 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import api, { setAuthToken } from "../lib/api";
-import Sidebar from "../components/Sidebar"; // New
-import ChatInterface from "../components/ChatInterface"; // Updated
+import Sidebar from "./Sidebar"; // New
+import ChatInterface from "./ChatInterface"; // Updated
 
-// --- TYPE DEFINITIONS ---
-// (These can be moved to a types.ts file for better organization)
 export interface UploadedFileState {
   id: number;
   name: string;
   status: "pending" | "processing" | "success" | "failed";
+}
+
+interface UploadedFileUploadResponse {
+  id: number;
+  name: string;
+  status?: UploadedFileState["status"];
+}
+
+interface UploadedFileListResponse {
+  id: number;
+  name: string | null;
+  status: string;
 }
 export interface ChatSession {
   id: string;
@@ -19,8 +29,32 @@ export interface ChatMessage {
   content: string;
 }
 
+const VALID_FILE_STATUSES = new Set<UploadedFileState["status"]>([
+  "pending",
+  "processing",
+  "success",
+  "failed",
+]);
+
+function normalizeFileStatus(status: string | undefined): UploadedFileState["status"] {
+  if (status && VALID_FILE_STATUSES.has(status as UploadedFileState["status"])) {
+    return status as UploadedFileState["status"];
+  }
+  return "pending";
+}
+
+function normalizeUploadedFile(
+  file: UploadedFileListResponse | UploadedFileUploadResponse
+): UploadedFileState {
+  return {
+    id: file.id,
+    name: file.name ?? "Untitled document",
+    status: normalizeFileStatus(file.status),
+  };
+}
+
 // --- MAIN PAGE COMPONENT ---
-export default function StudySpacePage() {
+export default function StudySpaceChat() {
   const [files, setFiles] = useState<UploadedFileState[]>([]);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -45,7 +79,20 @@ export default function StudySpacePage() {
         console.error("Failed to fetch chat sessions:", error);
       }
     };
+
+    const fetchFiles = async () => {
+      try {
+        const response = await api.get<UploadedFileListResponse[]>(
+          "/materials/files"
+        );
+        setFiles(response.data.map(normalizeUploadedFile));
+      } catch (error) {
+        console.error("Failed to fetch uploaded files:", error);
+      }
+    };
+
     fetchSessions();
+    fetchFiles();
   }, []); // Run only once on mount
 
   // Effect for polling file statuses
@@ -106,15 +153,18 @@ export default function StudySpacePage() {
     formData.append("name", file.name);
 
     try {
-      const response = await api.post<UploadedFileState>(
+      const response = await api.post<UploadedFileUploadResponse>(
         "/materials/file",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
-      setFiles((prev) => [...prev, response.data]);
+      const uploaded = normalizeUploadedFile(response.data);
+      setFiles((prev) => {
+        const deduped = prev.filter((fileItem) => fileItem.id !== uploaded.id);
+        return [uploaded, ...deduped];
+      });
     } catch (error) {
       console.error("Upload failed", error);
-      // Optionally, add a failed file to the list to show an error
     }
   };
 

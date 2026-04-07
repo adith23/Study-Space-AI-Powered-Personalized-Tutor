@@ -9,7 +9,7 @@ import {
 import type {
   ChatSession,
   UploadedFileState,
-} from "../components/MaterialUpload"; // Import types
+} from "./StudySpaceChat"; // Import types
 // Import types
 
 interface SidebarProps {

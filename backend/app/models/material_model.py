@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.core.database import Base
-from app.models.user import User
+from app.models.user_model import User
 
 
 class FileType(str, enum.Enum):
@@ -17,7 +17,6 @@ class FileType(str, enum.Enum):
     youtube = "youtube"
 
 
-# NEW: Enum for processing status
 class ProcessingStatus(str, enum.Enum):
     PENDING = "pending"
     PROCESSING = "processing"
@@ -34,23 +33,18 @@ class UploadedFile(Base):
     url = Column(String, nullable=True)
     file_type = Column(Enum(FileType), nullable=False)
 
-    # NEW/MODIFIED Fields
     status = Column(
         Enum(ProcessingStatus), default=ProcessingStatus.PENDING, nullable=False
     )
     error_message = Column(String, nullable=True)
     user_id = Column(
         Integer, ForeignKey("users.id"), nullable=False
-    )  # Ensure you have a users table
-
+    )  
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
-    user = relationship("User")  # Define relationship to User model
+    user = relationship("User")  
     chunks = relationship(
         "DocumentChunk", back_populates="source_file", cascade="all, delete-orphan"
     )
-
-    # NEW: Model for text chunks and their embeddings
-
 
 class DocumentChunk(Base):
     __tablename__ = "document_chunks"
@@ -58,10 +52,9 @@ class DocumentChunk(Base):
     id = Column(Integer, primary_key=True, index=True)
     content = Column(String, nullable=False)
 
-    # NEW: A reference to the ID of the vector stored in Pinecone
     vector_id = Column(String, nullable=False, unique=True)
 
-    metadata_ = Column(JSON, name="metadata", nullable=True)  # Store page number, etc.
+    metadata_ = Column(JSON, name="metadata", nullable=True) 
 
     source_file_id = Column(Integer, ForeignKey("uploaded_files.id"), nullable=False)
     source_file = relationship("UploadedFile", back_populates="chunks")

@@ -1,4 +1,4 @@
-import MaterialUpload from '../components/MaterialUpload';
+import StudySpaceChat from '../components/StudySpaceChat';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Home() {
@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <div className="bg-black min-h-screen flex">
       <div className="flex-1 flex flex-col justify-end items-center px-4 py-32">
-        <MaterialUpload />
+        <StudySpaceChat />
       </div>
     </div>
   );

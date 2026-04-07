@@ -9,12 +9,32 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function normalizeToken(raw: string | null): string | null {
+  if (!raw) return null;
+  const token = raw.trim();
+  if (!token || token === "undefined" || token === "null") return null;
+  return token;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+  const [token, setToken] = useState<string | null>(() => {
+    const normalized = normalizeToken(localStorage.getItem("token"));
+    if (!normalized) {
+      localStorage.removeItem("token");
+      return null;
+    }
+    return normalized;
+  });
 
   const login = (newToken: string) => {
-    localStorage.setItem("token", newToken);
-    setToken(newToken);
+    const normalized = normalizeToken(newToken);
+    if (!normalized) {
+      localStorage.removeItem("token");
+      setToken(null);
+      return;
+    }
+    localStorage.setItem("token", normalized);
+    setToken(normalized);
   };
 
   const logout = () => {

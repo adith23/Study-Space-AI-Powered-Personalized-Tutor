@@ -11,10 +11,28 @@ const api = axios.create({
   },
 });
 
+function normalizeToken(raw: string | null): string | null {
+  if (!raw) return null;
+  const token = raw.trim();
+  if (!token || token === "undefined" || token === "null") return null;
+  return token;
+}
+
+// Restore Bearer header before any React effect runs
+if (typeof window !== "undefined") {
+  const stored = normalizeToken(localStorage.getItem("token"));
+  if (stored) {
+    api.defaults.headers.common["Authorization"] = `Bearer ${stored}`;
+  } else {
+    localStorage.removeItem("token");
+  }
+}
+
 // Attach token dynamically
 export function setAuthToken(token: string | null) {
-  if (token) {
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  const normalized = normalizeToken(token);
+  if (normalized) {
+    api.defaults.headers.common["Authorization"] = `Bearer ${normalized}`;
   } else {
     delete api.defaults.headers.common["Authorization"];
   }

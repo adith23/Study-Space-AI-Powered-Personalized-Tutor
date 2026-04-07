@@ -14,7 +14,6 @@ class ChatSession(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # Add a name for the chat session for easier identification
     name = Column(String, default="New Chat")
 
     user = relationship("User")
@@ -34,7 +33,6 @@ class ChatMessage(Base):
         UUID(as_uuid=True), ForeignKey("chat_sessions.id"), nullable=False
     )
 
-    # The role of the message sender (human or ai)
     role = Column(String(10), nullable=False)
     content = Column(Text, nullable=False)
 

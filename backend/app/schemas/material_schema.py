@@ -1,6 +1,9 @@
-from pydantic import BaseModel, HttpUrl
-from typing import Optional
 from enum import Enum
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, HttpUrl
+
+from app.models.material_model import ProcessingStatus
 
 class FileType(str, Enum):
     notes = "notes"
@@ -21,6 +24,14 @@ class UploadedFileResponse(BaseModel):
     url: Optional[HttpUrl] = None
     file_type: FileType
     name: Optional[str] = None
+    status: ProcessingStatus
+    error_message: Optional[str] = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
+
+
+class StatusResponse(BaseModel):
+    id: int
+    name: str
+    status: ProcessingStatus
+    error_message: Optional[str] = None

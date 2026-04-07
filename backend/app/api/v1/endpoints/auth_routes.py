@@ -1,14 +1,13 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.models.user import User
-from app.schemas.user import UserCreate, UserLogin, UserResponse
+from app.models.user_model import User
+from app.schemas.user_schema import UserCreate, UserLogin, AuthResponse
 from app.core.security import get_password_hash, verify_password, create_access_token
-from datetime import timedelta
 
 router = APIRouter()
 
-@router.post("/signup", response_model=UserResponse)
+@router.post("/signup", response_model=AuthResponse)
 def signup(user: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter((User.email == user.email) | (User.username == user.username)).first()
     if existing_user:
@@ -19,9 +18,11 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    return db_user
 
-@router.post("/login")
+    access_token = create_access_token(data={"sub": db_user.email, "user_id": str(db_user.id)})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@router.post("/login", response_model=AuthResponse)
 def login(user: UserLogin, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
     if not db_user or not verify_password(user.password, db_user.hashed_password):
