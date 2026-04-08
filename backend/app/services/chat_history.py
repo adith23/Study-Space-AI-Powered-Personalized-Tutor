@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.models.chat_model import ChatMessage
 
-
+# Postgres chat message history
 class PostgresChatMessageHistory(BaseChatMessageHistory):
     """
     Chat message history stored in a Postgres database.
@@ -34,15 +34,14 @@ class PostgresChatMessageHistory(BaseChatMessageHistory):
 
     def add_message(self, message: BaseMessage) -> None:
         """Append a message to the database."""
-        # Use LangChain's utility to convert the message object to a dict
+
         message_dict = messages_to_dict([message])[0]
 
-        # Extract role and content
         role = message_dict.get("type")
         content = message_dict.get("data", {}).get("content")
 
         if not role or not content:
-            return  # Or raise an error
+            return
 
         new_message = ChatMessage(
             session_id=self.session_id,

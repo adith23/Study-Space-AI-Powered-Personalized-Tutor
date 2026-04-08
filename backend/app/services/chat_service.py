@@ -11,10 +11,11 @@ from app.core.config import settings
 from app.models.user_model import User
 from app.schemas.chat_schema import ConversationalChatRequest
 from app.services.chat_history import PostgresChatMessageHistory
+from app.services.chat_session_service import get_chat_session
 
 pinecone = PineconeClient(api_key=settings.PINECONE_API_KEY)
 
-
+# Get the Pinecone index
 def _get_pinecone_index():
     if settings.PINECONE_INDEX_HOST:
         return pinecone.Index(host=settings.PINECONE_INDEX_HOST)
@@ -23,6 +24,7 @@ def _get_pinecone_index():
     raise ValueError("PINECONE_INDEX_HOST or PINECONE_INDEX_NAME must be configured.")
 
 
+# Extract the hits from the response
 def _extract_hits(response: object) -> list:
     if isinstance(response, dict):
         return response.get("result", {}).get("hits", []) or []
@@ -34,6 +36,7 @@ def _extract_hits(response: object) -> list:
     return hits or []
 
 
+# Retrieve the documents from the Pinecone index
 def _retrieve_documents(
     *, query_text: str, current_user: User, file_ids: list[int], top_k: int = 8
 ) -> list[Document]:
@@ -83,9 +86,17 @@ def _retrieve_documents(
 
     return documents
 
+
+# Run a conversational chat
 async def run_conversational_chat(
     *, request: ConversationalChatRequest, db: Session, current_user: User
 ) -> dict:
+    get_chat_session(
+        session_id=request.session_id,
+        db=db,
+        current_user=current_user,
+    )
+
     llm = ChatGoogleGenerativeAI(
         model=settings.GEMINI_CHAT_MODEL,
         google_api_key=settings.GEMINI_API_KEY,

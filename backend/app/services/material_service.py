@@ -14,7 +14,7 @@ from app.tasks.material_tasks import process_document_task
 
 UPLOAD_DIR = "storage/uploads"
 
-
+# Validate the URL
 def _validate_url(url: Optional[str]) -> Optional[str]:
     if not url:
         return None
@@ -34,7 +34,7 @@ def _validate_url(url: Optional[str]) -> Optional[str]:
             ],
         )
 
-
+# Create a uploaded file
 async def create_uploaded_file(
     *,
     file_type: SchemaFileType,
@@ -74,7 +74,7 @@ async def create_uploaded_file(
     process_document_task.delay(new_file.id)
     return new_file
 
-
+# Get the status of a file
 def get_user_file_status(*, file_id: int, db: Session, current_user: User) -> UploadedFile:
     file_record = (
         db.query(UploadedFile)
@@ -87,7 +87,7 @@ def get_user_file_status(*, file_id: int, db: Session, current_user: User) -> Up
 
     return file_record
 
-
+# List all files for a user
 def list_user_files(*, db: Session, current_user: User) -> List[UploadedFile]:
     return (
         db.query(UploadedFile)

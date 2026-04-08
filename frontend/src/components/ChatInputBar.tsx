@@ -11,6 +11,7 @@ interface ChatInputBarProps {
   onSelectFileForContext: React.Dispatch<React.SetStateAction<Set<number>>>;
 }
 
+// Chat input bar component
 const ChatInputBar: React.FC<ChatInputBarProps> = ({
   onChatSubmit,
   onFileUpload,
@@ -19,6 +20,8 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
   selectedFileIds,
   onSelectFileForContext,
 }) => {
+  
+  // State for the query, file to upload, and uploading status
   const [query, setQuery] = useState("");
   const [fileToUpload, setFileToUpload] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -29,6 +32,7 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
     setQuery("");
   };
 
+  // Handle key down
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -38,15 +42,16 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
     }
   };
 
+  // Handle file select
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setFileToUpload(file);
     }
-    // Reset the input value to allow selecting the same file again
     e.target.value = "";
   };
 
+  // Handle upload click
   const handleUploadClick = async () => {
     if (!fileToUpload) return;
     setIsUploading(true);
@@ -128,7 +133,7 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
           ref={fileInputRef}
           onChange={handleFileSelect}
           className="hidden"
-          accept=".pdf,.txt,.md" 
+          accept=".pdf,.txt,.md"
         />
         <textarea
           value={query}

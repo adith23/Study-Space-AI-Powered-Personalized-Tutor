@@ -6,7 +6,7 @@ from sqlalchemy.sql import func
 from app.core.database import Base
 from app.models.user_model import User
 
-
+# File type enum
 class FileType(str, enum.Enum):
     notes = "notes"
     syllabus = "syllabus"
@@ -16,19 +16,19 @@ class FileType(str, enum.Enum):
     web_link = "web_link"
     youtube = "youtube"
 
-
+# Processing status enum
 class ProcessingStatus(str, enum.Enum):
     PENDING = "pending"
     PROCESSING = "processing"
     SUCCESS = "success"
     FAILED = "failed"
 
-
+# Uploaded file model
 class UploadedFile(Base):
     __tablename__ = "uploaded_files"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=True)  # Add this line
+    name = Column(String, nullable=True) 
     stored_path = Column(String, nullable=True)
     url = Column(String, nullable=True)
     file_type = Column(Enum(FileType), nullable=False)
@@ -46,6 +46,7 @@ class UploadedFile(Base):
         "DocumentChunk", back_populates="source_file", cascade="all, delete-orphan"
     )
 
+# Document chunk model
 class DocumentChunk(Base):
     __tablename__ = "document_chunks"
 

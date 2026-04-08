@@ -28,20 +28,20 @@ CHUNK_SEPARATORS = ["\n\n", "\n", ". ", " ", ""]
 PIPELINE_VERSION = "v2"
 HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
 
-
+# Section chunk data class
 @dataclass
 class SectionChunk:
     text: str
     section_title: str
     heading_path: str
 
-
+# Get the Docling converter
 @lru_cache(maxsize=1)
 def get_docling_converter() -> DocumentConverter:
     logger.info("Initializing Docling converter...")
     return DocumentConverter()
 
-
+# Get the Pinecone index
 @lru_cache(maxsize=1)
 def get_pinecone_index():
     if settings.PINECONE_INDEX_HOST:
@@ -50,7 +50,7 @@ def get_pinecone_index():
         return pinecone.Index(settings.PINECONE_INDEX_NAME)
     raise ValueError("PINECONE_INDEX_HOST or PINECONE_INDEX_NAME must be configured.")
 
-
+# Extract the markdown with Docling
 def _extract_markdown_with_docling(file_path: str) -> str:
     conversion_result = get_docling_converter().convert(file_path)
     docling_document = getattr(conversion_result, "document", None)
@@ -63,7 +63,7 @@ def _extract_markdown_with_docling(file_path: str) -> str:
 
     return markdown_text
 
-
+# Extract the markdown with retry
 def _extract_markdown_with_retry(file_path: str) -> str:
     last_error = None
     for attempt in range(1, MAX_DOCLING_ATTEMPTS + 1):
@@ -87,7 +87,7 @@ def _extract_markdown_with_retry(file_path: str) -> str:
         f"Docling extraction failed after {MAX_DOCLING_ATTEMPTS} attempts."
     ) from last_error
 
-
+# Build the token splitter
 def _build_token_splitter() -> RecursiveCharacterTextSplitter:
     return RecursiveCharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=CHUNK_SIZE_TOKENS,
@@ -95,13 +95,13 @@ def _build_token_splitter() -> RecursiveCharacterTextSplitter:
         separators=CHUNK_SEPARATORS,
     )
 
-
+# Heading path to string
 def _heading_path_to_string(active_headings: List[Tuple[int, str]]) -> str:
     if not active_headings:
         return ""
     return " > ".join([heading for _, heading in active_headings])
 
-
+# Structure aware sections
 def _structure_aware_sections(markdown_text: str) -> List[SectionChunk]:
     lines = markdown_text.splitlines()
     sections: List[SectionChunk] = []
@@ -147,7 +147,7 @@ def _structure_aware_sections(markdown_text: str) -> List[SectionChunk]:
 
     return sections
 
-
+# Chunk with structure
 def _chunk_with_structure(markdown_text: str) -> List[SectionChunk]:
     sections = _structure_aware_sections(markdown_text)
     splitter = _build_token_splitter()
@@ -170,7 +170,7 @@ def _chunk_with_structure(markdown_text: str) -> List[SectionChunk]:
 
     return final_chunks
 
-
+# Build metadata for chunks
 def _build_metadata_for_chunks(
     chunks: List[SectionChunk], *, file_id: int, user_id: int, source: Optional[str]
 ) -> List[dict]:
@@ -189,7 +189,7 @@ def _build_metadata_for_chunks(
         for idx, chunk in enumerate(chunks)
     ]
 
-
+# Process and embed document
 def process_and_embed_document(db: Session, file_id: int):
     """
     The core function to process a single uploaded file.
@@ -222,7 +222,6 @@ def process_and_embed_document(db: Session, file_id: int):
         logger.info("Created %d text chunks.", len(texts_to_embed))
 
         # 2. Prepare data for Pinecone
-        # We need unique IDs for each vector and metadata
         vector_ids = [str(uuid4()) for _ in texts_to_embed]
 
         metadata_list = _build_metadata_for_chunks(
@@ -244,14 +243,13 @@ def process_and_embed_document(db: Session, file_id: int):
         index.upsert_records(namespace=settings.PINECONE_NAMESPACE, records=records)
 
         # 4. Store chunk metadata in PostgreSQL
-        # Delete old chunks first to ensure idempotency
         db.query(DocumentChunk).filter(DocumentChunk.source_file_id == file_id).delete()
         db.commit()
 
         for i, chunk_text in enumerate(texts_to_embed):
             new_chunk = DocumentChunk(
                 content=chunk_text,
-                vector_id=vector_ids[i],  # Store the Pinecone vector ID
+                vector_id=vector_ids[i], 
                 metadata_=metadata_list[i],
                 source_file_id=file_id,
             )

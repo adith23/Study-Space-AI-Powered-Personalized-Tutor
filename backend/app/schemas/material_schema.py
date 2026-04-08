@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, HttpUrl
 
 from app.models.material_model import ProcessingStatus
 
+# File type enum
 class FileType(str, Enum):
     notes = "notes"
     syllabus = "syllabus"
@@ -14,10 +15,12 @@ class FileType(str, Enum):
     web_link = "web_link"
     youtube = "youtube"
 
+# Uploaded file create schema
 class UploadedFileCreate(BaseModel):
     file_type: FileType
     url: Optional[HttpUrl] = None
 
+# Uploaded file response schema
 class UploadedFileResponse(BaseModel):
     id: int
     stored_path: Optional[str] = None
@@ -29,7 +32,7 @@ class UploadedFileResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-
+# Status response schema
 class StatusResponse(BaseModel):
     id: int
     name: str

@@ -17,7 +17,7 @@ from app.services.material_service import (
 
 router = APIRouter()
 
-
+# Upload a file
 @router.post("/file", response_model=UploadedFileResponse)
 async def upload_file(
     background_tasks: BackgroundTasks,
@@ -35,7 +35,7 @@ async def upload_file(
         current_user=current_user,
     )
 
-
+# Get all files for a user
 @router.get("/files", response_model=List[UploadedFileResponse])
 def get_files(
     db: Session = Depends(get_db),
@@ -43,7 +43,7 @@ def get_files(
 ):
     return list_user_files(db=db, current_user=current_user)
 
-
+# Get the status of a file
 @router.get("/{file_id}/status", response_model=StatusResponse)
 def get_file_status(
     file_id: int,

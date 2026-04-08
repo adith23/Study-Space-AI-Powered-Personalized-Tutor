@@ -6,6 +6,7 @@ from app.services.document_processor import process_and_embed_document
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 @celery_app.task(name="tasks.process_document_task")
 def process_document_task(file_id: int):
     """

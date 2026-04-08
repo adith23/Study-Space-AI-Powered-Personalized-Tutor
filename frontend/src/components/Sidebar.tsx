@@ -9,8 +9,7 @@ import {
 import type {
   ChatSession,
   UploadedFileState,
-} from "./StudySpaceChat"; // Import types
-// Import types
+} from "./StudySpaceChat"; 
 
 interface SidebarProps {
   sessions: ChatSession[];

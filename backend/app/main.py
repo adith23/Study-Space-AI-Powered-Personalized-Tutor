@@ -6,7 +6,7 @@ from app.core.config import settings
 from app.api.v1.api_routes import api_router
 
 # Import models to register them with SQLAlchemy
-from app.models import user_model, material_model, chat_model  # register ORM metadata
+from app.models import user_model, material_model, chat_model  
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -20,7 +20,7 @@ app = FastAPI(
 # Set up CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,  # Use specific origins from settings
+    allow_origins=settings.CORS_ORIGINS,  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
