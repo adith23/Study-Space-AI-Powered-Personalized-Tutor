@@ -8,6 +8,7 @@ from app.models.chat_model import ChatMessage, ChatSession
 from app.models.user_model import User
 
 
+# Get an owned chat session
 def _get_owned_chat_session(
     *, session_id: UUID, db: Session, current_user: User
 ) -> ChatSession:
@@ -20,7 +21,7 @@ def _get_owned_chat_session(
         raise HTTPException(status_code=404, detail="Chat session not found")
     return session
 
-
+# Create a chat session 
 def create_chat_session(*, db: Session, current_user: User) -> ChatSession:
     new_session = ChatSession(user_id=current_user.id)
     db.add(new_session)
@@ -28,7 +29,7 @@ def create_chat_session(*, db: Session, current_user: User) -> ChatSession:
     db.refresh(new_session)
     return new_session
 
-
+# List all chat sessions for a user
 def list_user_chat_sessions(*, db: Session, current_user: User) -> List[ChatSession]:
     return (
         db.query(ChatSession)
@@ -37,7 +38,7 @@ def list_user_chat_sessions(*, db: Session, current_user: User) -> List[ChatSess
         .all()
     )
 
-
+# Get a chat session
 def get_chat_session(*, session_id: UUID, db: Session, current_user: User) -> ChatSession:
     return _get_owned_chat_session(
         session_id=session_id,
@@ -45,7 +46,7 @@ def get_chat_session(*, session_id: UUID, db: Session, current_user: User) -> Ch
         current_user=current_user,
     )
 
-
+# List all messages for a chat session
 def list_chat_session_messages(
     *, session_id: UUID, db: Session, current_user: User
 ) -> List[ChatMessage]:

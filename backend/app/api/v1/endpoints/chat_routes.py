@@ -22,7 +22,7 @@ from app.services.chat_session_service import (
 
 router = APIRouter()
 
-
+# Create a chat session
 @router.post("/chat/sessions", response_model=ChatSessionResponse, status_code=201)
 def create_session(
     db: Session = Depends(get_db),
@@ -30,7 +30,7 @@ def create_session(
 ):
     return create_chat_session(db=db, current_user=current_user)
 
-
+# List all chat sessions for a user
 @router.get("/chat/sessions", response_model=List[ChatSessionResponse])
 def list_sessions(
     db: Session = Depends(get_db),
@@ -38,7 +38,7 @@ def list_sessions(
 ):
     return list_user_chat_sessions(db=db, current_user=current_user)
 
-
+# List all messages for a chat session
 @router.get("/chat/sessions/{session_id}/messages", response_model=List[ChatMessageResponse])
 def list_session_messages(
     session_id: UUID,
@@ -51,7 +51,7 @@ def list_session_messages(
         current_user=current_user,
     )
 
-
+# Run a conversational chat
 @router.post("/chat", response_model=ChatResponse)
 async def conversational_chat(
     request: ConversationalChatRequest,
