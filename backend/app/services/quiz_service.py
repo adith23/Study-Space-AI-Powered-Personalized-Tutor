@@ -18,8 +18,8 @@ from app.schemas.quiz_schema import (
     QuizResponse,
     QuizSourceResponse,
 )
-from app.services.quiz_context_service import (
-    build_quiz_generation_context,
+from app.services.content_generation_context_service import (
+    build_content_generation_context,
     get_valid_selected_files,
 )
 from app.services.quiz_generation_service import generate_quiz_payload

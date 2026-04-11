@@ -14,7 +14,7 @@ pinecone = PineconeClient(api_key=settings.PINECONE_API_KEY)
 
 
 @dataclass
-class QuizGenerationContext:
+class ContentGenerationContext:
     mode: QuizGenerationMode
     context_text: str
 
@@ -58,14 +58,16 @@ def get_valid_selected_files(
     ]
     if invalid_files:
         raise ValueError(
-            "All selected sources must be processed successfully before quiz generation."
+            "All selected sources must be processed successfully before generation."
         )
 
     file_map = {file.id: file for file in files}
     return [file_map[file_id] for file_id in file_ids]
 
 
-def _build_broad_context(*, db: Session, files: List[UploadedFile]) -> QuizGenerationContext:
+def _build_broad_context(
+    *, db: Session, files: List[UploadedFile]
+) -> ContentGenerationContext:
     file_ids = [file.id for file in files]
     chunks = (
         db.query(DocumentChunk)
@@ -75,11 +77,12 @@ def _build_broad_context(*, db: Session, files: List[UploadedFile]) -> QuizGener
     if not chunks:
         raise ValueError("No processed content is available for the selected sources.")
 
+    file_position = {file_id: index for index, file_id in enumerate(file_ids)}
     file_name_map = {file.id: file.name or f"Source {file.id}" for file in files}
     ordered_chunks = sorted(
         chunks,
         key=lambda chunk: (
-            file_ids.index(chunk.source_file_id),
+            file_position.get(chunk.source_file_id, 0),
             (chunk.metadata_ or {}).get("chunk_index", 0),
             chunk.id,
         ),
@@ -90,13 +93,15 @@ def _build_broad_context(*, db: Session, files: List[UploadedFile]) -> QuizGener
         metadata = chunk.metadata_ or {}
         section_title = metadata.get("section_title") or "Untitled"
         heading_path = metadata.get("heading_path") or ""
-        source_name = file_name_map.get(chunk.source_file_id, f"Source {chunk.source_file_id}")
+        source_name = file_name_map.get(
+            chunk.source_file_id, f"Source {chunk.source_file_id}"
+        )
         header = f"[Source: {source_name}] [Section: {section_title}]"
         if heading_path:
             header = f"{header} [Path: {heading_path}]"
         parts.append(f"{header}\n{chunk.content}")
 
-    return QuizGenerationContext(
+    return ContentGenerationContext(
         mode=QuizGenerationMode.BROAD_FULL_SOURCE,
         context_text="\n\n".join(parts),
     )
@@ -145,7 +150,7 @@ def _retrieve_focused_documents(
 
 def _build_focused_context(
     *, current_user: User, files: List[UploadedFile], focus_prompt: str, top_k: int
-) -> QuizGenerationContext:
+) -> ContentGenerationContext:
     file_ids = [file.id for file in files]
     documents = _retrieve_focused_documents(
         current_user=current_user,
@@ -167,25 +172,25 @@ def _build_focused_context(
             header = f"{header} [Path: {heading_path}]"
         parts.append(f"{header}\n{document.page_content}")
 
-    return QuizGenerationContext(
+    return ContentGenerationContext(
         mode=QuizGenerationMode.FOCUSED_RAG,
         context_text="\n\n".join(parts),
     )
 
 
-def build_quiz_generation_context(
+def build_content_generation_context(
     *,
     db: Session,
     current_user: User,
     files: List[UploadedFile],
     focus_prompt: str | None,
-    number_of_questions: int,
-) -> QuizGenerationContext:
+    item_count: int,
+) -> ContentGenerationContext:
     if focus_prompt:
         return _build_focused_context(
             current_user=current_user,
             files=files,
             focus_prompt=focus_prompt,
-            top_k=max(8, min(24, number_of_questions * 4)),
+            top_k=max(8, min(24, item_count * 4)),
         )
     return _build_broad_context(db=db, files=files)

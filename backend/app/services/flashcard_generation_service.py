@@ -7,29 +7,23 @@ from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
 
 from app.core.config import settings
 from app.models.quiz_model import QuizDifficulty, QuizGenerationMode
-from app.schemas.quiz_schema import GeneratedQuizPayload
+from app.schemas.flashcard_schema import GeneratedFlashcardPayload
 from app.services.content_generation_context_service import ContentGenerationContext
-
-
 
 
 def _build_system_prompt(mode: QuizGenerationMode) -> str:
     mode_instruction = (
-        "Create a broad, representative quiz that covers the selected source material."
+        "Create a broad, representative flashcard deck that covers the selected source material."
         if mode == QuizGenerationMode.BROAD_FULL_SOURCE
-        else "Create a focused quiz that stays tightly aligned to the requested focus."
+        else "Create a focused flashcard deck that stays tightly aligned to the requested focus."
     )
     return (
-        "You are generating a source-grounded multiple-choice quiz from supplied study material. "
+        "You are generating source-grounded study flashcards from supplied material. "
         f"{mode_instruction} "
-        "Only use facts that are directly supported by the supplied context. "
+        "Only use facts directly supported by the supplied context. "
         "Return valid JSON only. Do not use markdown fences. "
-        'The JSON must match this shape: {"questions":[{"question_text":"...","options":["...","...","...","..."],'
-        '"correct_option":"A","source_snippet":"...","source_metadata":{"section_title":"..."}}]}. '
-        "Each question must have exactly 4 options. "
-        "correct_option must be one of A, B, C, or D. "
-        "Do not produce duplicate or near-duplicate questions. "
-        "Avoid trick questions and unsupported inferences."
+        'The JSON must match this shape: {"cards":[{"front_text":"...","back_text":"...","source_snippet":"...","source_metadata":{"section_title":"..."}}]}. '
+        "Do not produce duplicate or near-duplicate cards."
     )
 
 
@@ -37,7 +31,7 @@ def _build_user_prompt(
     *,
     context: ContentGenerationContext,
     difficulty_level: QuizDifficulty,
-    number_of_questions: int,
+    number_of_cards: int,
     focus_prompt: str | None,
 ) -> str:
     focus_line = (
@@ -46,15 +40,18 @@ def _build_user_prompt(
         else "Focus requirement: none. Cover the selected sources broadly."
     )
     return (
-        f"Generate exactly {number_of_questions} questions.\n"
+        f"Generate exactly {number_of_cards} flashcards.\n"
         f"Difficulty: {difficulty_level.value}.\n"
         f"Generation mode: {context.mode.value}.\n"
         f"{focus_line}\n"
         "Requirements:\n"
-        "- Each question must be answerable from the context.\n"
-        "- Provide one clearly correct answer and three plausible distractors.\n"
-        "- Keep wording concise and student-facing.\n"
-        "- Include a short source_snippet copied or paraphrased from the context that supports the answer.\n"
+        "- Each card must be answerable from the context.\n"
+        "- front_text must be concise and suitable for recall.\n"
+        "- back_text must provide the grounded answer, definition, or explanation.\n"
+        "- easy cards should favor direct recall.\n"
+        "- medium cards should emphasize applied understanding or comparison.\n"
+        "- hard cards should emphasize synthesis or deeper conceptual distinctions.\n"
+        "- Include a short source_snippet copied or paraphrased from the context that supports the card.\n"
         "- Include source_metadata when section information is obvious from the context.\n\n"
         "Context:\n"
         f"{context.context_text}"
@@ -91,23 +88,23 @@ def _extract_json_payload(text: str) -> str:
     return stripped[start : end + 1]
 
 
-def _validate_question_count(
-    payload: GeneratedQuizPayload, expected_question_count: int
-) -> GeneratedQuizPayload:
-    if len(payload.questions) != expected_question_count:
+def _validate_card_count(
+    payload: GeneratedFlashcardPayload, expected_card_count: int
+) -> GeneratedFlashcardPayload:
+    if len(payload.cards) != expected_card_count:
         raise ValueError(
-            f"Expected {expected_question_count} questions but received {len(payload.questions)}."
+            f"Expected {expected_card_count} cards but received {len(payload.cards)}."
         )
     return payload
 
 
-def generate_quiz_payload(
+def generate_flashcard_payload(
     *,
     context: ContentGenerationContext,
     difficulty_level: QuizDifficulty,
-    number_of_questions: int,
+    number_of_cards: int,
     focus_prompt: str | None,
-) -> GeneratedQuizPayload:
+) -> GeneratedFlashcardPayload:
     llm = ChatGoogleGenerativeAI(
         model=settings.GEMINI_CHAT_MODEL,
         google_api_key=settings.GEMINI_API_KEY,
@@ -120,7 +117,7 @@ def generate_quiz_payload(
             _build_user_prompt(
                 context=context,
                 difficulty_level=difficulty_level,
-                number_of_questions=number_of_questions,
+                number_of_cards=number_of_cards,
                 focus_prompt=focus_prompt,
             ),
         ),
@@ -131,22 +128,24 @@ def generate_quiz_payload(
         try:
             response = llm.invoke(messages)
             payload_text = _extract_json_payload(_extract_response_text(response))
-            payload = GeneratedQuizPayload.model_validate_json(payload_text)
-            return _validate_question_count(payload, number_of_questions)
+            payload = GeneratedFlashcardPayload.model_validate_json(payload_text)
+            return _validate_card_count(payload, number_of_cards)
         except (ValueError, json.JSONDecodeError) as exc:
             last_error = exc
             if attempt == 0:
                 messages.append(
                     (
                         "human",
-                        "The previous response was invalid. Return only valid JSON that matches the required schema and question count.",
+                        "The previous response was invalid. Return only valid JSON that matches the required schema and card count.",
                     )
                 )
                 continue
-            raise ValueError(f"Quiz generation returned invalid structured output: {exc}") from exc
+            raise ValueError(
+                f"Flashcard generation returned invalid structured output: {exc}"
+            ) from exc
         except ChatGoogleGenerativeAIError:
             raise
 
     if last_error is not None:
         raise last_error
-    raise ValueError("Quiz generation failed without a recoverable response.")
+    raise ValueError("Flashcard generation failed without a recoverable response.")

@@ -1,5 +1,10 @@
 import axios from "axios";
 import type {
+  CreateFlashcardDeckPayload,
+  FlashcardDeckDetail,
+  FlashcardDeckSummary,
+} from "../types/flashcard";
+import type {
   CreateQuizPayload,
   QuizAttemptResult,
   QuizDetail,
@@ -74,6 +79,28 @@ export async function submitQuizAttempt(
 export async function getQuizAttempt(quizId: number, attemptId: number) {
   const response = await api.get<QuizAttemptResult>(
     `/materials/quizzes/${quizId}/attempts/${attemptId}`
+  );
+  return response.data;
+}
+
+export async function createFlashcardDeck(payload: CreateFlashcardDeckPayload) {
+  const response = await api.post<FlashcardDeckSummary>(
+    "/materials/flashcards",
+    payload
+  );
+  return response.data;
+}
+
+export async function listFlashcardDecks() {
+  const response = await api.get<FlashcardDeckSummary[]>(
+    "/materials/flashcards"
+  );
+  return response.data;
+}
+
+export async function getFlashcardDeck(deckId: number) {
+  const response = await api.get<FlashcardDeckDetail>(
+    `/materials/flashcards/${deckId}`
   );
   return response.data;
 }

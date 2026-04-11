@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.api.v1.endpoints import (
     auth_routes,
     chat_routes,
+    flashcard_routes,
     materials_file_routes,
     quiz_routes,
 )
@@ -21,4 +22,8 @@ api_router.include_router(
 
 api_router.include_router(
     quiz_routes.router, prefix="/materials", tags=["materials"]
+)
+
+api_router.include_router(
+    flashcard_routes.router, prefix="/materials", tags=["materials"]
 )

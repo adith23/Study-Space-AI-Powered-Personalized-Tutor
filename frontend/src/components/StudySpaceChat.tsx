@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import api, { setAuthToken } from "../lib/api";
 import Sidebar from "./Sidebar"; // New
 import ChatInterface from "./ChatInterface"; // Updated
+import FlashcardWorkspace from "./FlashcardWorkspace";
 import QuizWorkspace from "./QuizWorkspace";
 
 export interface UploadedFileState {
@@ -30,7 +31,7 @@ export interface ChatMessage {
   content: string;
 }
 
-type WorkspaceView = "chat" | "quiz";
+type WorkspaceView = "chat" | "quiz" | "flashcards";
 
 const VALID_FILE_STATUSES = new Set<UploadedFileState["status"]>([
   "pending",
@@ -206,6 +207,16 @@ export default function StudySpaceChat() {
             >
               Quiz
             </button>
+            <button
+              onClick={() => setActiveView("flashcards")}
+              className={`rounded-t-xl px-4 py-2 text-sm font-medium transition-colors ${
+                activeView === "flashcards"
+                  ? "bg-zinc-800 text-white"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              Flashcards
+            </button>
           </div>
         </div>
 
@@ -224,6 +235,12 @@ export default function StudySpaceChat() {
               <p>Select or create a chat to begin.</p>
             </div>
           )
+        ) : activeView === "flashcards" ? (
+          <FlashcardWorkspace
+            allFiles={files}
+            selectedFileIds={selectedFileIds}
+            onSelectFileForContext={setSelectedFileIds}
+          />
         ) : (
           <QuizWorkspace
             allFiles={files}
