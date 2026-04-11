@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import api, { setAuthToken } from "../lib/api";
 import Sidebar from "./Sidebar"; // New
 import ChatInterface from "./ChatInterface"; // Updated
+import QuizWorkspace from "./QuizWorkspace";
 
 export interface UploadedFileState {
   id: number;
@@ -28,6 +29,8 @@ export interface ChatMessage {
   role: "human" | "ai";
   content: string;
 }
+
+type WorkspaceView = "chat" | "quiz";
 
 const VALID_FILE_STATUSES = new Set<UploadedFileState["status"]>([
   "pending",
@@ -58,6 +61,8 @@ export default function StudySpaceChat() {
   const [files, setFiles] = useState<UploadedFileState[]>([]);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [selectedFileIds, setSelectedFileIds] = useState<Set<number>>(new Set());
+  const [activeView, setActiveView] = useState<WorkspaceView>("chat");
 
   // Effect for setting token and fetching initial sessions
   useEffect(() => {
@@ -179,17 +184,52 @@ export default function StudySpaceChat() {
       />
 
       <main className="w-2/3 flex flex-col bg-[#1e1f22]">
-        {activeSessionId ? (
-          <ChatInterface
-            key={activeSessionId} // Important: resets component state on session change
-            sessionId={activeSessionId}
-            allFiles={files}
-            onFileUpload={handleFileUpload}
-          />
-        ) : (
-          <div className="flex-grow flex items-center justify-center text-zinc-500">
-            <p>Select or create a chat to begin.</p>
+        <div className="border-b border-zinc-800 px-4 pt-4">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setActiveView("chat")}
+              className={`rounded-t-xl px-4 py-2 text-sm font-medium transition-colors ${
+                activeView === "chat"
+                  ? "bg-zinc-800 text-white"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              Chat
+            </button>
+            <button
+              onClick={() => setActiveView("quiz")}
+              className={`rounded-t-xl px-4 py-2 text-sm font-medium transition-colors ${
+                activeView === "quiz"
+                  ? "bg-zinc-800 text-white"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              Quiz
+            </button>
           </div>
+        </div>
+
+        {activeView === "chat" ? (
+          activeSessionId ? (
+            <ChatInterface
+              key={activeSessionId}
+              sessionId={activeSessionId}
+              allFiles={files}
+              onFileUpload={handleFileUpload}
+              selectedFileIds={selectedFileIds}
+              onSelectFileForContext={setSelectedFileIds}
+            />
+          ) : (
+            <div className="flex-grow flex items-center justify-center text-zinc-500">
+              <p>Select or create a chat to begin.</p>
+            </div>
+          )
+        ) : (
+          <QuizWorkspace
+            allFiles={files}
+            selectedFileIds={selectedFileIds}
+            onSelectFileForContext={setSelectedFileIds}
+          />
         )}
       </main>
     </div>

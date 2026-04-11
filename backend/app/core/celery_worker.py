@@ -9,7 +9,7 @@ celery_app = Celery(
     "tasks",
     broker=settings.CELERY_BROKER_URL,
     backend=settings.CELERY_RESULT_BACKEND,
-    include=["app.tasks.material_tasks"], 
+    include=["app.tasks.material_tasks", "app.tasks.quiz_tasks"], 
 )
 
 # Optional configuration

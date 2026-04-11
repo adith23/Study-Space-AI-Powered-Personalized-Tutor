@@ -11,18 +11,19 @@ interface ChatInterfaceProps {
   sessionId: string;
   allFiles: UploadedFileState[];
   onFileUpload: (file: File) => Promise<void>;
+  selectedFileIds: Set<number>;
+  onSelectFileForContext: React.Dispatch<React.SetStateAction<Set<number>>>;
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({
   sessionId,
   allFiles,
   onFileUpload,
+  selectedFileIds,
+  onSelectFileForContext,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedFileIds, setSelectedFileIds] = useState<Set<number>>(
-    new Set()
-  );
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
   const readyFiles = allFiles.filter((f) => f.status === "success");
@@ -119,7 +120,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           isLoading={isLoading}
           readyFiles={readyFiles}
           selectedFileIds={selectedFileIds}
-          onSelectFileForContext={setSelectedFileIds}
+          onSelectFileForContext={onSelectFileForContext}
         />
       </div>
     </div>
