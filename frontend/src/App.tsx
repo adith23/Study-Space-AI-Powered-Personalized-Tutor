@@ -42,7 +42,6 @@ function AppContent() {
 }
 
 function App() {
-  // AuthProvider is mounted in main.tsx
   return <AppContent />;
 }
 
