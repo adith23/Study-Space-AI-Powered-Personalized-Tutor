@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import api, { setAuthToken } from "@/lib/api";
+import api from "@/lib/api";
 import Sidebar from "@/components/Sidebar"; // New
 import ChatInterface from "@/components/ChatInterface"; // Updated
 import FlashcardWorkspace from "@/components/FlashcardWorkspace";
@@ -67,13 +67,8 @@ export default function StudySpaceChat() {
   const [selectedFileIds, setSelectedFileIds] = useState<Set<number>>(new Set());
   const [activeView, setActiveView] = useState<WorkspaceView>("chat");
 
-  // Effect for setting token and fetching initial sessions
+  // Effect for fetching initial sessions
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      setAuthToken(token);
-    }
-
     const fetchSessions = async () => {
       try {
         const response = await api.get<ChatSession[]>(

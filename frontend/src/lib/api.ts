@@ -12,53 +12,14 @@ import type {
   SubmitQuizAttemptPayload,
 } from "@/types/quiz";
 
-const API_BASE_URL =
-  (process.env.NEXT_PUBLIC_API_BASE_URL as string) || "http://127.0.0.1:8000/api/v1";
-
+// Client-side API requests. They go to the Next.js rewrite proxy.
+// Next.js automatically attaches the HttpOnly cookie.
 const api = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true,
+  baseURL: "/api/v1",
   headers: {
     "Content-Type": "application/json",
   },
 });
-
-function normalizeToken(raw: string | null): string | null {
-  if (!raw) return null;
-  const token = raw.trim();
-  if (!token || token === "undefined" || token === "null") return null;
-  return token;
-}
-
-// Restore Bearer header + token cookie before any React effect runs
-if (typeof window !== "undefined") {
-  const stored = normalizeToken(localStorage.getItem("token"));
-  if (stored) {
-    api.defaults.headers.common["Authorization"] = `Bearer ${stored}`;
-    // set a client cookie so Next.js middleware can read it during routing
-    document.cookie = `token=${stored}; path=/`;
-  } else {
-    // clear cookie if nothing stored
-    document.cookie = "token=; path=/; max-age=0";
-    localStorage.removeItem("token");
-  }
-}
-
-// Attach token dynamically
-export function setAuthToken(token: string | null) {
-  const normalized = normalizeToken(token);
-  if (normalized) {
-    api.defaults.headers.common["Authorization"] = `Bearer ${normalized}`;
-    if (typeof window !== "undefined") {
-      document.cookie = `token=${normalized}; path=/`;
-    }
-  } else {
-    delete api.defaults.headers.common["Authorization"];
-    if (typeof window !== "undefined") {
-      document.cookie = "token=; path=/; max-age=0";
-    }
-  }
-}
 
 export async function createQuiz(payload: CreateQuizPayload) {
   const response = await api.post<QuizSummary>("/materials/quizzes", payload);
@@ -119,27 +80,12 @@ export async function getFlashcardDeck(deckId: number) {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response) {
-      // Handle unauthorized centrally
-      if (error.response.status === 401) {
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("token");
-          document.cookie = "token=; path=/; max-age=0";
-          window.location.href = "/login";
-        }
-        return Promise.reject(new Error("Unauthorized"));
+    if (error.response && error.response.status === 401) {
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
       }
-
-      const message =
-        error.response.data?.detail ||
-        error.response.data?.message ||
-        "An error occurred";
-      return Promise.reject(new Error(message));
-    } else if (error.request) {
-      return Promise.reject(new Error("No response from server"));
-    } else {
-      return Promise.reject(error);
     }
+    return Promise.reject(error);
   }
 );
 

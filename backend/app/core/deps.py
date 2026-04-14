@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from jose import JWTError
@@ -10,7 +10,7 @@ from app.schemas.user_schema import TokenData
 security_scheme = HTTPBearer()
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security_scheme),
+    request: Request,
     db: Session = Depends(get_db)
 ) -> User:
     credentials_exception = HTTPException(
@@ -19,8 +19,16 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     
+    token = request.cookies.get("access_token")
+    if not token:
+        # Fallback to header if not in cookie
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise credentials_exception
+        token = auth_header.split(" ")[1]
+
     try:
-        payload = security.verify_token(credentials.credentials, "access")
+        payload = security.verify_token(token, "access")
         if payload is None:
             raise credentials_exception
             
