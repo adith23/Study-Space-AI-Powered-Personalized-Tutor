@@ -1,11 +1,13 @@
+"use client";
+
 import { useState } from "react";
-import { signupUser } from "../services/auth";
-import { useAuth } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { signupUser } from "@/services/auth";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function SignupForm() {
   const { login } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [form, setForm] = useState({ username: "", email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
 
@@ -15,7 +17,7 @@ export default function SignupForm() {
     try {
       const res = await signupUser(form);
       login(res.access_token); // Auto-login after signup
-      navigate("/");
+      router.push("/");
     } catch (err: any) {
       setError(err.message || "Signup failed");
     }

@@ -1,18 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 
-import type { UploadedFileState } from "./StudySpaceChat";
+import type { UploadedFileState } from "@/components/StudySpaceChat";
 import {
   createFlashcardDeck,
   getFlashcardDeck,
   listFlashcardDecks,
-} from "../lib/api";
+} from "@/lib/api";
 import type {
   CreateFlashcardDeckPayload,
   FlashcardDeckDetail,
   FlashcardDeckSummary,
-} from "../types/flashcard";
-import type { QuizDifficulty } from "../types/quiz";
+} from "@/types/flashcard";
+import type { QuizDifficulty } from "@/types/quiz";
 
 interface FlashcardWorkspaceProps {
   allFiles: UploadedFileState[];

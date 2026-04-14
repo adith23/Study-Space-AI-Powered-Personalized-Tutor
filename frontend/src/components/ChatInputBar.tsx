@@ -1,9 +1,11 @@
+"use client";
+
 import React, { useState, useRef } from "react";
 import { Paperclip, ArrowUp, XCircle, Loader2 } from "lucide-react";
-import type { UploadedFileState } from "./StudySpaceChat";
+import type { UploadedFileState } from "@/components/StudySpaceChat";
 
 interface ChatInputBarProps {
-  onChatSubmit: (query: string) => Promise<void>;
+  onChatSubmit: (query: string) => void;
   onFileUpload: (file: File) => Promise<void>;
   isLoading: boolean;
   readyFiles: UploadedFileState[];
@@ -27,8 +29,8 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleLocalSubmit = async () => {
-    await onChatSubmit(query);
+  const handleLocalSubmit = () => {
+    onChatSubmit(query);
     setQuery("");
   };
 

@@ -1,11 +1,13 @@
+"use client";
+
 import { useState } from "react";
-import { loginUser } from "../services/auth";
-import { useAuth } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { loginUser } from "@/services/auth";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
   const { login } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +18,7 @@ export default function LoginForm() {
     try {
       const res = await loginUser(username, password);
       login(res.access_token);
-      navigate("/");
+      router.push("/");
     } catch (err: any) {
       setError(err.message || "Login failed");
     }

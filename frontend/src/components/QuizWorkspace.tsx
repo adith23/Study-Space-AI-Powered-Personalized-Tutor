@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 
-import type { UploadedFileState } from "./StudySpaceChat";
+import type { UploadedFileState } from "@/components/StudySpaceChat";
 import {
   createQuiz,
   getQuiz,
   listQuizzes,
   submitQuizAttempt,
-} from "../lib/api";
+} from "@/lib/api";
 import type {
   QuizAttemptResult,
   QuizDetail,
   QuizDifficulty,
   QuizSummary,
-} from "../types/quiz";
+} from "@/types/quiz";
 
 interface QuizWorkspaceProps {
   allFiles: UploadedFileState[];

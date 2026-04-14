@@ -3,17 +3,17 @@ import type {
   CreateFlashcardDeckPayload,
   FlashcardDeckDetail,
   FlashcardDeckSummary,
-} from "../types/flashcard";
+} from "@/types/flashcard";
 import type {
   CreateQuizPayload,
   QuizAttemptResult,
   QuizDetail,
   QuizSummary,
   SubmitQuizAttemptPayload,
-} from "../types/quiz";
+} from "@/types/quiz";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api/v1";
+  (process.env.NEXT_PUBLIC_API_BASE_URL as string) || "http://127.0.0.1:8000/api/v1";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -30,12 +30,16 @@ function normalizeToken(raw: string | null): string | null {
   return token;
 }
 
-// Restore Bearer header before any React effect runs
+// Restore Bearer header + token cookie before any React effect runs
 if (typeof window !== "undefined") {
   const stored = normalizeToken(localStorage.getItem("token"));
   if (stored) {
     api.defaults.headers.common["Authorization"] = `Bearer ${stored}`;
+    // set a client cookie so Next.js middleware can read it during routing
+    document.cookie = `token=${stored}; path=/`;
   } else {
+    // clear cookie if nothing stored
+    document.cookie = "token=; path=/; max-age=0";
     localStorage.removeItem("token");
   }
 }
@@ -45,8 +49,14 @@ export function setAuthToken(token: string | null) {
   const normalized = normalizeToken(token);
   if (normalized) {
     api.defaults.headers.common["Authorization"] = `Bearer ${normalized}`;
+    if (typeof window !== "undefined") {
+      document.cookie = `token=${normalized}; path=/`;
+    }
   } else {
     delete api.defaults.headers.common["Authorization"];
+    if (typeof window !== "undefined") {
+      document.cookie = "token=; path=/; max-age=0";
+    }
   }
 }
 
@@ -110,6 +120,16 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response) {
+      // Handle unauthorized centrally
+      if (error.response.status === 401) {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+          document.cookie = "token=; path=/; max-age=0";
+          window.location.href = "/login";
+        }
+        return Promise.reject(new Error("Unauthorized"));
+      }
+
       const message =
         error.response.data?.detail ||
         error.response.data?.message ||

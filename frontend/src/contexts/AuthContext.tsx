@@ -1,5 +1,8 @@
-import { createContext, useContext, useState } from "react";
+"use client";
+
+import React, { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
+import { setAuthToken } from "@/lib/api";
 
 interface AuthContextType {
   token: string | null;
@@ -17,28 +20,35 @@ function normalizeToken(raw: string | null): string | null {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(() => {
-    const normalized = normalizeToken(localStorage.getItem("token"));
-    if (!normalized) {
+  const [token, setToken] = useState<string | null>(null);
+
+  // Hydrate token on mount (client-only)
+  useEffect(() => {
+    const stored = normalizeToken(localStorage.getItem("token"));
+    if (!stored) {
       localStorage.removeItem("token");
-      return null;
     }
-    return normalized;
-  });
+    setToken(stored);
+    // ensure axios + cookie are in sync
+    setAuthToken(stored);
+  }, []);
 
   const login = (newToken: string) => {
     const normalized = normalizeToken(newToken);
     if (!normalized) {
       localStorage.removeItem("token");
+      setAuthToken(null);
       setToken(null);
       return;
     }
     localStorage.setItem("token", normalized);
+    setAuthToken(normalized);
     setToken(normalized);
   };
 
   const logout = () => {
     localStorage.removeItem("token");
+    setAuthToken(null);
     setToken(null);
   };
 

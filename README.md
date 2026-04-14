@@ -2,7 +2,7 @@
 
 An AI-powered learning platform with:
 - FastAPI backend for auth, materials, and chat APIs
-- React + TypeScript + Vite frontend
+- Next.js (App Router) + TypeScript frontend
 - Async document processing with Celery + Redis
 - PostgreSQL for application data
 - Pinecone + embeddings for retrieval
@@ -19,8 +19,8 @@ An AI-powered learning platform with:
 
 ### Frontend
 - React
+- Next.js (App Router)
 - TypeScript
-- Vite
 - Tailwind CSS
 
 ## Prerequisites
@@ -34,7 +34,7 @@ An AI-powered learning platform with:
 
 ```text
 backend/   FastAPI app, Celery tasks, DB models
-frontend/  React + Vite app
+frontend/  Next.js App Router application
 ```
 
 ## Environment Configuration

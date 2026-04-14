@@ -1,9 +1,11 @@
+"use client";
+
 import { useState, useEffect } from "react";
-import api, { setAuthToken } from "../lib/api";
-import Sidebar from "./Sidebar"; // New
-import ChatInterface from "./ChatInterface"; // Updated
-import FlashcardWorkspace from "./FlashcardWorkspace";
-import QuizWorkspace from "./QuizWorkspace";
+import api, { setAuthToken } from "@/lib/api";
+import Sidebar from "@/components/Sidebar"; // New
+import ChatInterface from "@/components/ChatInterface"; // Updated
+import FlashcardWorkspace from "@/components/FlashcardWorkspace";
+import QuizWorkspace from "@/components/QuizWorkspace";
 
 export interface UploadedFileState {
   id: number;
