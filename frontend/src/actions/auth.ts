@@ -3,9 +3,13 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000/api/v1";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000/api/v1";
 
-export async function loginAction(_prevState: any, formData: FormData) {
+export async function loginAction(
+  _prevState: { error?: string } | undefined,
+  formData: FormData,
+) {
   const username = formData.get("username") as string;
   const password = formData.get("password") as string;
 
@@ -26,7 +30,7 @@ export async function loginAction(_prevState: any, formData: FormData) {
     }
 
     const data = await res.json();
-    
+
     // Secure HttpOnly Cookie
     const cookieStore = await cookies();
     cookieStore.set("access_token", data.access_token, {
@@ -74,7 +78,7 @@ export async function signupAction(_prevState: any, formData: FormData) {
     }
 
     const data = await res.json();
-    
+
     const cookieStore = await cookies();
     cookieStore.set("access_token", data.access_token, {
       httpOnly: true,
