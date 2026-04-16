@@ -23,7 +23,6 @@ class UploadedFileCreate(BaseModel):
 # Uploaded file response schema
 class UploadedFileResponse(BaseModel):
     id: int
-    stored_path: Optional[str] = None
     url: Optional[HttpUrl] = None
     file_type: FileType
     name: Optional[str] = None

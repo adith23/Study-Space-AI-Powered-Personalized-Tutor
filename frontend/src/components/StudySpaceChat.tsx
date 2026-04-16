@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
-import Sidebar from "@/components/Sidebar"; // New
-import ChatInterface from "@/components/ChatInterface"; // Updated
+import Sidebar from "@/components/Sidebar";
+import ChatInterface from "@/components/ChatInterface";
 import FlashcardWorkspace from "@/components/FlashcardWorkspace";
 import QuizWorkspace from "@/components/QuizWorkspace";
+import DocumentViewer from "@/components/DocumentViewer";
 
 export interface UploadedFileState {
   id: number;
@@ -66,6 +67,13 @@ export default function StudySpaceChat() {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [selectedFileIds, setSelectedFileIds] = useState<Set<number>>(new Set());
   const [activeView, setActiveView] = useState<WorkspaceView>("chat");
+
+  // Document viewer state
+  const [viewingFileId, setViewingFileId] = useState<number | null>(null);
+
+  const viewingFile = viewingFileId
+    ? files.find((f) => f.id === viewingFileId) ?? null
+    : null;
 
   // Effect for fetching initial sessions
   useEffect(() => {
@@ -171,6 +179,18 @@ export default function StudySpaceChat() {
     }
   };
 
+  const handleFileClick = (fileId: number) => {
+    // Toggle: clicking the same file again closes the viewer
+    setViewingFileId((prev) => (prev === fileId ? null : fileId));
+  };
+
+  const handleCloseViewer = () => {
+    setViewingFileId(null);
+  };
+
+  // Determine layout: when viewer is open, we use a split view
+  const isViewerOpen = viewingFileId !== null && viewingFile !== null;
+
   return (
     <div className="flex h-screen bg-gray-900 text-white font-sans">
       <Sidebar
@@ -179,73 +199,95 @@ export default function StudySpaceChat() {
         onSelectSession={setActiveSessionId}
         onCreateSession={handleCreateSession}
         files={files}
+        viewingFileId={viewingFileId}
+        onFileClick={handleFileClick}
       />
 
-      <main className="w-2/3 flex flex-col bg-[#1e1f22]">
-        <div className="border-b border-zinc-800 px-4 pt-4">
-          <div className="flex gap-2">
-            <button
-              onClick={() => setActiveView("chat")}
-              className={`rounded-t-xl px-4 py-2 text-sm font-medium transition-colors ${
-                activeView === "chat"
-                  ? "bg-zinc-800 text-white"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              Chat
-            </button>
-            <button
-              onClick={() => setActiveView("quiz")}
-              className={`rounded-t-xl px-4 py-2 text-sm font-medium transition-colors ${
-                activeView === "quiz"
-                  ? "bg-zinc-800 text-white"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              Quiz
-            </button>
-            <button
-              onClick={() => setActiveView("flashcards")}
-              className={`rounded-t-xl px-4 py-2 text-sm font-medium transition-colors ${
-                activeView === "flashcards"
-                  ? "bg-zinc-800 text-white"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              Flashcards
-            </button>
+      {/* Workspace area — splits when document viewer is open */}
+      <div className={`flex flex-grow min-w-0 ${isViewerOpen ? "flex-row" : ""}`}>
+        {/* Main workspace (chat / quiz / flashcards) */}
+        <main
+          className={`flex flex-col bg-[#1e1f22] min-w-0 ${
+            isViewerOpen ? "w-1/2 border-r border-zinc-700" : "w-full"
+          }`}
+        >
+          <div className="border-b border-zinc-800 px-4 pt-4">
+            <div className="flex gap-2">
+              <button
+                onClick={() => setActiveView("chat")}
+                className={`rounded-t-xl px-4 py-2 text-sm font-medium transition-colors ${
+                  activeView === "chat"
+                    ? "bg-zinc-800 text-white"
+                    : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                Chat
+              </button>
+              <button
+                onClick={() => setActiveView("quiz")}
+                className={`rounded-t-xl px-4 py-2 text-sm font-medium transition-colors ${
+                  activeView === "quiz"
+                    ? "bg-zinc-800 text-white"
+                    : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                Quiz
+              </button>
+              <button
+                onClick={() => setActiveView("flashcards")}
+                className={`rounded-t-xl px-4 py-2 text-sm font-medium transition-colors ${
+                  activeView === "flashcards"
+                    ? "bg-zinc-800 text-white"
+                    : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                Flashcards
+              </button>
+            </div>
           </div>
-        </div>
 
-        {activeView === "chat" ? (
-          activeSessionId ? (
-            <ChatInterface
-              key={activeSessionId}
-              sessionId={activeSessionId}
+          {activeView === "chat" ? (
+            activeSessionId ? (
+              <ChatInterface
+                key={activeSessionId}
+                sessionId={activeSessionId}
+                allFiles={files}
+                onFileUpload={handleFileUpload}
+                selectedFileIds={selectedFileIds}
+                onSelectFileForContext={setSelectedFileIds}
+              />
+            ) : (
+              <div className="flex-grow flex items-center justify-center text-zinc-500">
+                <p>Select or create a chat to begin.</p>
+              </div>
+            )
+          ) : activeView === "flashcards" ? (
+            <FlashcardWorkspace
               allFiles={files}
-              onFileUpload={handleFileUpload}
               selectedFileIds={selectedFileIds}
               onSelectFileForContext={setSelectedFileIds}
             />
           ) : (
-            <div className="flex-grow flex items-center justify-center text-zinc-500">
-              <p>Select or create a chat to begin.</p>
-            </div>
-          )
-        ) : activeView === "flashcards" ? (
-          <FlashcardWorkspace
-            allFiles={files}
-            selectedFileIds={selectedFileIds}
-            onSelectFileForContext={setSelectedFileIds}
-          />
-        ) : (
-          <QuizWorkspace
-            allFiles={files}
-            selectedFileIds={selectedFileIds}
-            onSelectFileForContext={setSelectedFileIds}
-          />
+            <QuizWorkspace
+              allFiles={files}
+              selectedFileIds={selectedFileIds}
+              onSelectFileForContext={setSelectedFileIds}
+            />
+          )}
+        </main>
+
+        {/* Document viewer panel (side-by-side split) */}
+        {isViewerOpen && viewingFile && (
+          <div className="w-1/2 min-w-0">
+            <DocumentViewer
+              key={viewingFileId}
+              fileId={viewingFileId}
+              fileName={viewingFile.name}
+              onClose={handleCloseViewer}
+            />
+          </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

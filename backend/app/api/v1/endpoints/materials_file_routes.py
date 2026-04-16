@@ -1,6 +1,8 @@
+import os
 from typing import List, Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -51,3 +53,21 @@ def get_file_status(
     current_user: User = Depends(get_current_active_user),
 ):
     return get_user_file_status(file_id=file_id, db=db, current_user=current_user)
+
+# Serve raw file content for the document viewer
+@router.get("/files/{file_id}/content")
+def download_file_content(
+    file_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    file_record = get_user_file_status(file_id=file_id, db=db, current_user=current_user)
+
+    if not file_record.stored_path or not os.path.exists(file_record.stored_path):
+        raise HTTPException(status_code=404, detail="File content not found on disk")
+
+    return FileResponse(
+        path=file_record.stored_path,
+        filename=file_record.name or "document",
+        media_type="application/octet-stream",
+    )

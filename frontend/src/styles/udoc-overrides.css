@@ -1,0 +1,17 @@
+/* udoc-viewer dark theme overrides to match Study Space UI */
+.udoc-viewer-root.udoc-viewer-dark {
+  --udoc-bg-viewport: #1e1f22;
+  --udoc-bg-surface: #2d2d2d;
+  --udoc-bg-panel: #18181b;
+  --udoc-bg-panel-tabs: #18181b;
+  --udoc-bg-input: #27272a;
+  --udoc-text-primary: rgba(255, 255, 255, 0.87);
+  --udoc-text-secondary: rgba(255, 255, 255, 0.7);
+  --udoc-text-muted: rgba(255, 255, 255, 0.5);
+  --udoc-primary: #3b82f6;
+  --udoc-primary-hover: #2563eb;
+  --udoc-primary-focus-ring: rgba(59, 130, 246, 0.25);
+  --udoc-border: #3f3f46;
+  --udoc-border-input: #52525b;
+  --udoc-border-light: #27272a;
+}
