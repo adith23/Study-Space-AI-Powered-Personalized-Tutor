@@ -1,11 +1,13 @@
-import React, { useState, useRef, useEffect } from "react";
-import api from "../lib/api";
+"use client";
+
+import React, { useState, useRef, useEffect, useTransition } from "react";
+import api from "@/lib/api";
 import { Loader2 } from "lucide-react";
-import ChatInputBar from "./ChatInputBar";
+import ChatInputBar from "@/components/ChatInputBar";
 import type {
   ChatMessage,
   UploadedFileState,
-} from "./StudySpaceChat";
+} from "@/components/StudySpaceChat";
 
 interface ChatInterfaceProps {
   sessionId: string;
@@ -23,15 +25,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   onSelectFileForContext,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
   const readyFiles = allFiles.filter((f) => f.status === "success");
 
   // Fetch message history
   useEffect(() => {
-    const fetchHistory = async () => {
-      setIsLoading(true);
+    startTransition(async () => {
       try {
         const response = await api.get<ChatMessage[]>(
           `/materials/chat/sessions/${sessionId}/messages`
@@ -40,11 +41,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       } catch (error) {
         console.error("Failed to fetch chat history", error);
         setMessages([{ role: "ai", content: "Could not load chat history." }]);
-      } finally {
-        setIsLoading(false);
       }
-    };
-    fetchHistory();
+    });
   }, [sessionId]);
 
   // Scroll to bottom
@@ -52,34 +50,33 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleChatSubmit = async (query: string) => {
-    if (!query.trim() || isLoading) return;
+  const handleChatSubmit = (query: string) => {
+    if (!query.trim() || isPending) return;
 
     const userMessage: ChatMessage = { role: "human", content: query };
     setMessages((prev) => [...prev, userMessage]);
-    setIsLoading(true);
 
-    try {
-      const response = await api.post<{ answer: string }>("/materials/chat", {
-        query: userMessage.content,
-        session_id: sessionId,
-        file_ids: Array.from(selectedFileIds), // Can be empty
-      });
-      const aiMessage: ChatMessage = {
-        role: "ai",
-        content: response.data.answer,
-      };
-      setMessages((prev) => [...prev, aiMessage]);
-    } catch (error) {
-      const errorMessage: ChatMessage = {
-        role: "ai",
-        content: "Sorry, I encountered an error.",
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-      console.error("Chat failed", error);
-    } finally {
-      setIsLoading(false);
-    }
+    startTransition(async () => {
+      try {
+        const response = await api.post<{ answer: string }>("/materials/chat", {
+          query: userMessage.content,
+          session_id: sessionId,
+          file_ids: Array.from(selectedFileIds), // Can be empty
+        });
+        const aiMessage: ChatMessage = {
+          role: "ai",
+          content: response.data.answer,
+        };
+        setMessages((prev) => [...prev, aiMessage]);
+      } catch (error) {
+        const errorMessage: ChatMessage = {
+          role: "ai",
+          content: "Sorry, I encountered an error.",
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+        console.error("Chat failed", error);
+      }
+    });
   };
 
   return (
@@ -102,7 +99,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
             </div>
           </div>
         ))}
-        {isLoading && messages[messages.length - 1]?.role === "human" && (
+        {isPending && messages[messages.length - 1]?.role === "human" && (
           <div className="flex justify-start">
             <div className="p-3 rounded-lg bg-zinc-700">
               <Loader2 className="animate-spin" />
@@ -117,7 +114,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         <ChatInputBar
           onChatSubmit={handleChatSubmit}
           onFileUpload={onFileUpload}
-          isLoading={isLoading}
+          isLoading={isPending}
           readyFiles={readyFiles}
           selectedFileIds={selectedFileIds}
           onSelectFileForContext={onSelectFileForContext}

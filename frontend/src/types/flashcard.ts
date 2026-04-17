@@ -1,4 +1,4 @@
-import type { QuizDifficulty, QuizGenerationMode, QuizStatus } from "./quiz";
+import type { QuizDifficulty, QuizGenerationMode, QuizStatus } from "@/types/quiz";
 
 export interface FlashcardDeckSummary {
   id: number;
