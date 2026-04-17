@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 
-// Lazily-typed to avoid importing WASM module at the top level
 type UDocClientInstance = Awaited<
   ReturnType<(typeof import("@docmentis/udoc-viewer"))["UDocClient"]["create"]>
 >;

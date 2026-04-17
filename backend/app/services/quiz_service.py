@@ -115,17 +115,19 @@ def generate_quiz_for_id(*, db: Session, quiz_id: int) -> None:
 
     files = [source.uploaded_file for source in quiz.sources]
     if not files:
-        _mark_quiz_failed(db=db, quiz=quiz, error_message="Quiz has no selected sources.")
+        _mark_quiz_failed(
+            db=db, quiz=quiz, error_message="Quiz has no selected sources."
+        )
         return
 
     current_user = quiz.user
     try:
-        context = build_quiz_generation_context(
+        context = build_content_generation_context(
             db=db,
             current_user=current_user,
             files=files,
             focus_prompt=quiz.focus_prompt,
-            number_of_questions=quiz.number_of_questions,
+            item_count=quiz.number_of_questions,
         )
         payload = generate_quiz_payload(
             context=context,

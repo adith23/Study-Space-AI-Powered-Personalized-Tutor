@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { Paperclip, ArrowUp, XCircle, Loader2 } from "lucide-react";
-import type { UploadedFileState } from "@/components/StudySpaceChat";
+import type { UploadedFileState } from "@/types/dashboard";
 
 interface ChatInputBarProps {
   onChatSubmit: (query: string) => void;

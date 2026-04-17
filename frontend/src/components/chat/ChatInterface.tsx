@@ -1,13 +1,10 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useTransition } from "react";
-import api from "@/lib/api";
+import { listChatMessages, sendChatMessage } from "@/lib/api/chat";
 import { Loader2 } from "lucide-react";
-import ChatInputBar from "@/components/ChatInputBar";
-import type {
-  ChatMessage,
-  UploadedFileState,
-} from "@/components/StudySpaceChat";
+import ChatInputBar from "@/components/chat/ChatInputBar";
+import type { UploadedFileState, ChatMessage } from "@/types/dashboard";
 
 interface ChatInterfaceProps {
   sessionId: string;
@@ -34,10 +31,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   useEffect(() => {
     startTransition(async () => {
       try {
-        const response = await api.get<ChatMessage[]>(
-          `/materials/chat/sessions/${sessionId}/messages`
-        );
-        setMessages(response.data);
+        const response = await listChatMessages(sessionId);
+        setMessages(response);
       } catch (error) {
         console.error("Failed to fetch chat history", error);
         setMessages([{ role: "ai", content: "Could not load chat history." }]);
@@ -58,14 +53,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
     startTransition(async () => {
       try {
-        const response = await api.post<{ answer: string }>("/materials/chat", {
-          query: userMessage.content,
-          session_id: sessionId,
-          file_ids: Array.from(selectedFileIds), // Can be empty
-        });
+        const response = await sendChatMessage(
+          userMessage.content,
+          sessionId,
+          Array.from(selectedFileIds)
+        );
         const aiMessage: ChatMessage = {
           role: "ai",
-          content: response.data.answer,
+          content: response.answer,
         };
         setMessages((prev) => [...prev, aiMessage]);
       } catch (error) {
