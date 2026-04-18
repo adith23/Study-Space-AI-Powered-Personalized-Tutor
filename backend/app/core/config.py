@@ -47,6 +47,14 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3000",  # React dev server alternative
     ]
 
+    # Video Generation Configuration
+    VIDEO_STORAGE_PATH: str = os.getenv("VIDEO_STORAGE_PATH", "storage/generated/videos")
+    FFMPEG_PATH: str = os.getenv("FFMPEG_PATH", "ffmpeg")
+    VIDEO_MAX_SCENES: int = int(os.getenv("VIDEO_MAX_SCENES", "12"))
+    VIDEO_IMAGE_MODEL: str = os.getenv("VIDEO_IMAGE_MODEL", "gemini-2.5-flash-image")
+    VIDEO_TTS_MODEL: str = os.getenv("VIDEO_TTS_MODEL", "gemini-3.1-flash-tts-preview")
+    VIDEO_TTS_VOICE: str = os.getenv("VIDEO_TTS_VOICE", "Kore")
+
     @validator("CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v: str | List[str]) -> List[str] | str:
         if isinstance(v, str) and not v.startswith("["):

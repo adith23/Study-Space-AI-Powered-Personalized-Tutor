@@ -6,6 +6,7 @@ from app.api.v1.endpoints import (
     flashcard_routes,
     materials_file_routes,
     quiz_routes,
+    video_routes,
 )
 
 api_router = APIRouter()
@@ -26,4 +27,8 @@ api_router.include_router(
 
 api_router.include_router(
     flashcard_routes.router, prefix="/materials", tags=["materials"]
+)
+
+api_router.include_router(
+    video_routes.router, prefix="/videos", tags=["videos"]
 )
