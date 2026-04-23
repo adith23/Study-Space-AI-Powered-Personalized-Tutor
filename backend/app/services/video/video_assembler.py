@@ -17,7 +17,7 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 
-def _run_ffmpeg(args: list[str], description: str) -> None:
+def _run_ffmpeg(args: list[str], description: str, cwd: str | None = None) -> None:
     """Run an FFmpeg command and raise on failure."""
     cmd = [settings.FFMPEG_PATH] + args
     logger.info("FFmpeg [%s]: %s", description, " ".join(cmd))
@@ -26,9 +26,12 @@ def _run_ffmpeg(args: list[str], description: str) -> None:
         capture_output=True,
         text=True,
         timeout=300,
+        cwd=cwd,
     )
     if result.returncode != 0:
-        logger.error("FFmpeg stderr: %s", result.stderr[-2000:] if result.stderr else "")
+        logger.error(
+            "FFmpeg stderr: %s", result.stderr[-2000:] if result.stderr else ""
+        )
         raise RuntimeError(
             f"FFmpeg failed ({description}): {result.stderr[-500:] if result.stderr else 'unknown error'}"
         )
@@ -54,18 +57,29 @@ def _create_scene_clip(
     _run_ffmpeg(
         [
             "-y",
-            "-loop", "1",
-            "-i", image_path,
-            "-i", audio_path,
-            "-filter_complex", zoom_filter,
-            "-c:v", "libx264",
-            "-preset", "fast",
-            "-tune", "stillimage",
-            "-c:a", "aac",
-            "-b:a", "192k",
-            "-pix_fmt", "yuv420p",
+            "-loop",
+            "1",
+            "-i",
+            image_path,
+            "-i",
+            audio_path,
+            "-filter_complex",
+            zoom_filter,
+            "-c:v",
+            "libx264",
+            "-preset",
+            "fast",
+            "-tune",
+            "stillimage",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "192k",
+            "-pix_fmt",
+            "yuv420p",
             "-shortest",
-            "-t", str(duration),
+            "-t",
+            str(duration),
             output_path,
         ],
         description=f"scene clip {os.path.basename(output_path)}",
@@ -77,31 +91,43 @@ def _concatenate_clips(
     output_path: str,
 ) -> None:
     """Concatenate scene clips into a single video using FFmpeg concat demuxer."""
-    # Write the concat file list
-    concat_dir = os.path.dirname(output_path)
-    concat_file = os.path.join(concat_dir, "concat_list.txt")
+    # Write the concat file list using relative paths to the output directory
+    video_dir = os.path.dirname(output_path)
+    concat_file = os.path.join(video_dir, "concat_list.txt")
 
     with open(concat_file, "w", encoding="utf-8") as f:
         for clip in clip_paths:
-            # FFmpeg concat demuxer requires forward slashes or escaped backslashes
-            safe_path = clip.replace("\\", "/")
+            # Use relative path from the video_dir to the clip
+            rel_clip = os.path.relpath(clip, video_dir)
+            # FFmpeg concat demuxer requires forward slashes
+            safe_path = rel_clip.replace("\\", "/")
             f.write(f"file '{safe_path}'\n")
 
     _run_ffmpeg(
         [
             "-y",
-            "-f", "concat",
-            "-safe", "0",
-            "-i", concat_file,
-            "-c:v", "libx264",
-            "-preset", "fast",
-            "-c:a", "aac",
-            "-b:a", "192k",
-            "-pix_fmt", "yuv420p",
-            "-movflags", "+faststart",
-            output_path,
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "concat_list.txt",  # Ref relative to cwd
+            "-c:v",
+            "libx264",
+            "-preset",
+            "fast",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "192k",
+            "-pix_fmt",
+            "yuv420p",
+            "-movflags",
+            "+faststart",
+            "output.mp4",  # Ref relative to cwd
         ],
         description="concatenate scenes",
+        cwd=video_dir,
     )
 
     # Cleanup temp concat file
@@ -116,9 +142,12 @@ def _generate_thumbnail(video_path: str, thumbnail_path: str) -> None:
     _run_ffmpeg(
         [
             "-y",
-            "-i", video_path,
-            "-vframes", "1",
-            "-q:v", "2",
+            "-i",
+            video_path,
+            "-vframes",
+            "1",
+            "-q:v",
+            "2",
             thumbnail_path,
         ],
         description="generate thumbnail",

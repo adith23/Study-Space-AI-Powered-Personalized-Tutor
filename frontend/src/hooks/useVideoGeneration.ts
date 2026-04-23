@@ -6,7 +6,6 @@ import {
   deleteVideo,
 } from "@/lib/api/video";
 import type {
-  VideoGenerateRequest,
   VideoListItem,
   VideoMeta,
   VideoStatusType,

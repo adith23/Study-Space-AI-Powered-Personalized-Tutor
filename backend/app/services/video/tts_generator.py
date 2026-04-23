@@ -21,7 +21,7 @@ from app.schemas.video_schema import VideoScene
 logger = logging.getLogger(__name__)
 
 MAX_RETRIES = 3
-RETRY_BASE_DELAY = 2  # seconds
+RETRY_BASE_DELAY = 5  # seconds
 
 
 def _get_genai_client() -> genai.Client:
@@ -87,9 +87,7 @@ def generate_scene_audio(
             # Extract audio bytes from the response
             audio_data = response.candidates[0].content.parts[0].inline_data.data
             if not audio_data:
-                raise ValueError(
-                    f"Empty audio data for scene {scene.scene_number}"
-                )
+                raise ValueError(f"Empty audio data for scene {scene.scene_number}")
 
             duration = _save_wav(audio_data, output_path)
             logger.info(

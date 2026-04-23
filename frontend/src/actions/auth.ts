@@ -24,12 +24,15 @@ export async function loginAction(
       body: JSON.stringify({ username, password }),
     });
 
+    const data = await res.json().catch(() => ({}));
+
     if (!res.ok) {
-      const data = await res.json();
       return { error: data.detail || "Failed to login" };
     }
 
-    const data = await res.json();
+    if (!data.access_token || !data.refresh_token) {
+      return { error: "Invalid response from server." };
+    }
 
     // Secure HttpOnly Cookie
     const cookieStore = await cookies();
@@ -49,10 +52,11 @@ export async function loginAction(
       path: "/",
     });
   } catch (error) {
-    return { error: "Network error occurred." };
+    console.error("Login action error:", error);
+    return { error: "An unexpected error occurred." };
   }
 
-  // Redirect after success
+  // Redirect after success (must be outside try/catch in most cases)
   redirect("/");
 }
 
@@ -72,12 +76,15 @@ export async function signupAction(_prevState: any, formData: FormData) {
       body: JSON.stringify({ username, email, password }),
     });
 
+    const data = await res.json().catch(() => ({}));
+
     if (!res.ok) {
-      const data = await res.json();
       return { error: data.detail || "Failed to sign up" };
     }
 
-    const data = await res.json();
+    if (!data.access_token || !data.refresh_token) {
+      return { error: "Invalid response from server." };
+    }
 
     const cookieStore = await cookies();
     cookieStore.set("access_token", data.access_token, {
@@ -96,7 +103,8 @@ export async function signupAction(_prevState: any, formData: FormData) {
       path: "/",
     });
   } catch (error) {
-    return { error: "Network error occurred." };
+    console.error("Signup action error:", error);
+    return { error: "An unexpected error occurred." };
   }
 
   redirect("/");

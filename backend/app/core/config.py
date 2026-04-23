@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings
 from pydantic import validator
 import os
 
+
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Study Space API"
     VERSION: str = "1.0.0"
@@ -21,7 +22,7 @@ class Settings(BaseSettings):
 
     # NEW: Switched to Google Gemini
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY")
-    GEMINI_CHAT_MODEL: str = "gemini-2.5-flash"
+    GEMINI_CHAT_MODEL: str = "gemini-3.1-flash-lite-preview"
 
     # NEW: Pinecone Configuration
     PINECONE_API_KEY: str = os.getenv("PINECONE_API_KEY")
@@ -36,7 +37,9 @@ class Settings(BaseSettings):
     # JWT Configuration
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "")
     JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
+        os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
+    )
     REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 
     # CORS Configuration
@@ -48,11 +51,13 @@ class Settings(BaseSettings):
     ]
 
     # Video Generation Configuration
-    VIDEO_STORAGE_PATH: str = os.getenv("VIDEO_STORAGE_PATH", "storage/generated/videos")
+    VIDEO_STORAGE_PATH: str = os.getenv(
+        "VIDEO_STORAGE_PATH", "storage/generated/videos"
+    )
     FFMPEG_PATH: str = os.getenv("FFMPEG_PATH", "ffmpeg")
-    VIDEO_MAX_SCENES: int = int(os.getenv("VIDEO_MAX_SCENES", "12"))
+    VIDEO_MAX_SCENES: int = int(os.getenv("VIDEO_MAX_SCENES", "3"))
     VIDEO_IMAGE_MODEL: str = os.getenv("VIDEO_IMAGE_MODEL", "gemini-2.5-flash-image")
-    VIDEO_TTS_MODEL: str = os.getenv("VIDEO_TTS_MODEL", "gemini-3.1-flash-tts-preview")
+    VIDEO_TTS_MODEL: str = os.getenv("VIDEO_TTS_MODEL", "gemini-2.5-flash-preview-tts")
     VIDEO_TTS_VOICE: str = os.getenv("VIDEO_TTS_VOICE", "Kore")
 
     @validator("CORS_ORIGINS", pre=True)
@@ -63,7 +68,7 @@ class Settings(BaseSettings):
             return v
 
     class Config:
-        env_file = ".env"  # This will load environment variables from .env file
+        env_file = ".env"
         case_sensitive = True
 
 

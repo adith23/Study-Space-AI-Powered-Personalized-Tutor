@@ -7,22 +7,28 @@ import AIPanel from "@/components/layout/AIPanel";
 import DocumentViewer from "@/components/viewers/DocumentViewer";
 import QuizViewer from "@/components/viewers/QuizViewer";
 import FlashcardViewer from "@/components/viewers/FlashcardViewer";
+import VideoPlayer from "@/components/viewers/VideoPlayer";
 import UploadModal from "@/components/modals/UploadModal";
 import CustomizeQuizModal from "@/components/modals/CustomizeQuizModal";
 import CustomizeFlashcardsModal from "@/components/modals/CustomizeFlashcardsModal";
+import VideoStudioModal from "@/components/modals/VideoStudioModal";
 
 import { useFiles } from "@/hooks/useFiles";
 import { useChatSessions } from "@/hooks/useChatSessions";
 import { useAIGeneration } from "@/hooks/useAIGeneration";
+import { useVideoGeneration } from "@/hooks/useVideoGeneration";
 
 export default function StudySpaceChat() {
   // Middle Column View State
-  const [middleColumnView, setMiddleColumnView] = useState<"document" | "quiz" | "flashcard">("document");
+  const [middleColumnView, setMiddleColumnView] = useState<
+    "document" | "quiz" | "flashcard" | "video"
+  >("document");
 
   // Modal states
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
   const [isFlashcardsModalOpen, setIsFlashcardsModalOpen] = useState(false);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   // Custom Hooks
   const {
@@ -34,15 +40,11 @@ export default function StudySpaceChat() {
     handleFileUpload,
     handleFileClick,
     handleSelectAllFiles,
-    handleSelectFile
+    handleSelectFile,
   } = useFiles(setMiddleColumnView);
 
-  const {
-    sessions,
-    activeSessionId,
-    setActiveSessionId,
-    handleCreateSession
-  } = useChatSessions();
+  const { sessions, activeSessionId, setActiveSessionId, handleCreateSession } =
+    useChatSessions();
 
   const {
     quizzes,
@@ -52,12 +54,21 @@ export default function StudySpaceChat() {
     activeDeckId,
     setActiveDeckId,
     handleCreateQuiz,
-    handleCreateFlashcards
+    handleCreateFlashcards,
   } = useAIGeneration(selectedFileIds, setMiddleColumnView);
+
+  const { videos, activeVideoMeta, setActiveVideoId, handleGenerateVideo } =
+    useVideoGeneration(selectedFileIds);
 
   return (
     <div className="flex flex-col h-screen bg-black text-white font-sans overflow-hidden">
-      <TopNav title={middleColumnView === "document" ? (viewingFile?.name || "Study Space") : "Study Space"} />
+      <TopNav
+        title={
+          middleColumnView === "document"
+            ? viewingFile?.name || "Study Space"
+            : "Study Space"
+        }
+      />
 
       <div className="flex flex-grow min-h-0">
         <ContentPanel
@@ -79,21 +90,27 @@ export default function StudySpaceChat() {
               onClose={() => setMiddleColumnView("document")}
             />
           )}
-          
+
           {middleColumnView === "quiz" && activeQuizId && (
-            <QuizViewer 
+            <QuizViewer
               key={`quiz-${activeQuizId}`}
-              quizId={activeQuizId} 
-              onClose={() => setMiddleColumnView("document")} 
+              quizId={activeQuizId}
+              onClose={() => setMiddleColumnView("document")}
             />
           )}
-          
+
           {middleColumnView === "flashcard" && activeDeckId && (
-            <FlashcardViewer 
+            <FlashcardViewer
               key={`deck-${activeDeckId}`}
-              deckId={activeDeckId} 
-              onClose={() => setMiddleColumnView("document")} 
+              deckId={activeDeckId}
+              onClose={() => setMiddleColumnView("document")}
             />
+          )}
+
+          {middleColumnView === "video" && (
+            <div className="flex-grow flex flex-col min-h-0">
+              <VideoPlayer videoMeta={activeVideoMeta} />
+            </div>
           )}
 
           {middleColumnView === "document" && !viewingFileId && (
@@ -114,8 +131,10 @@ export default function StudySpaceChat() {
           onCreateSession={handleCreateSession}
           onOpenQuizModal={() => setIsQuizModalOpen(true)}
           onOpenFlashcardsModal={() => setIsFlashcardsModalOpen(true)}
+          onOpenVideoModal={() => setIsVideoModalOpen(true)}
           quizzes={quizzes}
           decks={decks}
+          videos={videos}
           onQuizClick={(id) => {
             setActiveQuizId(id);
             setMiddleColumnView("quiz");
@@ -123,6 +142,10 @@ export default function StudySpaceChat() {
           onDeckClick={(id) => {
             setActiveDeckId(id);
             setMiddleColumnView("flashcard");
+          }}
+          onVideoClick={(id) => {
+            setActiveVideoId(id);
+            setMiddleColumnView("video");
           }}
         />
       </div>
@@ -132,7 +155,7 @@ export default function StudySpaceChat() {
         onClose={() => setIsUploadModalOpen(false)}
         onUpload={handleFileUpload}
       />
-      
+
       <CustomizeQuizModal
         isOpen={isQuizModalOpen}
         onClose={() => setIsQuizModalOpen(false)}
@@ -141,13 +164,23 @@ export default function StudySpaceChat() {
           setIsQuizModalOpen(false);
         }}
       />
-      
+
       <CustomizeFlashcardsModal
         isOpen={isFlashcardsModalOpen}
         onClose={() => setIsFlashcardsModalOpen(false)}
         onCreate={(config) => {
           handleCreateFlashcards(config);
           setIsFlashcardsModalOpen(false);
+        }}
+      />
+
+      <VideoStudioModal
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
+        onCreate={(config) => {
+          handleGenerateVideo(config);
+          setIsVideoModalOpen(false);
+          setMiddleColumnView("video");
         }}
       />
     </div>

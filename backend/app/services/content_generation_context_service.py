@@ -70,9 +70,7 @@ def _build_broad_context(
 ) -> ContentGenerationContext:
     file_ids = [file.id for file in files]
     chunks = (
-        db.query(DocumentChunk)
-        .filter(DocumentChunk.source_file_id.in_(file_ids))
-        .all()
+        db.query(DocumentChunk).filter(DocumentChunk.source_file_id.in_(file_ids)).all()
     )
     if not chunks:
         raise ValueError("No processed content is available for the selected sources.")
@@ -159,7 +157,9 @@ def _build_focused_context(
         top_k=top_k,
     )
     if not documents:
-        raise ValueError("No focused context could be retrieved for the selected sources.")
+        raise ValueError(
+            "No focused context could be retrieved for the selected sources."
+        )
 
     parts: List[str] = []
     for document in documents:

@@ -1,5 +1,5 @@
 import React from "react";
-import { Play, Loader2, AlertCircle, Film } from "lucide-react";
+import { Loader2, AlertCircle, Film } from "lucide-react";
 import { getVideoStreamUrl } from "@/lib/api/video";
 import type { VideoMeta, VideoStatusType } from "@/types/video";
 

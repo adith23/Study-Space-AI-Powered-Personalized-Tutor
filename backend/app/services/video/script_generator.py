@@ -32,17 +32,17 @@ SYSTEM_PROMPT = (
     "The JSON must match this shape exactly:\n"
     '{"title":"...","scenes":[{"scene_number":1,"narration_text":"...",'
     '"visual_description":"...","duration_seconds":15.0,'
-    '"key_concept":"..."}],"total_duration_seconds":180.0}\n\n'
+    '"key_concept":"..."}],"total_duration_seconds":60.0}\n\n'
     "Rules:\n"
-    "- Create 8-12 scenes that cover the key concepts in a logical flow.\n"
+    "- Create 3 scenes that cover the key concepts in a logical flow.\n"
     "- Each scene's narration_text should be 2-4 sentences of clear, "
     "educational narration (as if spoken aloud by a narrator).\n"
     "- Each scene's visual_description should be a detailed prompt for an "
     "AI image generator: describe the illustration style, colours, objects, "
     "and composition. Use 'flat vector educational illustration' style.\n"
-    "- duration_seconds per scene should be 10-25 seconds.\n"
+    "- duration_seconds per scene should be 10-20 seconds.\n"
     "- total_duration_seconds must equal the sum of all scene durations and "
-    "be approximately 180 seconds (3 minutes).\n"
+    "be approximately 90 seconds.\n"
     "- Do not reference prior or next scenes in narration.\n"
     "- Make narration engaging and student-friendly."
 )
