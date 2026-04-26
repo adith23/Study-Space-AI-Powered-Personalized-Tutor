@@ -10,6 +10,9 @@ from app.core.database import Base
 class VideoStatus(str, enum.Enum):
     PENDING = "pending"
     SCRIPTING = "scripting"
+    PLANNING_VISUALS = "planning_visuals"
+    COMPILING_MANIM = "compiling_manim"
+    RENDERING_MANIM = "rendering_manim"
     GENERATING_IMAGES = "generating_images"
     GENERATING_AUDIO = "generating_audio"
     ASSEMBLING = "assembling"
@@ -23,6 +26,11 @@ class VideoStyle(str, enum.Enum):
     DEEP_DIVE = "deep_dive"
 
 
+class VideoRenderer(str, enum.Enum):
+    IMAGE = "image"
+    MANIM = "manim"
+
+
 class GeneratedVideo(Base):
     __tablename__ = "generated_videos"
 
@@ -30,13 +38,15 @@ class GeneratedVideo(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     title = Column(String, nullable=True)
 
-    status = Column(
-        Enum(VideoStatus), default=VideoStatus.PENDING, nullable=False
-    )
+    status = Column(Enum(VideoStatus), default=VideoStatus.PENDING, nullable=False)
     progress_pct = Column(Integer, default=0, nullable=False)
 
     script_json = Column(JSON, nullable=True)
+    render_spec_json = Column(JSON, nullable=True)
+    artifacts_json = Column(JSON, nullable=True)
+
     style = Column(Enum(VideoStyle), default=VideoStyle.EXPLAINER, nullable=False)
+    renderer = Column(Enum(VideoRenderer), default=VideoRenderer.IMAGE, nullable=False)
     duration_seconds = Column(Float, nullable=True)
 
     video_path = Column(String, nullable=True)

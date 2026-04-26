@@ -1,18 +1,15 @@
-from typing import List, Optional
+from __future__ import annotations
 
-from pydantic import BaseModel
+from typing import Any, Literal, Optional
 
-
-# ── Request Schemas ──────────────────────────────────────────────────────────
+from pydantic import BaseModel, Field
 
 
 class VideoGenerateRequest(BaseModel):
-    file_ids: List[int]
+    file_ids: list[int]
     focus_prompt: Optional[str] = None
-    style: str = "explainer"  # explainer | summary | deep_dive
-
-
-# ── Internal Pipeline Schemas ────────────────────────────────────────────────
+    style: str = "explainer"
+    renderer: Literal["image", "manim"] = "image"
 
 
 class VideoScene(BaseModel):
@@ -25,16 +22,47 @@ class VideoScene(BaseModel):
 
 class VideoScript(BaseModel):
     title: str
-    scenes: List[VideoScene]
+    scenes: list[VideoScene]
     total_duration_seconds: float
 
 
-# ── Response Schemas ─────────────────────────────────────────────────────────
+class ArtifactMeta(BaseModel):
+    path: str
+    kind: str
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class RenderedSceneClip(BaseModel):
+    scene_number: int
+    scene_name: str
+    clip_path: str
+    duration_seconds: float | None = None
+
+
+class AudioClipResult(BaseModel):
+    scene_number: int
+    audio_path: str
+    duration_seconds: float
+
+
+class RenderedVisualResult(BaseModel):
+    scene_clips: list[RenderedSceneClip] = Field(default_factory=list)
+    image_paths: list[str] = Field(default_factory=list)
+    preview_path: str | None = None
+    duration_hint_seconds: float | None = None
+    artifacts: dict[str, ArtifactMeta] = Field(default_factory=dict)
+
+
+class AssemblyResult(BaseModel):
+    video_path: str
+    thumbnail_path: str
+    duration_seconds: float
 
 
 class VideoGenerateResponse(BaseModel):
     id: int
     status: str
+    renderer: str = "image"
 
     class Config:
         from_attributes = True
@@ -51,6 +79,7 @@ class VideoStatusResponse(BaseModel):
     created_at: Optional[str] = None
     error_message: Optional[str] = None
     style: Optional[str] = None
+    renderer: str = "image"
 
     class Config:
         from_attributes = True
@@ -63,6 +92,7 @@ class VideoListItem(BaseModel):
     duration_seconds: Optional[float] = None
     style: Optional[str] = None
     created_at: Optional[str] = None
+    renderer: str = "image"
 
     class Config:
         from_attributes = True

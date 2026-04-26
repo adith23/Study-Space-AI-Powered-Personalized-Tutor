@@ -17,18 +17,12 @@ api_router.include_router(
     materials_file_routes.router, prefix="/materials", tags=["materials"]
 )
 
-api_router.include_router(
-    chat_routes.router, prefix="/materials", tags=["materials"]
-)
+api_router.include_router(chat_routes.router, prefix="/materials", tags=["materials"])
 
-api_router.include_router(
-    quiz_routes.router, prefix="/materials", tags=["materials"]
-)
+api_router.include_router(quiz_routes.router, prefix="/materials", tags=["materials"])
 
 api_router.include_router(
     flashcard_routes.router, prefix="/materials", tags=["materials"]
 )
 
-api_router.include_router(
-    video_routes.router, prefix="/videos", tags=["videos"]
-)
+api_router.include_router(video_routes.router, prefix="/videos", tags=["videos"])
