@@ -638,11 +638,3 @@ No automated frontend tests are currently configured. Manual testing covers the 
 This project is currently unlicensed. If you intend to use or adapt this codebase, please contact the author.
 
 ---
-
-## Contact
-
-Built by [Your Name](https://github.com/your-username)
-
-- GitHub: [github.com/your-username](https://github.com/your-username)
-- LinkedIn: [linkedin.com/in/your-profile](https://linkedin.com/in/your-profile)
-- Email: your.email@example.com
