@@ -13,6 +13,7 @@ celery_app = Celery(
         "app.tasks.material_tasks",
         "app.tasks.quiz_tasks",
         "app.tasks.flashcard_tasks",
+        "app.tasks.video_tasks",
     ], 
 )
 

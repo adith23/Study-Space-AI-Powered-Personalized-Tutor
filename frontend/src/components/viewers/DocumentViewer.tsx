@@ -17,7 +17,7 @@ export default function DocumentViewer({
   onClose,
 }: DocumentViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const viewerRef = useRef<ReturnType<Awaited<ReturnType<typeof import("@docmentis/udoc-viewer")>["UDocClient"]["create"]>["createViewer"]> extends Promise<infer V> ? V : never>(null);
+  const viewerRef = useRef<any>(null);
   const { client, isReady, error: clientError } = useDocClient();
   const [isLoading, setIsLoading] = useState(true);
   const [viewerError, setViewerError] = useState<string | null>(null);
@@ -78,17 +78,20 @@ export default function DocumentViewer({
   return (
     <div className="flex flex-col h-full bg-[#1e1f22]">
       {/* Header bar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-700 bg-zinc-900 flex-shrink-0">
-        <span className="text-sm font-medium text-zinc-200 truncate" title={fileName}>
-          {fileName}
-        </span>
-        <button
-          onClick={onClose}
-          className="p-1 rounded hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
-          title="Close viewer"
-        >
-          <X size={18} />
-        </button>
+      <div className="flex items-center justify-between px-4 py-4 border-b border-zinc-800 bg-[#1e1f22] flex-shrink-0">
+        <h2 className="text-sm font-semibold text-white">Document Viewer</h2>
+        <div className="flex items-center gap-4">
+          <span className="text-sm font-medium text-zinc-400 truncate max-w-xs" title={fileName}>
+            {fileName}
+          </span>
+          <button
+            onClick={onClose}
+            className="text-zinc-400 hover:text-white transition-colors"
+            title="Close viewer"
+          >
+            <X size={18} />
+          </button>
+        </div>
       </div>
 
       {/* Viewer area */}

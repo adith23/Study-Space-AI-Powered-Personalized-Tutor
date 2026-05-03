@@ -15,6 +15,7 @@ from app.services.chat_session_service import get_chat_session
 
 pinecone = PineconeClient(api_key=settings.PINECONE_API_KEY)
 
+
 # Get the Pinecone index
 def _get_pinecone_index():
     if settings.PINECONE_INDEX_HOST:

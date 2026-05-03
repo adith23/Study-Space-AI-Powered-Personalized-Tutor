@@ -6,7 +6,7 @@ from app.core.config import settings
 from app.api.v1.api_routes import api_router
 
 # Import models to register them with SQLAlchemy
-from app.models import user_model, material_model, chat_model, flashcard_model, quiz_model  
+from app.models import user_model, material_model, chat_model, flashcard_model, quiz_model, video_model  
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
