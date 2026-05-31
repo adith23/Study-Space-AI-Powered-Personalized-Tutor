@@ -54,6 +54,15 @@ Rules:
 - Use at least one visual block per scene.
 - Use only fields required by each block type.
 - Use concise scene names suitable as Python class names after sanitization.
+
+Field requirements by block type:
+- title_card: title, optional subtitle
+- bullet_build: heading, bullets
+- highlight_definition: term, definition
+- equation_step: optional title, steps
+- axes_plot: optional title, x_label, y_label, points, optional x_range, optional y_range
+- flow_diagram: optional title, nodes
+- comparison_table: optional title, headers, rows
 """
 
 
@@ -86,6 +95,89 @@ def _extract_json_payload(text: str) -> str:
     return stripped[start : end + 1]
 
 
+def _normalize_highlight_definition_block(block: dict[str, Any]) -> dict[str, Any]:
+    normalized = dict(block)
+    if normalized.get("block_type") != "highlight_definition":
+        return normalized
+
+    term = normalized.get("term")
+    definition = normalized.get("definition")
+
+    if not term and "title" in normalized:
+        normalized["term"] = normalized.get("title")
+    if not definition and "content" in normalized:
+        normalized["definition"] = normalized.get("content")
+
+    normalized.pop("title", None)
+    normalized.pop("content", None)
+    return normalized
+
+
+def _normalize_equation_step_block(block: dict[str, Any]) -> dict[str, Any]:
+    normalized = dict(block)
+    if normalized.get("block_type") != "equation_step":
+        return normalized
+
+    if "steps" not in normalized:
+        content = normalized.pop("content", None)
+        if isinstance(content, str):
+            normalized["steps"] = [
+                line.strip() for line in content.split("|") if line.strip()
+            ]
+        elif isinstance(content, list):
+            normalized["steps"] = content
+
+    return normalized
+
+
+def _normalize_flow_diagram_block(block: dict[str, Any]) -> dict[str, Any]:
+    normalized = dict(block)
+    if normalized.get("block_type") != "flow_diagram":
+        return normalized
+
+    if "nodes" not in normalized:
+        content = normalized.pop("content", None)
+        if isinstance(content, str):
+            normalized["nodes"] = [
+                part.strip() for part in content.split("|") if part.strip()
+            ]
+        elif isinstance(content, list):
+            normalized["nodes"] = content
+
+    return normalized
+
+
+def _normalize_visual_block(block: dict[str, Any]) -> dict[str, Any]:
+    normalized = _normalize_highlight_definition_block(block)
+    normalized = _normalize_equation_step_block(normalized)
+    normalized = _normalize_flow_diagram_block(normalized)
+    return normalized
+
+
+def _normalize_render_spec_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    normalized = dict(payload)
+    scenes = normalized.get("scenes")
+    if not isinstance(scenes, list):
+        return normalized
+
+    normalized_scenes: list[dict[str, Any]] = []
+    for scene in scenes:
+        if not isinstance(scene, dict):
+            normalized_scenes.append(scene)
+            continue
+        normalized_scene = dict(scene)
+        blocks = normalized_scene.get("visual_blocks")
+        if isinstance(blocks, list):
+            normalized_scene["visual_blocks"] = [
+                _normalize_visual_block(block) if isinstance(block, dict) else block
+                for block in blocks
+            ]
+        normalized_scenes.append(normalized_scene)
+
+    normalized["scenes"] = normalized_scenes
+    return normalized
+
+
 class ManimPlanGenerator:
     def __init__(self) -> None:
         self._llm = ChatGoogleGenerativeAI(
@@ -112,7 +204,13 @@ class ManimPlanGenerator:
     def _repair_prompt(self, raw_error: str) -> str:
         return (
             "The previous response was invalid against the schema. "
-            "Return valid JSON only and fix this issue:\n"
+            "Return valid JSON only and fix this issue.\n"
+            "Important reminders:\n"
+            '- highlight_definition must use {"term": "...", "definition": "..."}\n'
+            "- do not use alias fields like title/content for highlight_definition\n"
+            "- equation_step must use a steps array\n"
+            "- flow_diagram must use a nodes array\n"
+            "Schema error details:\n"
             f"{raw_error}"
         )
 
@@ -142,7 +240,9 @@ class ManimPlanGenerator:
             try:
                 response = self._llm.invoke(messages)
                 payload_text = _extract_json_payload(_extract_response_text(response))
-                return ManimRenderSpec.model_validate_json(payload_text)
+                payload = json.loads(payload_text)
+                payload = _normalize_render_spec_payload(payload)
+                return ManimRenderSpec.model_validate(payload)
             except (ValueError, json.JSONDecodeError) as exc:
                 last_error = exc
                 if attempt == 0:

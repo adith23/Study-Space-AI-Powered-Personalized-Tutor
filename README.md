@@ -195,6 +195,7 @@ sudo service redis-server start
 ```bash
 cd backend
 source venv/bin/activate
+venv\Scripts\activate
 python -m uvicorn app.main:app --reload
 # API: http://127.0.0.1:8000
 # Docs: http://127.0.0.1:8000/api/v1/docs
@@ -207,6 +208,7 @@ In a separate terminal:
 ```bash
 cd backend
 source venv/bin/activate
+venv\Scripts\activate
 
 # Linux / macOS
 celery -A app.core.celery_worker.celery_app worker --loglevel=info

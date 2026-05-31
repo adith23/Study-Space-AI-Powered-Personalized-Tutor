@@ -77,13 +77,17 @@ class ManimCliRunner:
         command = [
             settings.MANIM_CLI_BIN,
             "render",
-            module_path,
+            Path(
+                module_path
+            ).name,  # Pass only the filename since cwd is the workspace root
             scene_name,
             f"-q{settings.MANIM_RENDER_QUALITY}",
             "--format",
             "mp4",
             "--media_dir",
-            str(workspace.manim_media_dir()),
+            str(
+                workspace.manim_media_dir().resolve()
+            ),  # Absolute path to prevent doubling
             "--output_file",
             output_name,
         ]

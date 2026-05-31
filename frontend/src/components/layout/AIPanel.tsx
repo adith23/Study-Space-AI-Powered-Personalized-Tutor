@@ -9,6 +9,10 @@ import {
   Send,
 } from "lucide-react";
 import ChatInterface from "@/components/chat/ChatInterface";
+import {
+  formatVideoSubtitle,
+  getVideoRendererLabel,
+} from "@/lib/videoPresentation";
 import type { UploadedFileState, ChatSession } from "@/types/dashboard";
 import type { QuizSummary } from "@/types/quiz";
 import type { FlashcardDeckSummary } from "@/types/flashcard";
@@ -19,19 +23,13 @@ interface AIPanelProps {
   selectedFileIds: Set<number>;
   onSelectFileForContext: React.Dispatch<React.SetStateAction<Set<number>>>;
   onFileUpload: (file: File) => Promise<void>;
-
-  // Chat props
   activeSessionId: string | null;
   sessions: ChatSession[];
   onSelectSession: (id: string) => void;
   onCreateSession: () => void;
-
-  // Action handlers
   onOpenQuizModal: () => void;
   onOpenFlashcardsModal: () => void;
   onOpenVideoModal: () => void;
-
-  // Generated Items
   quizzes: QuizSummary[];
   decks: FlashcardDeckSummary[];
   videos: VideoListItem[];
@@ -65,13 +63,12 @@ const AIPanel: React.FC<AIPanelProps> = ({
   const [chatQuery, setChatQuery] = useState("");
 
   return (
-    <aside className="flex flex-col w-[400px] bg-[#1e1f22] border-l border-zinc-800 shrink-0">
-      {/* Header Tabs */}
-      <div className="flex items-center justify-between p-4 border-b border-zinc-800">
-        <div className="flex bg-zinc-800/50 p-1 rounded-full">
+    <aside className="flex w-[400px] shrink-0 flex-col border-l border-zinc-800 bg-[#1e1f22]">
+      <div className="flex items-center justify-between border-b border-zinc-800 p-4">
+        <div className="flex rounded-full bg-zinc-800/50 p-1">
           <button
             onClick={() => setActiveTab("ai_content")}
-            className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
               activeTab === "ai_content"
                 ? "bg-zinc-700 text-white"
                 : "text-zinc-400 hover:text-white"
@@ -84,7 +81,7 @@ const AIPanel: React.FC<AIPanelProps> = ({
           </button>
           <button
             onClick={() => setActiveTab("chat")}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
               activeTab === "chat"
                 ? "bg-zinc-700 text-white"
                 : "text-zinc-400 hover:text-white"
@@ -93,32 +90,30 @@ const AIPanel: React.FC<AIPanelProps> = ({
             Chat
           </button>
         </div>
-        <button className="text-zinc-400 hover:text-white transition-colors">
+        <button className="text-zinc-400 transition-colors hover:text-white">
           <ChevronsRight size={18} />
         </button>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-grow overflow-y-auto flex flex-col relative">
+      <div className="relative flex flex-grow flex-col overflow-y-auto">
         {activeTab === "ai_content" ? (
-          <div className="p-4 space-y-6">
-            {/* Action Buttons Grid */}
+          <div className="space-y-6 p-4">
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={onOpenQuizModal}
-                className="flex items-center justify-between p-3 rounded-xl bg-zinc-800/80 border border-zinc-700 hover:bg-zinc-700 transition-colors group"
+                className="group flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800/80 p-3 transition-colors hover:bg-zinc-700"
               >
                 <div className="flex items-center gap-3">
                   <Map size={18} className="text-blue-400" />
                   <span className="text-sm font-medium text-white">Quiz</span>
                 </div>
-                <div className="w-6 h-6 rounded border border-zinc-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex h-6 w-6 items-center justify-center rounded border border-zinc-600 opacity-0 transition-opacity group-hover:opacity-100">
                   <span className="text-[10px] text-zinc-400">⌘Q</span>
                 </div>
               </button>
               <button
                 onClick={onOpenFlashcardsModal}
-                className="flex items-center justify-between p-3 rounded-xl bg-zinc-800/80 border border-zinc-700 hover:bg-zinc-700 transition-colors group"
+                className="group flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800/80 p-3 transition-colors hover:bg-zinc-700"
               >
                 <div className="flex items-center gap-3">
                   <FileText size={18} className="text-green-400" />
@@ -129,7 +124,7 @@ const AIPanel: React.FC<AIPanelProps> = ({
               </button>
               <button
                 onClick={onOpenVideoModal}
-                className="flex items-center justify-between p-3 rounded-xl bg-zinc-800/80 border border-zinc-700 hover:bg-zinc-700 transition-colors group"
+                className="group flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800/80 p-3 transition-colors hover:bg-zinc-700"
               >
                 <div className="flex items-center gap-3">
                   <PlayCircle size={18} className="text-red-400" />
@@ -138,7 +133,7 @@ const AIPanel: React.FC<AIPanelProps> = ({
                   </span>
                 </div>
               </button>
-              <button className="flex items-center justify-between p-3 rounded-xl bg-zinc-800/80 border border-zinc-700 hover:bg-zinc-700 transition-colors group">
+              <button className="group flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800/80 p-3 transition-colors hover:bg-zinc-700">
                 <div className="flex items-center gap-3">
                   <Headphones size={18} className="text-blue-300" />
                   <span className="text-sm font-medium text-white">
@@ -146,7 +141,7 @@ const AIPanel: React.FC<AIPanelProps> = ({
                   </span>
                 </div>
               </button>
-              <button className="flex items-center justify-between p-3 rounded-xl bg-zinc-800/80 border border-zinc-700 hover:bg-zinc-700 transition-colors group">
+              <button className="group flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800/80 p-3 transition-colors hover:bg-zinc-700">
                 <div className="flex items-center gap-3">
                   <FileText size={18} className="text-yellow-400" />
                   <span className="text-sm font-medium text-white">
@@ -156,10 +151,9 @@ const AIPanel: React.FC<AIPanelProps> = ({
               </button>
             </div>
 
-            {/* Generated Items List */}
-            <div className="space-y-2 mt-8">
-              {quizzes.length === 0 && decks.length === 0 && (
-                <p className="text-sm text-zinc-500 text-center py-4">
+            <div className="mt-8 space-y-2">
+              {quizzes.length === 0 && decks.length === 0 && videos.length === 0 && (
+                <p className="py-4 text-center text-sm text-zinc-500">
                   No content generated yet.
                 </p>
               )}
@@ -168,10 +162,10 @@ const AIPanel: React.FC<AIPanelProps> = ({
                 <div
                   key={`quiz-${quiz.id}`}
                   onClick={() => onQuizClick(quiz.id)}
-                  className="flex items-center justify-between p-3 rounded-xl hover:bg-zinc-800/50 transition-colors cursor-pointer group"
+                  className="group flex cursor-pointer items-center justify-between rounded-xl p-3 transition-colors hover:bg-zinc-800/50"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
+                    <div className="rounded-lg bg-blue-500/20 p-2 text-blue-400">
                       <Map size={20} />
                     </div>
                     <div>
@@ -184,7 +178,7 @@ const AIPanel: React.FC<AIPanelProps> = ({
                       </p>
                     </div>
                   </div>
-                  <button className="p-1 rounded text-zinc-500 hover:text-white hover:bg-zinc-700 opacity-0 group-hover:opacity-100 transition-all">
+                  <button className="rounded p-1 text-zinc-500 opacity-0 transition-all hover:bg-zinc-700 hover:text-white group-hover:opacity-100">
                     <MoreVertical size={16} />
                   </button>
                 </div>
@@ -194,10 +188,10 @@ const AIPanel: React.FC<AIPanelProps> = ({
                 <div
                   key={`deck-${deck.id}`}
                   onClick={() => onDeckClick(deck.id)}
-                  className="flex items-center justify-between p-3 rounded-xl hover:bg-zinc-800/50 transition-colors cursor-pointer group"
+                  className="group flex cursor-pointer items-center justify-between rounded-xl p-3 transition-colors hover:bg-zinc-800/50"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-green-500/20 text-green-400">
+                    <div className="rounded-lg bg-green-500/20 p-2 text-green-400">
                       <FileText size={20} />
                     </div>
                     <div>
@@ -209,7 +203,7 @@ const AIPanel: React.FC<AIPanelProps> = ({
                       </p>
                     </div>
                   </div>
-                  <button className="p-1 rounded text-zinc-500 hover:text-white hover:bg-zinc-700 opacity-0 group-hover:opacity-100 transition-all">
+                  <button className="rounded p-1 text-zinc-500 opacity-0 transition-all hover:bg-zinc-700 hover:text-white group-hover:opacity-100">
                     <MoreVertical size={16} />
                   </button>
                 </div>
@@ -219,25 +213,25 @@ const AIPanel: React.FC<AIPanelProps> = ({
                 <div
                   key={`video-${video.id}`}
                   onClick={() => onVideoClick(video.id)}
-                  className="flex items-center justify-between p-3 rounded-xl hover:bg-zinc-800/50 transition-colors cursor-pointer group"
+                  className="group flex cursor-pointer items-center justify-between rounded-xl p-3 transition-colors hover:bg-zinc-800/50"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-red-500/20 text-red-400">
+                    <div className="rounded-lg bg-red-500/20 p-2 text-red-400">
                       <PlayCircle size={20} />
                     </div>
                     <div>
                       <h4 className="text-sm font-medium text-white">
                         {video.title || `Video ${video.id}`}
                       </h4>
-                      <p className="text-xs text-zinc-500">
-                        {video.duration_seconds
-                          ? `${Math.floor(video.duration_seconds / 60)}:${String(Math.floor(video.duration_seconds % 60)).padStart(2, "0")}`
-                          : video.style || "Video"}{" "}
-                        | {video.status}
-                      </p>
+                      <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                        <span>{formatVideoSubtitle(video)}</span>
+                        <span className="rounded-full border border-zinc-700 px-2 py-0.5 text-[10px] uppercase tracking-wide text-zinc-300">
+                          {getVideoRendererLabel(video.renderer)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <button className="p-1 rounded text-zinc-500 hover:text-white hover:bg-zinc-700 opacity-0 group-hover:opacity-100 transition-all">
+                  <button className="rounded p-1 text-zinc-500 opacity-0 transition-all hover:bg-zinc-700 hover:text-white group-hover:opacity-100">
                     <MoreVertical size={16} />
                   </button>
                 </div>
@@ -245,8 +239,7 @@ const AIPanel: React.FC<AIPanelProps> = ({
             </div>
           </div>
         ) : (
-          /* Chat Interface */
-          <div className="flex-grow flex flex-col">
+          <div className="flex flex-grow flex-col">
             {activeSessionId ? (
               <ChatInterface
                 key={activeSessionId}
@@ -257,15 +250,15 @@ const AIPanel: React.FC<AIPanelProps> = ({
                 onSelectFileForContext={onSelectFileForContext}
               />
             ) : (
-              <div className="flex-grow flex flex-col items-center justify-center p-4">
-                <p className="text-sm text-zinc-500 mb-4">No chat selected.</p>
+              <div className="flex flex-grow flex-col items-center justify-center p-4">
+                <p className="mb-4 text-sm text-zinc-500">No chat selected.</p>
                 {sessions.length > 0 ? (
-                  <div className="space-y-2 w-full max-w-xs">
+                  <div className="w-full max-w-xs space-y-2">
                     {sessions.map((s) => (
                       <button
                         key={s.id}
                         onClick={() => onSelectSession(s.id)}
-                        className="w-full text-left px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm text-white transition-colors"
+                        className="w-full rounded-lg bg-zinc-800 px-4 py-2 text-left text-sm text-white transition-colors hover:bg-zinc-700"
                       >
                         {s.name}
                       </button>
@@ -274,7 +267,7 @@ const AIPanel: React.FC<AIPanelProps> = ({
                 ) : (
                   <button
                     onClick={onCreateSession}
-                    className="px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
+                    className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
                   >
                     Start a New Chat
                   </button>
@@ -285,10 +278,9 @@ const AIPanel: React.FC<AIPanelProps> = ({
         )}
       </div>
 
-      {/* Persistent Bottom Input Bar for AI Content Tab */}
       {activeTab === "ai_content" && (
-        <div className="p-4 border-t border-zinc-800">
-          <div className="flex items-center gap-2 bg-transparent border border-zinc-700 rounded-full px-4 py-2 focus-within:border-zinc-500 focus-within:bg-zinc-900 transition-colors">
+        <div className="border-t border-zinc-800 p-4">
+          <div className="flex items-center gap-2 rounded-full border border-zinc-700 bg-transparent px-4 py-2 transition-colors focus-within:border-zinc-500 focus-within:bg-zinc-900">
             <input
               type="text"
               value={chatQuery}
@@ -297,12 +289,12 @@ const AIPanel: React.FC<AIPanelProps> = ({
               className="flex-grow bg-transparent text-sm text-white placeholder-zinc-500 focus:outline-none"
             />
             {selectedFileIds.size > 0 && (
-              <span className="text-xs text-zinc-400 font-medium whitespace-nowrap">
+              <span className="whitespace-nowrap text-xs font-medium text-zinc-400">
                 {selectedFileIds.size} source
                 {selectedFileIds.size > 1 ? "s" : ""}
               </span>
             )}
-            <button className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-700 text-zinc-300 hover:bg-zinc-600 hover:text-white transition-colors shrink-0">
+            <button className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-700 text-zinc-300 transition-colors hover:bg-zinc-600 hover:text-white">
               <Send size={12} />
             </button>
           </div>

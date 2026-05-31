@@ -5,15 +5,31 @@ import {
   listVideos,
   deleteVideo,
 } from "@/lib/api/video";
+import { DEFAULT_VIDEO_RENDERER, getVideoRenderer } from "@/lib/videoPresentation";
 import type {
   VideoListItem,
   VideoMeta,
+  VideoRendererType,
   VideoStatusType,
 } from "@/types/video";
 
 const POLL_INTERVAL_MS = 2000;
 
 const TERMINAL_STATUSES: VideoStatusType[] = ["completed", "failed"];
+
+function normalizeVideoListItem(video: VideoListItem): VideoListItem {
+  return {
+    ...video,
+    renderer: getVideoRenderer(video.renderer),
+  };
+}
+
+function normalizeVideoMeta(video: VideoMeta): VideoMeta {
+  return {
+    ...video,
+    renderer: getVideoRenderer(video.renderer),
+  };
+}
 
 export function useVideoGeneration(selectedFileIds: Set<number>) {
   const [videos, setVideos] = useState<VideoListItem[]>([]);
@@ -27,7 +43,7 @@ export function useVideoGeneration(selectedFileIds: Set<number>) {
   // Fetch the list of videos on mount
   useEffect(() => {
     listVideos()
-      .then(setVideos)
+      .then((items) => setVideos(items.map(normalizeVideoListItem)))
       .catch((err) => console.error("Failed to fetch videos:", err));
   }, []);
 
@@ -37,7 +53,7 @@ export function useVideoGeneration(selectedFileIds: Set<number>) {
 
     const poll = async () => {
       try {
-        const meta = await getVideoStatus(activeVideoId);
+        const meta = normalizeVideoMeta(await getVideoStatus(activeVideoId));
         setActiveVideoMeta(meta);
 
         if (TERMINAL_STATUSES.includes(meta.status)) {
@@ -58,6 +74,7 @@ export function useVideoGeneration(selectedFileIds: Set<number>) {
                     title: meta.title ?? v.title,
                     duration_seconds:
                       meta.duration_seconds ?? v.duration_seconds,
+                    renderer: meta.renderer ?? v.renderer,
                   }
                 : v
             )
@@ -82,6 +99,7 @@ export function useVideoGeneration(selectedFileIds: Set<number>) {
 
   const handleGenerateVideo = useCallback(
     async (config: {
+      renderer: VideoRendererType;
       style: "explainer" | "summary" | "deep_dive";
       focus: string;
     }) => {
@@ -95,16 +113,18 @@ export function useVideoGeneration(selectedFileIds: Set<number>) {
         setIsGenerating(true);
         const result = await generateVideo({
           file_ids: fileIds,
+          renderer: config.renderer,
           style: config.style,
           focus_prompt: config.focus.trim() || null,
         });
 
         // Add to list
-        const newItem: VideoListItem = {
+        const newItem = normalizeVideoListItem({
           id: result.id,
           status: result.status as VideoStatusType,
           created_at: new Date().toISOString(),
-        };
+          renderer: result.renderer ?? config.renderer ?? DEFAULT_VIDEO_RENDERER,
+        });
         setVideos((prev) => [newItem, ...prev]);
         setActiveVideoId(result.id);
         setActiveVideoMeta(null);

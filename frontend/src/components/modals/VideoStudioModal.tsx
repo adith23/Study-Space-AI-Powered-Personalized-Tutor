@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { Video } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import PillButton from "@/components/ui/PillButton";
+import type { VideoRendererType } from "@/types/video";
 
 interface VideoStudioModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreate: (config: {
+    renderer: VideoRendererType;
     style: "explainer" | "summary" | "deep_dive";
     focus: string;
   }) => void;
@@ -17,13 +19,14 @@ const VideoStudioModal: React.FC<VideoStudioModalProps> = ({
   onClose,
   onCreate,
 }) => {
+  const [renderer, setRenderer] = useState<VideoRendererType>("image");
   const [style, setStyle] = useState<"explainer" | "summary" | "deep_dive">(
     "explainer"
   );
   const [focus, setFocus] = useState("");
 
   const handleCreate = () => {
-    onCreate({ style, focus });
+    onCreate({ renderer, style, focus });
     onClose();
   };
 
@@ -41,7 +44,34 @@ const VideoStudioModal: React.FC<VideoStudioModalProps> = ({
       }
     >
       <div className="space-y-8">
-        {/* Video Style */}
+        <div className="space-y-4">
+          <h3 className="text-xl text-white">Renderer</h3>
+          <div className="inline-flex rounded-full bg-zinc-900 p-1 ring-1 ring-zinc-800">
+            {[
+              { value: "image" as const, label: "Classic" },
+              { value: "manim" as const, label: "Technical / Manim" },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setRenderer(option.value)}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  renderer === option.value
+                    ? "bg-zinc-700 text-white"
+                    : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-sm text-zinc-500">
+            {renderer === "image"
+              ? "Classic uses illustrated scene generation for a broad explainer format."
+              : "Technical / Manim emphasizes programmatic diagrams, charts, formulas, and structured technical visuals."}
+          </p>
+        </div>
+
         <div className="space-y-4">
           <h3 className="text-xl text-white">Video style</h3>
           <div className="flex gap-3">
@@ -70,7 +100,6 @@ const VideoStudioModal: React.FC<VideoStudioModalProps> = ({
           </p>
         </div>
 
-        {/* Focus Area */}
         <div className="space-y-4">
           <h3 className="text-xl text-white">
             What should the video focus on?
@@ -78,25 +107,39 @@ const VideoStudioModal: React.FC<VideoStudioModalProps> = ({
           <textarea
             value={focus}
             onChange={(e) => setFocus(e.target.value)}
-            className="w-full h-32 resize-none rounded-3xl border border-zinc-700 bg-transparent p-4 text-white focus:border-zinc-500 focus:outline-none"
-            placeholder="Leave empty to cover the material broadly..."
+            className="h-32 w-full resize-none rounded-3xl border border-zinc-700 bg-transparent p-4 text-white focus:border-zinc-500 focus:outline-none"
+            placeholder={
+              renderer === "image"
+                ? "Leave empty to cover the material broadly..."
+                : "Mention the concept, formula, chart, process, or technical flow to visualize..."
+            }
           />
         </div>
 
-        {/* Info */}
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
           <p className="text-sm text-zinc-400">
-            ⏱ The video will be approximately <strong className="text-zinc-300">3 minutes</strong> long
-            with 8–12 illustrated scenes narrated by AI. Generation
-            typically takes 2–5 minutes.
+            {renderer === "image" ? (
+              <>
+                The video will be approximately{" "}
+                <strong className="text-zinc-300">3 minutes</strong> long with
+                illustrated scenes narrated by AI. Generation typically takes
+                2-5 minutes.
+              </>
+            ) : (
+              <>
+                The video will be approximately{" "}
+                <strong className="text-zinc-300">3 minutes</strong> long with
+                technical animated visuals and AI narration. Generation may take
+                longer than Classic while the animation is compiled and rendered.
+              </>
+            )}
           </p>
         </div>
 
-        {/* Create Button */}
         <div className="flex justify-end pt-4">
           <button
             onClick={handleCreate}
-            className="rounded-full bg-zinc-700 px-8 py-2.5 text-sm font-bold text-white hover:bg-zinc-600 transition-colors"
+            className="rounded-full bg-zinc-700 px-8 py-2.5 text-sm font-bold text-white transition-colors hover:bg-zinc-600"
           >
             Generate Video
           </button>

@@ -52,24 +52,27 @@ class ManimSpecValidator:
                 )
 
     def _validate_text_lengths(self, spec: ManimRenderSpec) -> None:
-        max_length = settings.MANIM_MAX_TEXT_LENGTH
+        max_block_text_length = settings.MANIM_MAX_TEXT_LENGTH
         for scene in spec.scenes:
-            for text in (scene.scene_name, scene.objective, scene.narration_text):
-                if len(text) > max_length:
-                    raise ValueError("Scene text exceeds configured text length limit.")
+            if len(scene.scene_name) > settings.MANIM_MAX_SCENE_NAME_LENGTH:
+                raise ValueError("Scene name exceeds configured length limit.")
+            if len(scene.objective) > settings.MANIM_MAX_SCENE_OBJECTIVE_LENGTH:
+                raise ValueError("Scene objective exceeds configured length limit.")
+            if len(scene.narration_text) > settings.MANIM_MAX_NARRATION_LENGTH:
+                raise ValueError("Scene narration exceeds configured length limit.")
             for block in scene.visual_blocks:
                 for key, value in block.model_dump().items():
-                    if isinstance(value, str) and len(value) > max_length:
+                    if isinstance(value, str) and len(value) > max_block_text_length:
                         raise ValueError(f"Block field '{key}' exceeds text length limit.")
                     if isinstance(value, list):
                         for item in value:
-                            if isinstance(item, str) and len(item) > max_length:
+                            if isinstance(item, str) and len(item) > max_block_text_length:
                                 raise ValueError(
                                     f"Block field '{key}' contains oversized text."
                                 )
                             if isinstance(item, list):
                                 for nested in item:
-                                    if isinstance(nested, str) and len(nested) > max_length:
+                                    if isinstance(nested, str) and len(nested) > max_block_text_length:
                                         raise ValueError(
                                             f"Block field '{key}' contains oversized table cell text."
                                         )
