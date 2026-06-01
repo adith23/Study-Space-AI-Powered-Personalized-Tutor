@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class VideoGenerateRequest(BaseModel):
@@ -60,15 +60,16 @@ class AssemblyResult(BaseModel):
 
 
 class VideoGenerateResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     status: str
     renderer: str = "image"
 
-    class Config:
-        from_attributes = True
-
 
 class VideoStatusResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     status: str
     progress_pct: int
@@ -81,11 +82,10 @@ class VideoStatusResponse(BaseModel):
     style: Optional[str] = None
     renderer: str = "image"
 
-    class Config:
-        from_attributes = True
-
 
 class VideoListItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     title: Optional[str] = None
     status: str
@@ -93,6 +93,3 @@ class VideoListItem(BaseModel):
     style: Optional[str] = None
     created_at: Optional[str] = None
     renderer: str = "image"
-
-    class Config:
-        from_attributes = True

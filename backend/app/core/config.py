@@ -1,10 +1,12 @@
 from typing import List
 from pydantic_settings import BaseSettings
-from pydantic import validator
+from pydantic import field_validator, ConfigDict
 import os
 
 
 class Settings(BaseSettings):
+    model_config = ConfigDict(env_file=".env", case_sensitive=True)
+
     PROJECT_NAME: str = "Study Space API"
     VERSION: str = "1.0.0"
     DESCRIPTION: str = "AI-Powered Personalized Learning Platform"
@@ -85,16 +87,13 @@ class Settings(BaseSettings):
         os.getenv("VIDEO_ALIGNMENT_TOLERANCE_SECONDS", "0.35")
     )
 
-    @validator("CORS_ORIGINS", pre=True)
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
     def assemble_cors_origins(cls, v: str | List[str]) -> List[str] | str:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
         elif isinstance(v, (list, str)):
             return v
-
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
 
 
 settings = Settings()
