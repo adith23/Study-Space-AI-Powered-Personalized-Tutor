@@ -136,11 +136,23 @@ async def run_conversational_chat(
                 input=request.query,
             )
         )
-        standalone_question_text = (
+        standalone_question_content = (
             standalone_question.content
             if hasattr(standalone_question, "content")
-            else str(standalone_question)
-        ).strip() or request.query
+            else standalone_question
+        )
+        if isinstance(standalone_question_content, list):
+            texts = []
+            for item in standalone_question_content:
+                if isinstance(item, str):
+                    texts.append(item)
+                elif isinstance(item, dict) and "text" in item:
+                    texts.append(item["text"])
+            standalone_question_text = " ".join(texts).strip()
+        else:
+            standalone_question_text = str(standalone_question_content).strip()
+
+        standalone_question_text = standalone_question_text or request.query
 
         retrieved_docs = _retrieve_documents(
             query_text=standalone_question_text,

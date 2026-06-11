@@ -16,6 +16,7 @@ interface VideoPlayerProps {
 const STATUS_LABELS: Record<VideoStatusType, string> = {
   pending: `${VIDEO_STATUS_LABELS.pending}...`,
   scripting: `${VIDEO_STATUS_LABELS.scripting}...`,
+  generating_code: `${VIDEO_STATUS_LABELS.generating_code}...`,
   planning_visuals: `${VIDEO_STATUS_LABELS.planning_visuals}...`,
   compiling_manim: `${VIDEO_STATUS_LABELS.compiling_manim}...`,
   rendering_manim: `${VIDEO_STATUS_LABELS.rendering_manim}...`,

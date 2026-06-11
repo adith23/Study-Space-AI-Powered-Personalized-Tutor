@@ -56,7 +56,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         const response = await sendChatMessage(
           userMessage.content,
           sessionId,
-          Array.from(selectedFileIds)
+          Array.from(selectedFileIds),
         );
         const aiMessage: ChatMessage = {
           role: "ai",

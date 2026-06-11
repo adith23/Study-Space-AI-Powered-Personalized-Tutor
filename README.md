@@ -197,8 +197,8 @@ cd backend
 source venv/bin/activate
 venv\Scripts\activate
 python -m uvicorn app.main:app --reload
-# API: http://127.0.0.1:8000
-# Docs: http://127.0.0.1:8000/api/v1/docs
+API: http://127.0.0.1:8000
+Docs: http://127.0.0.1:8000/api/v1/docs
 ```
 
 ### 3. Start the Celery worker (required for file processing and video generation)
@@ -222,7 +222,7 @@ celery -A app.core.celery_worker.celery_app worker --loglevel=info --pool=thread
 ```bash
 cd frontend
 npm run dev
-# App: http://localhost:5173
+App: http://localhost:5173
 ```
 
 ### Production build

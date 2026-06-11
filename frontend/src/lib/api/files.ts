@@ -7,7 +7,7 @@ export async function listFiles() {
 }
 
 export async function getFileStatus(fileId: number) {
-  const response = await api.get<{ status: UploadedFileState["status"] }>(`/materials/${fileId}/status`);
+  const response = await api.get<{ status: UploadedFileState["status"]; error_message?: string }>(`/materials/${fileId}/status`);
   return response.data;
 }
 
@@ -21,4 +21,15 @@ export async function uploadFile(file: File) {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return response.data;
+}
+
+export async function renameFile(fileId: number, newName: string) {
+  const response = await api.put<UploadedFileUploadResponse>(`/materials/files/${fileId}/rename`, {
+    name: newName,
+  });
+  return response.data;
+}
+
+export async function deleteFile(fileId: number) {
+  await api.delete(`/materials/files/${fileId}`);
 }

@@ -10,6 +10,7 @@ from app.core.database import Base
 class VideoStatus(str, enum.Enum):
     PENDING = "pending"
     SCRIPTING = "scripting"
+    GENERATING_CODE = "generating_code"
     PLANNING_VISUALS = "planning_visuals"
     COMPILING_MANIM = "compiling_manim"
     RENDERING_MANIM = "rendering_manim"
@@ -29,6 +30,7 @@ class VideoStyle(str, enum.Enum):
 class VideoRenderer(str, enum.Enum):
     IMAGE = "image"
     MANIM = "manim"
+    MANIM_PRO = "manim_pro"
 
 
 class GeneratedVideo(Base):

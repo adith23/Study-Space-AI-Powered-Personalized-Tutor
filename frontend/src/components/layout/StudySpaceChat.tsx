@@ -41,6 +41,9 @@ export default function StudySpaceChat() {
     handleFileClick,
     handleSelectAllFiles,
     handleSelectFile,
+    handleRenameFile,
+    handleDeleteFile,
+    handleDismissFile,
   } = useFiles(setMiddleColumnView);
 
   const { sessions, activeSessionId, setActiveSessionId, handleCreateSession } =
@@ -79,6 +82,9 @@ export default function StudySpaceChat() {
           onAddContent={() => setIsUploadModalOpen(true)}
           onFileClick={handleFileClick}
           viewingFileId={middleColumnView === "document" ? viewingFileId : null}
+          onRenameFile={handleRenameFile}
+          onDeleteFile={handleDeleteFile}
+          onDismissFile={handleDismissFile}
         />
 
         <main className="flex-grow flex flex-col min-w-0 bg-[#09090b]">

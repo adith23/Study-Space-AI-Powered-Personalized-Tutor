@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     FFPROBE_PATH: str = os.getenv("FFPROBE_PATH", "ffprobe")
     VIDEO_MAX_SCENES: int = int(os.getenv("VIDEO_MAX_SCENES", "3"))
     VIDEO_IMAGE_MODEL: str = os.getenv("VIDEO_IMAGE_MODEL", "gemini-2.5-flash-image")
-    VIDEO_TTS_MODEL: str = os.getenv("VIDEO_TTS_MODEL", "gemini-2.5-flash-preview-tts")
+    VIDEO_TTS_MODEL: str = os.getenv("VIDEO_TTS_MODEL", "gemini-3.1-flash-tts-preview")
     VIDEO_TTS_VOICE: str = os.getenv("VIDEO_TTS_VOICE", "Kore")
 
     MANIM_PYTHON_BIN: str = os.getenv("MANIM_PYTHON_BIN", "python")
@@ -85,6 +85,10 @@ class Settings(BaseSettings):
         os.getenv("VIDEO_ALIGNMENT_TOLERANCE_SECONDS", "0.35")
     )
 
+    # ── Manim Pro (direct code generation) ────────────────────────
+    MANIM_PRO_MAX_RETRIES: int = int(os.getenv("MANIM_PRO_MAX_RETRIES", "3"))
+    MANIM_PRO_MAX_SCENES: int = int(os.getenv("MANIM_PRO_MAX_SCENES", "5"))
+
     @validator("CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v: str | List[str]) -> List[str] | str:
         if isinstance(v, str) and not v.startswith("["):
@@ -95,6 +99,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"
 
 
 settings = Settings()

@@ -34,6 +34,12 @@ class UploadedFileResponse(BaseModel):
 # Status response schema
 class StatusResponse(BaseModel):
     id: int
-    name: str
+    name: Optional[str] = None
     status: ProcessingStatus
     error_message: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+# Uploaded file update schema for rename
+class UploadedFileUpdate(BaseModel):
+    name: str

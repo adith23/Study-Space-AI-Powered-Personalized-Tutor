@@ -9,11 +9,13 @@ export const DEFAULT_VIDEO_RENDERER: VideoRendererType = "image";
 export const VIDEO_RENDERER_LABELS: Record<VideoRendererType, string> = {
   image: "Classic",
   manim: "Manim",
+  manim_pro: "Manim Pro",
 };
 
 export const VIDEO_STATUS_LABELS: Record<VideoStatusType, string> = {
   pending: "Preparing",
   scripting: "Writing script",
+  generating_code: "Generating animation code",
   planning_visuals: "Planning visuals",
   compiling_manim: "Compiling animation",
   rendering_manim: "Rendering animation",

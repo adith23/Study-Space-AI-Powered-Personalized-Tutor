@@ -95,3 +95,55 @@ def list_user_files(*, db: Session, current_user: User) -> List[UploadedFile]:
         .order_by(UploadedFile.uploaded_at.desc())
         .all()
     )
+
+# Rename an uploaded file
+def rename_uploaded_file(*, file_id: int, new_name: str, db: Session, current_user: User) -> UploadedFile:
+    file_record = (
+        db.query(UploadedFile)
+        .filter(UploadedFile.id == file_id, UploadedFile.user_id == current_user.id)
+        .first()
+    )
+    if not file_record:
+        raise HTTPException(status_code=404, detail="File not found")
+
+    file_record.name = new_name
+    db.commit()
+    db.refresh(file_record)
+    return file_record
+
+# Delete an uploaded file
+def delete_uploaded_file(*, file_id: int, db: Session, current_user: User) -> None:
+    file_record = (
+        db.query(UploadedFile)
+        .filter(UploadedFile.id == file_id, UploadedFile.user_id == current_user.id)
+        .first()
+    )
+    if not file_record:
+        raise HTTPException(status_code=404, detail="File not found")
+
+    # 1. Clean up Pinecone vectors if the file has chunks
+    from app.models.material_model import DocumentChunk
+    from app.services.document_processor import get_pinecone_index
+    from app.core.config import settings
+
+    chunks = db.query(DocumentChunk).filter(DocumentChunk.source_file_id == file_id).all()
+    if chunks:
+        vector_ids = [chunk.vector_id for chunk in chunks]
+        try:
+            index = get_pinecone_index()
+            index.delete(ids=vector_ids, namespace=settings.PINECONE_NAMESPACE)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Failed to delete Pinecone vectors for file {file_id}: {e}")
+
+    # 2. Clean up file on disk
+    if file_record.stored_path and os.path.exists(file_record.stored_path):
+        try:
+            os.remove(file_record.stored_path)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Failed to delete physical file {file_record.stored_path}: {e}")
+
+    # 3. Delete database record (cascades to document_chunks)
+    db.delete(file_record)
+    db.commit()
