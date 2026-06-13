@@ -1,30 +1,16 @@
-import { useState, useEffect } from "react";
-import { listChatSessions, createChatSession } from "@/lib/api/chat";
+import { useState } from "react";
+import { createChatSessionAction } from "@/actions/chat";
 import type { ChatSession } from "@/types/dashboard";
 
-export function useChatSessions() {
-  const [sessions, setSessions] = useState<ChatSession[]>([]);
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchSessions = async () => {
-      try {
-        const sessionsRes = await listChatSessions();
-        setSessions(sessionsRes);
-        if (sessionsRes.length > 0 && !activeSessionId) {
-          setActiveSessionId(sessionsRes[0].id);
-        }
-      } catch (error) {
-        console.error("Failed to fetch sessions:", error);
-      }
-    };
-    fetchSessions();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+export function useChatSessions(initialSessions: ChatSession[]) {
+  const [sessions, setSessions] = useState<ChatSession[]>(initialSessions);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(
+    initialSessions.length > 0 ? initialSessions[0].id : null,
+  );
 
   const handleCreateSession = async () => {
     try {
-      const response = await createChatSession();
+      const response = await createChatSessionAction();
       setSessions((prev) => [response, ...prev]);
       setActiveSessionId(response.id);
     } catch (error) {

@@ -18,7 +18,26 @@ import { useChatSessions } from "@/hooks/useChatSessions";
 import { useAIGeneration } from "@/hooks/useAIGeneration";
 import { useVideoGeneration } from "@/hooks/useVideoGeneration";
 
-export default function StudySpaceChat() {
+import type { UploadedFileListResponse, ChatSession } from "@/types/dashboard";
+import type { QuizSummary } from "@/types/quiz";
+import type { FlashcardDeckSummary } from "@/types/flashcard";
+import type { VideoListItem } from "@/types/video";
+
+interface StudySpaceChatProps {
+  initialFiles: UploadedFileListResponse[];
+  initialSessions: ChatSession[];
+  initialQuizzes: QuizSummary[];
+  initialDecks: FlashcardDeckSummary[];
+  initialVideos: VideoListItem[];
+}
+
+export default function StudySpaceChat({
+  initialFiles,
+  initialSessions,
+  initialQuizzes,
+  initialDecks,
+  initialVideos,
+}: StudySpaceChatProps) {
   // Middle Column View State
   const [middleColumnView, setMiddleColumnView] = useState<
     "document" | "quiz" | "flashcard" | "video"
@@ -30,7 +49,7 @@ export default function StudySpaceChat() {
   const [isFlashcardsModalOpen, setIsFlashcardsModalOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
-  // Custom Hooks
+  // Custom Hooks — initialized with server-fetched data
   const {
     files,
     viewingFileId,
@@ -44,10 +63,10 @@ export default function StudySpaceChat() {
     handleRenameFile,
     handleDeleteFile,
     handleDismissFile,
-  } = useFiles(setMiddleColumnView);
+  } = useFiles(initialFiles, setMiddleColumnView);
 
   const { sessions, activeSessionId, setActiveSessionId, handleCreateSession } =
-    useChatSessions();
+    useChatSessions(initialSessions);
 
   const {
     quizzes,
@@ -58,10 +77,10 @@ export default function StudySpaceChat() {
     setActiveDeckId,
     handleCreateQuiz,
     handleCreateFlashcards,
-  } = useAIGeneration(selectedFileIds, setMiddleColumnView);
+  } = useAIGeneration(initialQuizzes, initialDecks, selectedFileIds, setMiddleColumnView);
 
   const { videos, activeVideoMeta, setActiveVideoId, handleGenerateVideo } =
-    useVideoGeneration(selectedFileIds);
+    useVideoGeneration(initialVideos, selectedFileIds);
 
   return (
     <div className="flex flex-col h-screen bg-black text-white font-sans overflow-hidden">

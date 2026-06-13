@@ -4,7 +4,10 @@ import { useActionState } from "react";
 import { signupAction } from "@/actions/auth";
 
 export default function SignupForm() {
-  const [state, formAction, isPending] = useActionState(signupAction, undefined);
+  const [state, formAction, isPending] = useActionState(
+    signupAction,
+    undefined,
+  );
 
   return (
     <div className="max-w-sm mx-auto bg-white p-6 rounded-lg shadow-md text-zinc-900">
@@ -32,8 +35,8 @@ export default function SignupForm() {
           className="w-full mb-4 px-4 py-2 border rounded"
           required
         />
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={isPending}
           className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50 transition-colors"
         >

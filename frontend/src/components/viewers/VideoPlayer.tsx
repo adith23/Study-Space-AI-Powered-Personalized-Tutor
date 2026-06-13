@@ -1,6 +1,6 @@
 import React from "react";
 import { Loader2, AlertCircle, Film } from "lucide-react";
-import { getVideoStreamUrl } from "@/lib/api/video";
+import { getVideoStreamUrl } from "@/lib/api/endpoints/video";
 import {
   formatVideoDuration,
   getVideoErrorSummary,

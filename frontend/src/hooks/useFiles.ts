@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
-import { listFiles, getFileStatus, uploadFile, renameFile, deleteFile } from "@/lib/api/files";
-import type { UploadedFileState, UploadedFileListResponse, UploadedFileUploadResponse } from "@/types/dashboard";
+import { clientApi } from "@/lib/api/index.client";
+import {
+  uploadFileAction,
+  renameFileAction,
+  deleteFileAction,
+} from "@/actions/files";
+import type {
+  UploadedFileState,
+  UploadedFileListResponse,
+  UploadedFileUploadResponse,
+} from "@/types/dashboard";
 
 const VALID_FILE_STATUSES = new Set<UploadedFileState["status"]>([
   "pending",
@@ -16,7 +25,7 @@ function normalizeFileStatus(status: string | undefined): UploadedFileState["sta
   return "pending";
 }
 
-function normalizeUploadedFile(
+export function normalizeUploadedFile(
   file: UploadedFileListResponse | UploadedFileUploadResponse
 ): UploadedFileState {
   return {
@@ -27,31 +36,23 @@ function normalizeUploadedFile(
   };
 }
 
-export function useFiles(setMiddleColumnView: (view: "document" | "quiz" | "flashcard") => void) {
-  const [files, setFiles] = useState<UploadedFileState[]>([]);
+export function useFiles(
+  initialFiles: UploadedFileListResponse[],
+  setMiddleColumnView: (view: "document" | "quiz" | "flashcard") => void,
+) {
+  const [files, setFiles] = useState<UploadedFileState[]>(
+    initialFiles.map(normalizeUploadedFile),
+  );
   const [viewingFileId, setViewingFileId] = useState<number | null>(null);
   const [selectedFileIds, setSelectedFileIds] = useState<Set<number>>(new Set());
 
-  // Initial Fetch
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const filesRes = await listFiles();
-        setFiles(filesRes.map(normalizeUploadedFile));
-      } catch (error) {
-        console.error("Failed to fetch initial files:", error);
-      }
-    };
-    fetchFiles();
-  }, []);
-
-  // Poll File Status
+  // Poll File Status — uses clientApi for client-side polling
   useEffect(() => {
     const activePolls = new Map<number, ReturnType<typeof setInterval>>();
 
     const pollStatus = async (fileId: number) => {
       try {
-        const response = await getFileStatus(fileId);
+        const response = await clientApi.files.getStatus(fileId);
         const newStatus = response.status;
         const errorMsg = response.error_message;
         setFiles((prevFiles) =>
@@ -98,17 +99,36 @@ export function useFiles(setMiddleColumnView: (view: "document" | "quiz" | "flas
     // Add temp file to files list immediately to trigger skeleton loader
     setFiles((prev) => [tempFile, ...prev]);
 
+    const formData = new FormData();
+    formData.append("file_type", "pdf");
+    formData.append("file", file);
+    formData.append("name", file.name);
+
     try {
-      const response = await uploadFile(file);
-      const uploaded = normalizeUploadedFile(response);
-      
+      const result = await uploadFileAction(formData);
+
+      if (result.error || !result.data) {
+        setFiles((prev) => {
+          const exists = prev.some((f) => f.id === tempId);
+          if (!exists) return prev;
+          return prev.map((f) =>
+            f.id === tempId
+              ? { ...f, status: "failed", error: result.error || "Upload failed" }
+              : f
+          );
+        });
+        return;
+      }
+
+      const uploaded = normalizeUploadedFile(result.data);
+
       let wasDismissed = false;
       setFiles((prev) => {
         const exists = prev.some((f) => f.id === tempId);
         if (!exists) {
           wasDismissed = true;
           // Clean up the uploaded file on the backend since it was dismissed in the UI
-          deleteFile(uploaded.id).catch((err) =>
+          deleteFileAction(uploaded.id).catch((err) =>
             console.error("Failed to delete orphaned upload:", err)
           );
           return prev;
@@ -122,9 +142,8 @@ export function useFiles(setMiddleColumnView: (view: "document" | "quiz" | "flas
       }
     } catch (error: any) {
       console.error("Upload failed", error);
-      const errorMessage = error?.response?.data?.detail || error?.message || "Upload failed";
+      const errorMessage = error?.message || "Upload failed";
       setFiles((prev) => {
-        // Only update if it hasn't been dismissed
         const exists = prev.some((f) => f.id === tempId);
         if (!exists) return prev;
         return prev.map((f) =>
@@ -168,7 +187,7 @@ export function useFiles(setMiddleColumnView: (view: "document" | "quiz" | "flas
 
   const handleRenameFile = async (fileId: number, newName: string) => {
     try {
-      await renameFile(fileId, newName);
+      await renameFileAction(fileId, newName);
       setFiles((prev) =>
         prev.map((f) => (f.id === fileId ? { ...f, name: newName } : f))
       );
@@ -179,7 +198,7 @@ export function useFiles(setMiddleColumnView: (view: "document" | "quiz" | "flas
 
   const handleDeleteFile = async (fileId: number) => {
     try {
-      await deleteFile(fileId);
+      await deleteFileAction(fileId);
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
       setSelectedFileIds((prev) => {
         const next = new Set(prev);
@@ -197,7 +216,7 @@ export function useFiles(setMiddleColumnView: (view: "document" | "quiz" | "flas
   const handleDismissFile = async (fileId: number) => {
     try {
       if (fileId > 0) {
-        await deleteFile(fileId);
+        await deleteFileAction(fileId);
       }
     } catch (error) {
       console.error("Failed to dismiss failed file:", error);
