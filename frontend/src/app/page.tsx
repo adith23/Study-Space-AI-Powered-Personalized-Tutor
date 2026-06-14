@@ -144,39 +144,39 @@ export default function Home() {
           <div className="grid grid-cols-3 gap-4 w-full max-w-lg mb-8">
             {/* Upload Card */}
             <button className="group flex flex-col items-start bg-[#202022] hover:bg-[#28282b] border border-zinc-800/40 rounded-xl p-4 text-left transition-all duration-200 hover:-translate-y-0.5">
-              <div className="p-1.5 rounded-lg bg-zinc-900 group-hover:bg-zinc-850 text-zinc-300 group-hover:text-white transition-all mb-3.5">
-                <Upload size={16} />
+              <div className="p-2.5 rounded-lg bg-zinc-900 group-hover:bg-zinc-850 text-zinc-300 group-hover:text-white transition-all mb-3.5">
+                <Upload size={20} />
               </div>
-              <span className="text-white text-xs font-semibold block mb-0.5">
+              <span className="text-white text-lg font-semibold block mb-0.5">
                 Upload
               </span>
-              <span className="text-zinc-500 text-[9px] font-medium leading-normal">
+              <span className="text-zinc-300 text-[13px] font-medium leading-normal">
                 Files, Audio, Video
               </span>
             </button>
 
             {/* Link Card */}
             <button className="group flex flex-col items-start bg-[#202022] hover:bg-[#28282b] border border-zinc-800/40 rounded-xl p-4 text-left transition-all duration-200 hover:-translate-y-0.5">
-              <div className="p-1.5 rounded-lg bg-zinc-900 group-hover:bg-zinc-850 text-zinc-300 group-hover:text-white transition-all mb-3.5">
-                <LinkIcon size={16} />
+              <div className="p-2.5 rounded-lg bg-zinc-900 group-hover:bg-zinc-850 text-zinc-300 group-hover:text-white transition-all mb-3.5">
+                <LinkIcon size={20} />
               </div>
-              <span className="text-white text-xs font-semibold block mb-0.5">
+              <span className="text-white text-lg font-semibold block mb-0.5">
                 Link
               </span>
-              <span className="text-zinc-500 text-[9px] font-medium leading-normal">
+              <span className="text-zinc-300 text-[13px] font-medium leading-normal">
                 YouTube, Website
               </span>
             </button>
 
             {/* Paste Card */}
             <button className="group flex flex-col items-start bg-[#202022] hover:bg-[#28282b] border border-zinc-800/40 rounded-xl p-4 text-left transition-all duration-200 hover:-translate-y-0.5">
-              <div className="p-1.5 rounded-lg bg-zinc-900 group-hover:bg-zinc-850 text-zinc-300 group-hover:text-white transition-all mb-3.5">
-                <Clipboard size={16} />
+              <div className="p-2.5 rounded-lg bg-zinc-900 group-hover:bg-zinc-850 text-zinc-300 group-hover:text-white transition-all mb-3.5">
+                <Clipboard size={20} />
               </div>
-              <span className="text-white text-xs font-semibold block mb-0.5">
+              <span className="text-white text-lg font-semibold block mb-0.5">
                 Paste
               </span>
-              <span className="text-zinc-500 text-[9px] font-medium leading-normal">
+              <span className="text-zinc-300 text-[13px] font-medium leading-normal">
                 Copied Text
               </span>
             </button>
@@ -189,9 +189,9 @@ export default function Home() {
               placeholder="Explore Anything"
               value={exploreQuery}
               onChange={(e) => setExploreQuery(e.target.value)}
-              className="w-full bg-black border border-zinc-800 focus:border-zinc-650 hover:border-zinc-700/80 rounded-full py-2.5 pl-6 pr-12 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none transition-all duration-300"
+              className="w-full bg-black border border-white focus:border-white hover:border-white/80 rounded-full py-2.5 pl-6 pr-12 text-sm text-white placeholder-zinc-400 focus:outline-none transition-all duration-300"
             />
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-white pointer-events-none">
               <Search size={16} />
             </div>
           </div>
