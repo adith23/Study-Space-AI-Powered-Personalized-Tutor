@@ -23,7 +23,7 @@ import type { QuizSummary } from "@/types/quiz";
 import type { FlashcardDeckSummary } from "@/types/flashcard";
 import type { VideoListItem } from "@/types/video";
 
-interface StudySpaceChatProps {
+interface StudySpaceProps {
   initialFiles: UploadedFileListResponse[];
   initialSessions: ChatSession[];
   initialQuizzes: QuizSummary[];
@@ -31,13 +31,13 @@ interface StudySpaceChatProps {
   initialVideos: VideoListItem[];
 }
 
-export default function StudySpaceChat({
+export default function StudySpace({
   initialFiles,
   initialSessions,
   initialQuizzes,
   initialDecks,
   initialVideos,
-}: StudySpaceChatProps) {
+}: StudySpaceProps) {
   // Middle Column View State
   const [middleColumnView, setMiddleColumnView] = useState<
     "document" | "quiz" | "flashcard" | "video"
@@ -77,7 +77,12 @@ export default function StudySpaceChat({
     setActiveDeckId,
     handleCreateQuiz,
     handleCreateFlashcards,
-  } = useAIGeneration(initialQuizzes, initialDecks, selectedFileIds, setMiddleColumnView);
+  } = useAIGeneration(
+    initialQuizzes,
+    initialDecks,
+    selectedFileIds,
+    setMiddleColumnView,
+  );
 
   const { videos, activeVideoMeta, setActiveVideoId, handleGenerateVideo } =
     useVideoGeneration(initialVideos, selectedFileIds);
