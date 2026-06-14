@@ -38,6 +38,9 @@ class GeneratedVideo(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    space_id = Column(
+        Integer, ForeignKey("spaces.id", ondelete="CASCADE"), nullable=True, index=True
+    )
     title = Column(String, nullable=True)
 
     status = Column(Enum(VideoStatus), default=VideoStatus.PENDING, nullable=False)
@@ -62,3 +65,4 @@ class GeneratedVideo(Base):
     completed_at = Column(DateTime(timezone=True), nullable=True)
 
     user = relationship("User")
+    space = relationship("Space", back_populates="videos")

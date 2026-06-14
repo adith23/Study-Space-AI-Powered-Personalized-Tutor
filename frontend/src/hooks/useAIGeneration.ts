@@ -8,7 +8,7 @@ export function useAIGeneration(
   initialQuizzes: QuizSummary[],
   initialDecks: FlashcardDeckSummary[],
   selectedFileIds: Set<number>,
-  setMiddleColumnView: (view: "document" | "quiz" | "flashcard") => void
+  setMiddleColumnView: (view: "document" | "quiz" | "flashcard") => void,
 ) {
   const [quizzes, setQuizzes] = useState<QuizSummary[]>(initialQuizzes);
   const [decks, setDecks] = useState<FlashcardDeckSummary[]>(initialDecks);

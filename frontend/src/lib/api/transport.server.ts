@@ -11,10 +11,22 @@
  */
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import type { FetcherOptions } from "./types";
 
 const BACKEND_URL =
   process.env.INTERNAL_BACKEND_URL || "http://127.0.0.1:8000/api/v1";
+const LOGIN_EXPIRED_URL = "/login?expired=1";
+
+export function isNextRedirectError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "digest" in error &&
+    typeof error.digest === "string" &&
+    error.digest.startsWith("NEXT_REDIRECT")
+  );
+}
 
 /**
  * Authenticated server-side fetcher.
@@ -27,10 +39,12 @@ export async function serverTransport<T>(
   const cookieStore = await cookies();
   const token = cookieStore.get("access_token")?.value;
 
-  const headers = new Headers(options.headers);
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
+  if (!token) {
+    redirect(LOGIN_EXPIRED_URL);
   }
+
+  const headers = new Headers(options.headers);
+  headers.set("Authorization", `Bearer ${token}`);
 
   // Only set Content-Type for non-FormData bodies
   const isFormData =
@@ -47,6 +61,10 @@ export async function serverTransport<T>(
     body: options.body,
     cache: "no-store",
   });
+
+  if (res.status === 401) {
+    redirect(LOGIN_EXPIRED_URL);
+  }
 
   if (!res.ok) {
     const body = await res.text().catch(() => "Unknown error");

@@ -24,6 +24,7 @@ import type { FlashcardDeckSummary } from "@/types/flashcard";
 import type { VideoListItem } from "@/types/video";
 
 interface StudySpaceProps {
+  spaceName: string;
   initialFiles: UploadedFileListResponse[];
   initialSessions: ChatSession[];
   initialQuizzes: QuizSummary[];
@@ -32,6 +33,7 @@ interface StudySpaceProps {
 }
 
 export default function StudySpace({
+  spaceName,
   initialFiles,
   initialSessions,
   initialQuizzes,
@@ -49,7 +51,7 @@ export default function StudySpace({
   const [isFlashcardsModalOpen, setIsFlashcardsModalOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
-  // Custom Hooks — initialized with server-fetched data
+  // Custom Hooks — initialized with server-fetched data, scoped by spaceId
   const {
     files,
     viewingFileId,
@@ -92,8 +94,8 @@ export default function StudySpace({
       <TopNav
         title={
           middleColumnView === "document"
-            ? viewingFile?.name || "Study Space"
-            : "Study Space"
+            ? viewingFile?.name || spaceName
+            : spaceName
         }
       />
 

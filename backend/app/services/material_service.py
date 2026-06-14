@@ -14,6 +14,7 @@ from app.tasks.material_tasks import process_document_task
 
 UPLOAD_DIR = "storage/uploads"
 
+
 # Validate the URL
 def _validate_url(url: Optional[str]) -> Optional[str]:
     if not url:
@@ -34,6 +35,7 @@ def _validate_url(url: Optional[str]) -> Optional[str]:
             ],
         )
 
+
 # Create a uploaded file
 async def create_uploaded_file(
     *,
@@ -42,6 +44,7 @@ async def create_uploaded_file(
     url: Optional[str],
     db: Session,
     current_user: User,
+    space_id: Optional[int] = None,
 ) -> UploadedFile:
     if not file and not url:
         raise HTTPException(status_code=400, detail="Provide either a file or a URL.")
@@ -66,16 +69,26 @@ async def create_uploaded_file(
         file_type=ModelFileType(file_type.value),
         name=original_name,
         user_id=current_user.id,
+        space_id=space_id,
     )
     db.add(new_file)
     db.commit()
     db.refresh(new_file)
 
+    # Update space content count if scoped to a space
+    if space_id:
+        from app.services.space_service import recalculate_content_count
+
+        recalculate_content_count(space_id=space_id, db=db)
+
     process_document_task.delay(new_file.id)
     return new_file
 
+
 # Get the status of a file
-def get_user_file_status(*, file_id: int, db: Session, current_user: User) -> UploadedFile:
+def get_user_file_status(
+    *, file_id: int, db: Session, current_user: User
+) -> UploadedFile:
     file_record = (
         db.query(UploadedFile)
         .filter(UploadedFile.id == file_id, UploadedFile.user_id == current_user.id)
@@ -87,17 +100,21 @@ def get_user_file_status(*, file_id: int, db: Session, current_user: User) -> Up
 
     return file_record
 
+
 # List all files for a user
-def list_user_files(*, db: Session, current_user: User) -> List[UploadedFile]:
-    return (
-        db.query(UploadedFile)
-        .filter(UploadedFile.user_id == current_user.id)
-        .order_by(UploadedFile.uploaded_at.desc())
-        .all()
-    )
+def list_user_files(
+    *, db: Session, current_user: User, space_id: Optional[int] = None
+) -> List[UploadedFile]:
+    query = db.query(UploadedFile).filter(UploadedFile.user_id == current_user.id)
+    if space_id is not None:
+        query = query.filter(UploadedFile.space_id == space_id)
+    return query.order_by(UploadedFile.uploaded_at.desc()).all()
+
 
 # Rename an uploaded file
-def rename_uploaded_file(*, file_id: int, new_name: str, db: Session, current_user: User) -> UploadedFile:
+def rename_uploaded_file(
+    *, file_id: int, new_name: str, db: Session, current_user: User
+) -> UploadedFile:
     file_record = (
         db.query(UploadedFile)
         .filter(UploadedFile.id == file_id, UploadedFile.user_id == current_user.id)
@@ -110,6 +127,7 @@ def rename_uploaded_file(*, file_id: int, new_name: str, db: Session, current_us
     db.commit()
     db.refresh(file_record)
     return file_record
+
 
 # Delete an uploaded file
 def delete_uploaded_file(*, file_id: int, db: Session, current_user: User) -> None:
@@ -126,7 +144,9 @@ def delete_uploaded_file(*, file_id: int, db: Session, current_user: User) -> No
     from app.services.document_processor import get_pinecone_index
     from app.core.config import settings
 
-    chunks = db.query(DocumentChunk).filter(DocumentChunk.source_file_id == file_id).all()
+    chunks = (
+        db.query(DocumentChunk).filter(DocumentChunk.source_file_id == file_id).all()
+    )
     if chunks:
         vector_ids = [chunk.vector_id for chunk in chunks]
         try:
@@ -134,7 +154,10 @@ def delete_uploaded_file(*, file_id: int, db: Session, current_user: User) -> No
             index.delete(ids=vector_ids, namespace=settings.PINECONE_NAMESPACE)
         except Exception as e:
             import logging
-            logging.getLogger(__name__).error(f"Failed to delete Pinecone vectors for file {file_id}: {e}")
+
+            logging.getLogger(__name__).error(
+                f"Failed to delete Pinecone vectors for file {file_id}: {e}"
+            )
 
     # 2. Clean up file on disk
     if file_record.stored_path and os.path.exists(file_record.stored_path):
@@ -142,7 +165,10 @@ def delete_uploaded_file(*, file_id: int, db: Session, current_user: User) -> No
             os.remove(file_record.stored_path)
         except Exception as e:
             import logging
-            logging.getLogger(__name__).error(f"Failed to delete physical file {file_record.stored_path}: {e}")
+
+            logging.getLogger(__name__).error(
+                f"Failed to delete physical file {file_record.stored_path}: {e}"
+            )
 
     # 3. Delete database record (cascades to document_chunks)
     db.delete(file_record)

@@ -6,9 +6,7 @@ export async function GET(
   { params }: { params: Promise<{ fileId: string }> },
 ) {
   const { fileId } = await params;
-  const res = await serverTransportRaw(
-    `/materials/files/${fileId}/content`,
-  );
+  const res = await serverTransportRaw(`/materials/files/${fileId}/content`);
 
   if (!res.ok) {
     return new Response("File not found", { status: res.status });
@@ -18,8 +16,7 @@ export async function GET(
     headers: {
       "Content-Type":
         res.headers.get("content-type") || "application/octet-stream",
-      "Content-Disposition":
-        res.headers.get("content-disposition") || "inline",
+      "Content-Disposition": res.headers.get("content-disposition") || "inline",
     },
   });
 }

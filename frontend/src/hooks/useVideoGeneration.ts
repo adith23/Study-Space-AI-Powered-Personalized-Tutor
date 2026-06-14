@@ -130,7 +130,7 @@ export function useVideoGeneration(
         setIsGenerating(false);
       }
     },
-    [selectedFileIds]
+    [selectedFileIds],
   );
 
   const handleDeleteVideo = useCallback(

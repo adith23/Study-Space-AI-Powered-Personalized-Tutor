@@ -1,6 +1,7 @@
 "use server";
 
 import { api } from "@/lib/api/index.server";
+import { isNextRedirectError } from "@/lib/api/transport.server";
 import type { VideoGenerateRequest } from "@/types/video";
 
 export async function generateVideoAction(payload: VideoGenerateRequest) {
@@ -12,6 +13,7 @@ export async function deleteVideoAction(videoId: number) {
     await api.video.delete(videoId);
     return { error: null };
   } catch (err) {
+    if (isNextRedirectError(err)) throw err;
     return { error: err instanceof Error ? err.message : "Delete failed" };
   }
 }

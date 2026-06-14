@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
@@ -26,7 +28,7 @@ from app.services.quiz_generation_service import generate_quiz_payload
 
 
 def create_quiz(
-    *, db: Session, current_user: User, request: CreateQuizRequest
+    *, db: Session, current_user: User, request: CreateQuizRequest, space_id: Optional[int] = None
 ) -> QuizResponse:
     try:
         files = get_valid_selected_files(
@@ -45,6 +47,7 @@ def create_quiz(
     title = request.title or _default_quiz_title(files)
     quiz = Quiz(
         user_id=current_user.id,
+        space_id=space_id,
         title=title,
         difficulty_level=request.difficulty_level,
         number_of_questions=request.number_of_questions,
@@ -63,13 +66,11 @@ def create_quiz(
     return QuizResponse.model_validate(quiz)
 
 
-def list_quizzes(*, db: Session, current_user: User) -> list[QuizResponse]:
-    quizzes = (
-        db.query(Quiz)
-        .filter(Quiz.user_id == current_user.id)
-        .order_by(Quiz.created_at.desc(), Quiz.id.desc())
-        .all()
-    )
+def list_quizzes(*, db: Session, current_user: User, space_id: Optional[int] = None) -> list[QuizResponse]:
+    query = db.query(Quiz).filter(Quiz.user_id == current_user.id)
+    if space_id is not None:
+        query = query.filter(Quiz.space_id == space_id)
+    quizzes = query.order_by(Quiz.created_at.desc(), Quiz.id.desc()).all()
     return [QuizResponse.model_validate(quiz) for quiz in quizzes]
 
 

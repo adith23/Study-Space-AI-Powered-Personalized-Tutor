@@ -12,11 +12,15 @@ class ChatSession(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    space_id = Column(
+        Integer, ForeignKey("spaces.id", ondelete="CASCADE"), nullable=True, index=True
+    )
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     name = Column(String, default="New Chat")
 
     user = relationship("User")
+    space = relationship("Space", back_populates="chat_sessions")
     messages = relationship(
         "ChatMessage",
         back_populates="session",

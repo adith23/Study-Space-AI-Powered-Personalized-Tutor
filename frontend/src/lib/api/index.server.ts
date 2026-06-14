@@ -17,8 +17,10 @@ import { createChatApi } from "./endpoints/chat";
 import { createQuizApi } from "./endpoints/quiz";
 import { createFlashcardApi } from "./endpoints/flashcard";
 import { createVideoApi } from "./endpoints/video";
+import { createSpacesApi } from "./endpoints/spaces";
 
 export const api = {
+  spaces: createSpacesApi(serverTransport),
   files: createFilesApi(serverTransport),
   chat: createChatApi(serverTransport),
   quiz: createQuizApi(serverTransport),

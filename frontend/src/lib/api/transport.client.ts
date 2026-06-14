@@ -38,7 +38,9 @@ export async function clientTransport<T>(
 
   if (!res.ok) {
     if (res.status === 401 && typeof window !== "undefined") {
-      window.location.href = "/login";
+      const loginUrl = new URL("/login", window.location.origin);
+      loginUrl.searchParams.set("expired", "1");
+      window.location.assign(loginUrl.toString());
     }
     const body = await res.text().catch(() => "Unknown error");
     throw new Error(`API ${res.status}: ${body}`);

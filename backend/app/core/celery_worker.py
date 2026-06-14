@@ -26,3 +26,6 @@ celery_app = Celery(
 celery_app.conf.update(
     task_track_started=True,
 )
+
+# Register all SQLAlchemy models so relationship string references resolve correctly
+from app.models import user_model, material_model, chat_model, flashcard_model, quiz_model, video_model, space_model  # noqa: F401, E402
