@@ -1,10 +1,12 @@
 from typing import List
 from pydantic_settings import BaseSettings
-from pydantic import validator
+from pydantic import field_validator, ConfigDict
 import os
 
 
 class Settings(BaseSettings):
+    model_config = ConfigDict(env_file=".env", case_sensitive=True)
+
     PROJECT_NAME: str = "Study Space API"
     VERSION: str = "1.0.0"
     DESCRIPTION: str = "AI-Powered Personalized Learning Platform"
