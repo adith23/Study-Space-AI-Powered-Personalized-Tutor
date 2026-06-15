@@ -10,8 +10,8 @@ resource "aws_sqs_queue" "dlq" {
 # Always Free: 1M requests/month
 resource "aws_sqs_queue" "tasks" {
   name                       = "${var.project}-${var.environment}-tasks"
-  visibility_timeout_seconds = 960  # > Lambda max timeout (900s) + 60s buffer
-  message_retention_seconds  = 345600  # 4 days
+  visibility_timeout_seconds = 960    # > Lambda max timeout (900s) + 60s buffer
+  message_retention_seconds  = 345600 # 4 days
   receive_wait_time_seconds  = 20     # Long polling (reduces SQS API calls)
 
   redrive_policy = jsonencode({

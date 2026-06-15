@@ -8,8 +8,8 @@ resource "aws_lambda_function" "api" {
   role          = var.api_execution_role
   package_type  = "Image"
   image_uri     = var.api_image_uri
-  timeout       = 300  # 5 minutes for heavy AI requests
-  memory_size   = 512  # Minimum for FastAPI + LangChain cold start
+  timeout       = 300 # 5 minutes for heavy AI requests
+  memory_size   = 512 # Minimum for FastAPI + LangChain cold start
 
   ephemeral_storage {
     size = 2048 # 2 GB /tmp for document processing
@@ -17,8 +17,8 @@ resource "aws_lambda_function" "api" {
 
   environment {
     variables = {
-      ENVIRONMENT   = var.environment
-      AWS_LWA_PORT  = "8000"
+      ENVIRONMENT  = var.environment
+      AWS_LWA_PORT = "8000"
     }
   }
 
@@ -77,8 +77,8 @@ resource "aws_lambda_function" "worker" {
 resource "aws_lambda_event_source_mapping" "worker_sqs" {
   event_source_arn                   = var.sqs_queue_arn
   function_name                      = aws_lambda_function.worker.arn
-  batch_size                         = 1    # Process one task at a time
-  maximum_batching_window_in_seconds = 0    # No batching delay
+  batch_size                         = 1 # Process one task at a time
+  maximum_batching_window_in_seconds = 0 # No batching delay
   enabled                            = true
 
   scaling_config {
@@ -94,14 +94,14 @@ resource "aws_lambda_function" "frontend" {
   role          = var.frontend_execution_role
   package_type  = "Image"
   image_uri     = var.frontend_image_uri
-  timeout       = 30   # SSR pages should render fast
-  memory_size   = 256  # Lightweight for SSR
+  timeout       = 30  # SSR pages should render fast
+  memory_size   = 256 # Lightweight for SSR
 
   environment {
     variables = {
-      ENVIRONMENT           = var.environment
-      AWS_LWA_PORT          = "3000"
-      NEXT_PUBLIC_API_BASE_URL = "PLACEHOLDER"  # Set after CloudFront is created
+      ENVIRONMENT              = var.environment
+      AWS_LWA_PORT             = "3000"
+      NEXT_PUBLIC_API_BASE_URL = "PLACEHOLDER" # Set after CloudFront is created
     }
   }
 
