@@ -1,6 +1,12 @@
+export type VideoRendererType = "image" | "manim" | "manim_pro";
+
 export type VideoStatusType =
   | "pending"
   | "scripting"
+  | "generating_code"
+  | "planning_visuals"
+  | "compiling_manim"
+  | "rendering_manim"
   | "generating_images"
   | "generating_audio"
   | "assembling"
@@ -11,11 +17,13 @@ export interface VideoGenerateRequest {
   file_ids: number[];
   focus_prompt?: string | null;
   style?: "explainer" | "summary" | "deep_dive";
+  renderer?: VideoRendererType;
 }
 
 export interface VideoGenerateResponse {
   id: number;
   status: string;
+  renderer?: VideoRendererType | null;
 }
 
 export interface VideoMeta {
@@ -29,6 +37,7 @@ export interface VideoMeta {
   created_at?: string | null;
   error_message?: string | null;
   style?: string | null;
+  renderer?: VideoRendererType | null;
 }
 
 export interface VideoListItem {
@@ -38,4 +47,5 @@ export interface VideoListItem {
   duration_seconds?: number | null;
   style?: string | null;
   created_at?: string | null;
+  renderer?: VideoRendererType | null;
 }

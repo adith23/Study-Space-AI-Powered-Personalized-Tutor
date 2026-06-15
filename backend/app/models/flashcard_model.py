@@ -11,6 +11,9 @@ class FlashcardDeck(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    space_id = Column(
+        Integer, ForeignKey("spaces.id", ondelete="CASCADE"), nullable=True, index=True
+    )
     title = Column(String, nullable=False)
     difficulty_level = Column(Enum(QuizDifficulty), nullable=False)
     number_of_cards = Column(Integer, nullable=False)
@@ -24,6 +27,7 @@ class FlashcardDeck(Base):
     )
 
     user = relationship("User")
+    space = relationship("Space", back_populates="flashcard_decks")
     sources = relationship(
         "FlashcardDeckSource",
         back_populates="deck",

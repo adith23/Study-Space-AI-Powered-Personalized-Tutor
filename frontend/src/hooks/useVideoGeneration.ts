@@ -1,13 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import {
-  generateVideo,
-  getVideoStatus,
-  listVideos,
-  deleteVideo,
-} from "@/lib/api/video";
+import { clientApi } from "@/lib/api/index.client";
+import { generateVideoAction, deleteVideoAction } from "@/actions/video";
+import { DEFAULT_VIDEO_RENDERER, getVideoRenderer } from "@/lib/videoPresentation";
 import type {
   VideoListItem,
   VideoMeta,
+  VideoRendererType,
   VideoStatusType,
 } from "@/types/video";
 
@@ -15,8 +13,27 @@ const POLL_INTERVAL_MS = 2000;
 
 const TERMINAL_STATUSES: VideoStatusType[] = ["completed", "failed"];
 
-export function useVideoGeneration(selectedFileIds: Set<number>) {
-  const [videos, setVideos] = useState<VideoListItem[]>([]);
+function normalizeVideoListItem(video: VideoListItem): VideoListItem {
+  return {
+    ...video,
+    renderer: getVideoRenderer(video.renderer),
+  };
+}
+
+function normalizeVideoMeta(video: VideoMeta): VideoMeta {
+  return {
+    ...video,
+    renderer: getVideoRenderer(video.renderer),
+  };
+}
+
+export function useVideoGeneration(
+  initialVideos: VideoListItem[],
+  selectedFileIds: Set<number>,
+) {
+  const [videos, setVideos] = useState<VideoListItem[]>(
+    initialVideos.map(normalizeVideoListItem),
+  );
   const [activeVideoId, setActiveVideoId] = useState<number | null>(null);
   const [activeVideoMeta, setActiveVideoMeta] = useState<VideoMeta | null>(
     null
@@ -24,20 +41,15 @@ export function useVideoGeneration(selectedFileIds: Set<number>) {
   const [isGenerating, setIsGenerating] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Fetch the list of videos on mount
-  useEffect(() => {
-    listVideos()
-      .then(setVideos)
-      .catch((err) => console.error("Failed to fetch videos:", err));
-  }, []);
-
-  // Poll the active video's status
+  // Poll the active video's status — uses clientApi
   useEffect(() => {
     if (!activeVideoId) return;
 
     const poll = async () => {
       try {
-        const meta = await getVideoStatus(activeVideoId);
+        const meta = normalizeVideoMeta(
+          await clientApi.video.getStatus(activeVideoId),
+        );
         setActiveVideoMeta(meta);
 
         if (TERMINAL_STATUSES.includes(meta.status)) {
@@ -58,6 +70,7 @@ export function useVideoGeneration(selectedFileIds: Set<number>) {
                     title: meta.title ?? v.title,
                     duration_seconds:
                       meta.duration_seconds ?? v.duration_seconds,
+                    renderer: meta.renderer ?? v.renderer,
                   }
                 : v
             )
@@ -82,6 +95,7 @@ export function useVideoGeneration(selectedFileIds: Set<number>) {
 
   const handleGenerateVideo = useCallback(
     async (config: {
+      renderer: VideoRendererType;
       style: "explainer" | "summary" | "deep_dive";
       focus: string;
     }) => {
@@ -93,18 +107,20 @@ export function useVideoGeneration(selectedFileIds: Set<number>) {
 
       try {
         setIsGenerating(true);
-        const result = await generateVideo({
+        const result = await generateVideoAction({
           file_ids: fileIds,
+          renderer: config.renderer,
           style: config.style,
           focus_prompt: config.focus.trim() || null,
         });
 
         // Add to list
-        const newItem: VideoListItem = {
+        const newItem = normalizeVideoListItem({
           id: result.id,
           status: result.status as VideoStatusType,
           created_at: new Date().toISOString(),
-        };
+          renderer: result.renderer ?? config.renderer ?? DEFAULT_VIDEO_RENDERER,
+        });
         setVideos((prev) => [newItem, ...prev]);
         setActiveVideoId(result.id);
         setActiveVideoMeta(null);
@@ -114,13 +130,13 @@ export function useVideoGeneration(selectedFileIds: Set<number>) {
         setIsGenerating(false);
       }
     },
-    [selectedFileIds]
+    [selectedFileIds],
   );
 
   const handleDeleteVideo = useCallback(
     async (videoId: number) => {
       try {
-        await deleteVideo(videoId);
+        await deleteVideoAction(videoId);
         setVideos((prev) => prev.filter((v) => v.id !== videoId));
         if (activeVideoId === videoId) {
           setActiveVideoId(null);

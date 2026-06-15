@@ -1,8 +1,13 @@
 from celery import Celery
 from app.core.config import settings
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
+
+# Prevent HuggingFace Hub from using Xet backend which causes deadlocks in Celery thread pools on Windows
+os.environ["HF_HUB_DISABLE_XET"] = "1"
+os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 # Initialize Celery
 celery_app = Celery(
@@ -21,3 +26,6 @@ celery_app = Celery(
 celery_app.conf.update(
     task_track_started=True,
 )
+
+# Register all SQLAlchemy models so relationship string references resolve correctly
+from app.models import user_model, material_model, chat_model, flashcard_model, quiz_model, video_model, space_model  # noqa: F401, E402

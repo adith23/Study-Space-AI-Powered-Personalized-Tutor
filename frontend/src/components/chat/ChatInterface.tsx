@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useTransition } from "react";
-import { listChatMessages, sendChatMessage } from "@/lib/api/chat";
+import { clientApi } from "@/lib/api/index.client";
 import { Loader2 } from "lucide-react";
 import ChatInputBar from "@/components/chat/ChatInputBar";
 import type { UploadedFileState, ChatMessage } from "@/types/dashboard";
@@ -31,7 +31,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   useEffect(() => {
     startTransition(async () => {
       try {
-        const response = await listChatMessages(sessionId);
+        const response = await clientApi.chat.listMessages(sessionId);
         setMessages(response);
       } catch (error) {
         console.error("Failed to fetch chat history", error);
@@ -53,10 +53,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
     startTransition(async () => {
       try {
-        const response = await sendChatMessage(
+        const response = await clientApi.chat.sendMessage(
           userMessage.content,
           sessionId,
-          Array.from(selectedFileIds)
+          Array.from(selectedFileIds),
         );
         const aiMessage: ChatMessage = {
           role: "ai",

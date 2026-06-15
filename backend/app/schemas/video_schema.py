@@ -9,7 +9,7 @@ class VideoGenerateRequest(BaseModel):
     file_ids: list[int]
     focus_prompt: Optional[str] = None
     style: str = "explainer"
-    renderer: Literal["image", "manim"] = "image"
+    renderer: Literal["image", "manim", "manim_pro"] = "image"
 
 
 class VideoScene(BaseModel):

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Loader2, X } from "lucide-react";
-import { getFlashcardDeck } from "@/lib/api/flashcard";
+import { clientApi } from "@/lib/api/index.client";
 import type { FlashcardDeckDetail } from "@/types/flashcard";
 
 interface FlashcardViewerProps {
@@ -25,7 +25,7 @@ const FlashcardViewer: React.FC<FlashcardViewerProps> = ({ deckId, onClose }) =>
     const loadDeck = async () => {
       setIsLoadingDeck(true);
       try {
-        const data = await getFlashcardDeck(deckId);
+        const data = await clientApi.flashcard.get(deckId);
         if (isCancelled) return;
         setActiveDeck(data);
         

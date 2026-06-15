@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, String, Integer, DateTime, Enum, ForeignKey, JSON
+from sqlalchemy import Column, String, Integer, DateTime, Enum, ForeignKey, JSON, event
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -40,8 +40,12 @@ class UploadedFile(Base):
     user_id = Column(
         Integer, ForeignKey("users.id"), nullable=False
     )  
+    space_id = Column(
+        Integer, ForeignKey("spaces.id", ondelete="CASCADE"), nullable=True, index=True
+    )
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
     user = relationship("User")  
+    space = relationship("Space", back_populates="files")
     chunks = relationship(
         "DocumentChunk", back_populates="source_file", cascade="all, delete-orphan"
     )
