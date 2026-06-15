@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
 
     DATABASE_URL: str = os.getenv("DATABASE_URL")
+    DATABASE_SSL_MODE: str = os.getenv("DATABASE_SSL_MODE", "disable")
 
     CELERY_BROKER_URL: str = os.getenv("CELERY_BROKER_URL")
     CELERY_RESULT_BACKEND: str = os.getenv("CELERY_RESULT_BACKEND")
@@ -38,12 +39,10 @@ class Settings(BaseSettings):
     )
     REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 
-    CORS_ORIGINS: List[str] = [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ]
+    CORS_ORIGINS: List[str] = os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000",
+    )
 
     VIDEO_STORAGE_PATH: str = os.getenv(
         "VIDEO_STORAGE_PATH", "storage/generated/videos"
@@ -85,6 +84,22 @@ class Settings(BaseSettings):
     MANIM_MAX_EQUATION_STEPS: int = int(os.getenv("MANIM_MAX_EQUATION_STEPS", "6"))
     VIDEO_ALIGNMENT_TOLERANCE_SECONDS: float = float(
         os.getenv("VIDEO_ALIGNMENT_TOLERANCE_SECONDS", "0.35")
+    )
+
+    # ── Storage (Cloudflare R2 — S3-compatible, Always Free) ──────
+    STORAGE_BACKEND: str = os.getenv("STORAGE_BACKEND", "local")  # "local" or "r2"
+    R2_ENDPOINT_URL: str = os.getenv("R2_ENDPOINT_URL", "")
+    R2_ACCESS_KEY_ID: str = os.getenv("R2_ACCESS_KEY_ID", "")
+    R2_SECRET_ACCESS_KEY: str = os.getenv("R2_SECRET_ACCESS_KEY", "")
+    R2_BUCKET_NAME: str = os.getenv("R2_BUCKET_NAME", "")
+    R2_PUBLIC_URL: str = os.getenv("R2_PUBLIC_URL", "")
+
+    # ── AWS ───────────────────────────────────────────────────────
+    AWS_REGION: str = os.getenv("AWS_REGION", "us-east-1")
+    SQS_QUEUE_URL: str = os.getenv("SQS_QUEUE_URL", "")
+
+    # ── Environment ──────────────────────────────────────────────
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development"
     )
 
     # ── Manim Pro (direct code generation) ────────────────────────

@@ -21,7 +21,7 @@ from app.services.quiz_service import (
     get_quiz_or_404,
     list_quizzes,
 )
-from app.tasks.quiz_tasks import generate_quiz_task
+from app.core.task_dispatcher import dispatch_task
 
 router = APIRouter()
 
@@ -33,7 +33,7 @@ def create_quiz_route(
     current_user: User = Depends(get_current_active_user),
 ):
     quiz = create_quiz(db=db, current_user=current_user, request=request)
-    generate_quiz_task.delay(quiz.id)
+    dispatch_task("generate_quiz", {"quiz_id": quiz.id})
     return quiz
 
 

@@ -10,9 +10,10 @@ from app.models.material_model import FileType as ModelFileType
 from app.models.material_model import UploadedFile
 from app.models.user_model import User
 from app.schemas.material_schema import FileType as SchemaFileType
-from app.tasks.material_tasks import process_document_task
+from app.core.task_dispatcher import dispatch_task
+from app.core.storage import get_storage
 
-UPLOAD_DIR = "storage/uploads"
+UPLOAD_PREFIX = "uploads"
 
 
 # Validate the URL
@@ -54,14 +55,13 @@ async def create_uploaded_file(
     stored_path = None
     original_name = None
     if file:
-        os.makedirs(UPLOAD_DIR, exist_ok=True)
         ext = os.path.splitext(file.filename or "default.bin")[1]
         unique_name = f"{uuid4()}{ext}"
-        stored_path = os.path.join(UPLOAD_DIR, unique_name)
-
+        key = f"{UPLOAD_PREFIX}/{current_user.id}/{unique_name}"
+        storage = get_storage()
         original_name = file.filename
-        with open(stored_path, "wb") as f:
-            f.write(await file.read())
+        content = await file.read()
+        stored_path = storage.upload(content, key)
 
     new_file = UploadedFile(
         stored_path=stored_path,
@@ -81,7 +81,7 @@ async def create_uploaded_file(
 
         recalculate_content_count(space_id=space_id, db=db)
 
-    process_document_task.delay(new_file.id)
+    dispatch_task("process_document", {"file_id": new_file.id})
     return new_file
 
 
@@ -159,15 +159,22 @@ def delete_uploaded_file(*, file_id: int, db: Session, current_user: User) -> No
                 f"Failed to delete Pinecone vectors for file {file_id}: {e}"
             )
 
-    # 2. Clean up file on disk
-    if file_record.stored_path and os.path.exists(file_record.stored_path):
+    # 2. Clean up file from storage backend
+    if file_record.stored_path:
         try:
-            os.remove(file_record.stored_path)
+            storage = get_storage()
+            stored = file_record.stored_path
+            if stored.startswith("r2://"):
+                # Extract R2 key: "r2://bucket/key" → "key"
+                key = stored.split("//", 1)[1].split("/", 1)[1]
+                storage.delete(key)
+            elif os.path.exists(stored):
+                os.remove(stored)
         except Exception as e:
             import logging
 
             logging.getLogger(__name__).error(
-                f"Failed to delete physical file {file_record.stored_path}: {e}"
+                f"Failed to delete stored file {file_record.stored_path}: {e}"
             )
 
     # 3. Delete database record (cascades to document_chunks)

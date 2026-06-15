@@ -1,0 +1,33 @@
+# ── Stage 1: Builder ──────────────────────────────────────────
+FROM python:3.11-slim AS builder
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc g++ libpq-dev libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements-prod.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements-prod.txt
+
+# ── Stage 2: Runtime (Lambda Python base image) ──────────────
+FROM public.ecr.aws/lambda/python:3.11 AS runtime
+
+# Install runtime deps
+RUN dnf install -y libpq && dnf clean all
+
+# Install FFmpeg from static build (AL2023 repos don't include ffmpeg)
+RUN curl -L https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz | \
+    tar xJ --strip-components=1 -C /usr/local/bin/ --wildcards '*/ffmpeg' '*/ffprobe'
+
+# Copy Python packages from builder (--prefix creates lib/ and bin/ subdirs)
+COPY --from=builder /install/lib/python3.11/site-packages/ /var/lang/lib/python3.11/site-packages/
+COPY --from=builder /install/bin/ /var/lang/bin/
+
+# Copy application code
+COPY app/ ${LAMBDA_TASK_ROOT}/app/
+COPY lambda_worker.py ${LAMBDA_TASK_ROOT}/
+
+# Lambda handler: lambda_worker.handler
+CMD ["lambda_worker.handler"]
+
