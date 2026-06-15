@@ -1,8 +1,9 @@
-export type VideoRendererType = "image" | "manim";
+export type VideoRendererType = "image" | "manim" | "manim_pro";
 
 export type VideoStatusType =
   | "pending"
   | "scripting"
+  | "generating_code"
   | "planning_visuals"
   | "compiling_manim"
   | "rendering_manim"

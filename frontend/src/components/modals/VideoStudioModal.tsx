@@ -21,7 +21,7 @@ const VideoStudioModal: React.FC<VideoStudioModalProps> = ({
 }) => {
   const [renderer, setRenderer] = useState<VideoRendererType>("image");
   const [style, setStyle] = useState<"explainer" | "summary" | "deep_dive">(
-    "explainer"
+    "explainer",
   );
   const [focus, setFocus] = useState("");
 
@@ -43,19 +43,20 @@ const VideoStudioModal: React.FC<VideoStudioModalProps> = ({
         </div>
       }
     >
-      <div className="space-y-8">
-        <div className="space-y-4">
-          <h3 className="text-xl text-white">Renderer</h3>
+      <div className="space-y-6">
+        <div className="space-y-2.5">
+          <h3 className="text-lg font-medium text-white">Renderer</h3>
           <div className="inline-flex rounded-full bg-zinc-900 p-1 ring-1 ring-zinc-800">
             {[
               { value: "image" as const, label: "Classic" },
               { value: "manim" as const, label: "Technical / Manim" },
+              { value: "manim_pro" as const, label: "Manim Pro" },
             ].map((option) => (
               <button
                 key={option.value}
                 type="button"
                 onClick={() => setRenderer(option.value)}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                   renderer === option.value
                     ? "bg-zinc-700 text-white"
                     : "text-zinc-400 hover:text-white"
@@ -66,14 +67,17 @@ const VideoStudioModal: React.FC<VideoStudioModalProps> = ({
             ))}
           </div>
           <p className="text-sm text-zinc-500">
-            {renderer === "image"
-              ? "Classic uses illustrated scene generation for a broad explainer format."
-              : "Technical / Manim emphasizes programmatic diagrams, charts, formulas, and structured technical visuals."}
+            {renderer === "image" &&
+              "Classic uses illustrated scene generation for a broad explainer format."}
+            {renderer === "manim" &&
+              "Technical / Manim uses predefined animated diagrams, charts, and structured visuals."}
+            {renderer === "manim_pro" &&
+              "Manim Pro generates advanced custom animations using AI code generation for maximum visual quality."}
           </p>
         </div>
 
-        <div className="space-y-4">
-          <h3 className="text-xl text-white">Video style</h3>
+        <div className="space-y-2.5">
+          <h3 className="text-lg font-medium text-white">Video style</h3>
           <div className="flex gap-3">
             {(
               [
@@ -100,46 +104,58 @@ const VideoStudioModal: React.FC<VideoStudioModalProps> = ({
           </p>
         </div>
 
-        <div className="space-y-4">
-          <h3 className="text-xl text-white">
+        <div className="space-y-2.5">
+          <h3 className="text-lg font-medium text-white">
             What should the video focus on?
           </h3>
           <textarea
             value={focus}
             onChange={(e) => setFocus(e.target.value)}
-            className="h-32 w-full resize-none rounded-3xl border border-zinc-700 bg-transparent p-4 text-white focus:border-zinc-500 focus:outline-none"
+            className="h-24 w-full resize-none rounded-2xl border border-zinc-700 bg-transparent p-3 text-white focus:border-zinc-500 focus:outline-none"
             placeholder={
               renderer === "image"
                 ? "Leave empty to cover the material broadly..."
-                : "Mention the concept, formula, chart, process, or technical flow to visualize..."
+                : renderer === "manim"
+                  ? "Mention the concept, formula, chart, process, or technical flow to visualize..."
+                  : "Describe the concepts, relationships, or processes you want animated in detail..."
             }
           />
         </div>
 
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-3">
           <p className="text-sm text-zinc-400">
-            {renderer === "image" ? (
+            {renderer === "image" && (
               <>
                 The video will be approximately{" "}
                 <strong className="text-zinc-300">3 minutes</strong> long with
                 illustrated scenes narrated by AI. Generation typically takes
                 2-5 minutes.
               </>
-            ) : (
+            )}
+            {renderer === "manim" && (
               <>
                 The video will be approximately{" "}
                 <strong className="text-zinc-300">3 minutes</strong> long with
                 technical animated visuals and AI narration. Generation may take
-                longer than Classic while the animation is compiled and rendered.
+                longer than Classic while the animation is compiled and
+                rendered.
+              </>
+            )}
+            {renderer === "manim_pro" && (
+              <>
+                The video will be approximately{" "}
+                <strong className="text-zinc-300">3 minutes</strong> long with
+                AI-generated custom Manim animations. Generation may take longer
+                due to code generation, validation, and rendering.
               </>
             )}
           </p>
         </div>
 
-        <div className="flex justify-end pt-4">
+        <div className="flex justify-end pt-2">
           <button
             onClick={handleCreate}
-            className="rounded-full bg-zinc-700 px-8 py-2.5 text-sm font-bold text-white transition-colors hover:bg-zinc-600"
+            className="rounded-full bg-zinc-700 px-6 py-2 text-sm font-bold text-white transition-colors hover:bg-zinc-600"
           >
             Generate Video
           </button>

@@ -24,6 +24,10 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_user)
 
+    # Create a default space for the new user
+    from app.services.space_service import create_default_space
+    create_default_space(db=db, user=db_user)
+
     access_token = create_access_token(data={"sub": db_user.email, "user_id": str(db_user.id)})
     refresh_token = create_refresh_token(data={"sub": db_user.email, "user_id": str(db_user.id)})
     return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}

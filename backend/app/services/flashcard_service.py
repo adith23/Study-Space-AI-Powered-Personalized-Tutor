@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
@@ -20,7 +22,7 @@ from app.services.flashcard_generation_service import generate_flashcard_payload
 
 
 def create_flashcard_deck(
-    *, db: Session, current_user: User, request: CreateFlashcardDeckRequest
+    *, db: Session, current_user: User, request: CreateFlashcardDeckRequest, space_id: Optional[int] = None
 ) -> FlashcardDeckResponse:
     try:
         files = get_valid_selected_files(
@@ -39,6 +41,7 @@ def create_flashcard_deck(
     title = request.title or _default_deck_title(files)
     deck = FlashcardDeck(
         user_id=current_user.id,
+        space_id=space_id,
         title=title,
         difficulty_level=request.difficulty_level,
         number_of_cards=request.number_of_cards,
@@ -58,14 +61,12 @@ def create_flashcard_deck(
 
 
 def list_flashcard_decks(
-    *, db: Session, current_user: User
+    *, db: Session, current_user: User, space_id: Optional[int] = None
 ) -> list[FlashcardDeckResponse]:
-    decks = (
-        db.query(FlashcardDeck)
-        .filter(FlashcardDeck.user_id == current_user.id)
-        .order_by(FlashcardDeck.created_at.desc(), FlashcardDeck.id.desc())
-        .all()
-    )
+    query = db.query(FlashcardDeck).filter(FlashcardDeck.user_id == current_user.id)
+    if space_id is not None:
+        query = query.filter(FlashcardDeck.space_id == space_id)
+    decks = query.order_by(FlashcardDeck.created_at.desc(), FlashcardDeck.id.desc()).all()
     return [FlashcardDeckResponse.model_validate(deck) for deck in decks]
 
 

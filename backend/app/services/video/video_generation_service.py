@@ -19,6 +19,7 @@ from app.services.content_generation_context_service import (
 from app.services.video.artifacts import VideoArtifactRegistry, build_artifacts_snapshot
 from app.services.video.renderers.image_renderer import ImageRenderer
 from app.services.video.renderers.manim_renderer import ManimRenderer
+from app.services.video.renderers.manim_pro_renderer import ManimProRenderer
 from app.services.video.script_generator import generate_video_script
 from app.services.video.tts_generator import generate_all_scene_audio
 from app.services.video.video_assembler import (
@@ -50,6 +51,7 @@ class VideoPipelineOrchestrator:
         self._registry = {
             VideoRenderer.IMAGE: ImageRenderer(),
             VideoRenderer.MANIM: ManimRenderer(),
+            VideoRenderer.MANIM_PRO: ManimProRenderer(),
         }
         self._assembler = VisualAssemblyService()
 
@@ -197,6 +199,18 @@ class VideoPipelineOrchestrator:
                 style=video.style or "explainer",
                 focus_prompt=video.focus_prompt,
             )
+
+        if self._renderer_value(video) == VideoRenderer.MANIM_PRO.value:
+            _update_status(self.db, video, VideoStatus.GENERATING_CODE, 25)
+            result = renderer.render(
+                script=script,
+                context=context,
+                workspace=workspace,
+                style=video.style or "explainer",
+                focus_prompt=video.focus_prompt,
+            )
+            _update_status(self.db, video, VideoStatus.RENDERING_MANIM, 60)
+            return result
 
         _update_status(self.db, video, VideoStatus.GENERATING_IMAGES, 25)
         result = renderer.render(script=script, workspace=workspace)

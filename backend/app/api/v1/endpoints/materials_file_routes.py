@@ -9,12 +9,13 @@ from app.core.database import get_db
 from app.core.deps import get_current_active_user
 from app.models.user_model import User
 from app.schemas.material_schema import FileType as SchemaFileType
-from app.schemas.material_schema import StatusResponse
-from app.schemas.material_schema import UploadedFileResponse
+from app.schemas.material_schema import StatusResponse, UploadedFileResponse, UploadedFileUpdate
 from app.services.material_service import (
     create_uploaded_file,
     get_user_file_status,
     list_user_files,
+    rename_uploaded_file,
+    delete_uploaded_file,
 )
 
 router = APIRouter()
@@ -71,3 +72,25 @@ def download_file_content(
         filename=file_record.name or "document",
         media_type="application/octet-stream",
     )
+
+# Rename a file
+@router.put("/files/{file_id}/rename", response_model=UploadedFileResponse)
+def rename_file(
+    file_id: int,
+    payload: UploadedFileUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    return rename_uploaded_file(
+        file_id=file_id, new_name=payload.name, db=db, current_user=current_user
+    )
+
+# Delete a file
+@router.delete("/files/{file_id}", status_code=204)
+def delete_file(
+    file_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    delete_uploaded_file(file_id=file_id, db=db, current_user=current_user)
+    return None

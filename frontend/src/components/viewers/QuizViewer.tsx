@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Loader2, X } from "lucide-react";
-import { getQuiz, submitQuizAttempt } from "@/lib/api/quiz";
+import { clientApi } from "@/lib/api/index.client";
 import type { QuizAttemptResult, QuizDetail } from "@/types/quiz";
 
 interface QuizViewerProps {
@@ -29,7 +29,7 @@ const QuizViewer: React.FC<QuizViewerProps> = ({ quizId, onClose }) => {
     const loadQuiz = async () => {
       setIsLoadingQuiz(true);
       try {
-        const data = await getQuiz(quizId);
+        const data = await clientApi.quiz.get(quizId);
         if (isCancelled) return;
         setActiveQuiz(data);
         
@@ -90,7 +90,7 @@ const QuizViewer: React.FC<QuizViewerProps> = ({ quizId, onClose }) => {
     setErrorMessage(null);
     setIsSubmittingAttempt(true);
     try {
-      const result = await submitQuizAttempt(activeQuiz.id, {
+      const result = await clientApi.quiz.submitAttempt(activeQuiz.id, {
         answers: activeQuiz.questions.map((question) => ({
           question_id: question.id,
           selected_option: selectedAnswers[question.id],
