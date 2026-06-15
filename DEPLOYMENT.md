@@ -96,12 +96,7 @@ Run Phase 1 — create **only** ECR, SQS, IAM, and Monitoring (skip Lambda and C
 
 ```bash
 terraform init
-
-terraform apply \
-  -target=module.ecr \
-  -target=module.sqs \
-  -target=module.iam \
-  -target=module.monitoring
+terraform apply -target="module.ecr" -target="module.sqs" -target="module.iam" -target="module.monitoring"
 ```
 
 After Phase 1 completes, get the ECR repo URIs:
@@ -120,11 +115,11 @@ Before pushing images, configure GitHub Secrets in your repository (Settings →
 |---|---|
 | `AWS_ACCESS_KEY_ID` | Your IAM user access key |
 | `AWS_SECRET_ACCESS_KEY` | Your IAM user secret key |
-| `ECR_API_REPO_URI` | `public.ecr.aws/x9x0m0l8/study-space-api` |
-| `ECR_WORKER_REPO_URI` | `public.ecr.aws/x9x0m0l8/study-space-worker` |
-| `ECR_FRONTEND_REPO_URI` | `public.ecr.aws/x9x0m0l8/study-space-frontend` |
+| `ECR_API_REPO_URI` | `ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/study-space-api` |
+| `ECR_WORKER_REPO_URI` | `ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/study-space-worker` |
+| `ECR_FRONTEND_REPO_URI` | `ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/study-space-frontend` |
 
-*(Replace the ECR URIs with your actual `terraform output` values from Step 2.)*
+*(Replace `ACCOUNT_ID` with your AWS Account ID, or use the exact `terraform output ecr_api_repo` values from Step 2.)*
 
 ---
 
@@ -142,7 +137,7 @@ git push origin main
 
 2. Go to your GitHub repo → **Actions** tab → **"Bootstrap — Push Initial Images"** workflow → **Run workflow**
 
-This runs the one-time `.github/workflows/bootstrap.yml` which builds all 3 Docker images and pushes them to ECR — **without** trying to update Lambda functions (since they don't exist yet).
+This runs the one-time `.github/workflows/bootstrap.yml` which builds all 3 Docker images and pushes them to ECR Private — **without** trying to update Lambda functions (since they don't exist yet).
 
 3. Wait for the workflow to complete (green ✅).
 
@@ -150,12 +145,12 @@ This runs the one-time `.github/workflows/bootstrap.yml` which builds all 3 Dock
 
 ## Step 5 — Terraform Phase 2 (Lambda + CloudFront)
 
-Update `terraform.tfvars` with the **real** ECR image URIs:
+Update `terraform.tfvars` with the **real** ECR Private image URIs:
 
 ```hcl
-api_image_uri      = "public.ecr.aws/x9x0m0l8/study-space-api:latest"
-worker_image_uri   = "public.ecr.aws/x9x0m0l8/study-space-worker:latest"
-frontend_image_uri = "public.ecr.aws/x9x0m0l8/study-space-frontend:latest"
+api_image_uri      = "ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/study-space-api:latest"
+worker_image_uri   = "ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/study-space-worker:latest"
+frontend_image_uri = "ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/study-space-frontend:latest"
 ```
 
 Run Phase 2 — creates Lambda functions, Function URLs, and CloudFront:

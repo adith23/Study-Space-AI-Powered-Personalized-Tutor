@@ -47,11 +47,11 @@ resource "aws_cloudfront_distribution" "main" {
 
   # ── Default behavior → Frontend ───────────────────────────
   default_cache_behavior {
-    target_origin_id       = "frontend"
-    viewer_protocol_policy = "redirect-to-https"
-    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
-    cached_methods         = ["GET", "HEAD"]
-    compress               = true
+    target_origin_id           = "frontend"
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
 
     forwarded_values {
@@ -62,18 +62,18 @@ resource "aws_cloudfront_distribution" "main" {
     }
 
     min_ttl     = 0
-    default_ttl = 300    # 5 min cache for SSR pages
-    max_ttl     = 86400  # 1 day max
+    default_ttl = 300   # 5 min cache for SSR pages
+    max_ttl     = 86400 # 1 day max
   }
 
   # ── /api/* → API Lambda (no caching) ──────────────────────
   ordered_cache_behavior {
-    path_pattern           = "/api/*"
-    target_origin_id       = "api"
-    viewer_protocol_policy = "redirect-to-https"
-    allowed_methods        = ["GET", "HEAD", "OPTIONS", "PUT", "PATCH", "POST", "DELETE"]
-    cached_methods         = ["GET", "HEAD"]
-    compress               = true
+    path_pattern               = "/api/*"
+    target_origin_id           = "api"
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS", "PUT", "PATCH", "POST", "DELETE"]
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
     forwarded_values {
       query_string = true
@@ -84,17 +84,17 @@ resource "aws_cloudfront_distribution" "main" {
     }
 
     min_ttl     = 0
-    default_ttl = 0  # No caching for API
+    default_ttl = 0 # No caching for API
     max_ttl     = 0
   }
 
   # ── /health → API Lambda (for monitoring) ─────────────────
   ordered_cache_behavior {
-    path_pattern           = "/health"
-    target_origin_id       = "api"
-    viewer_protocol_policy = "redirect-to-https"
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
+    path_pattern               = "/health"
+    target_origin_id           = "api"
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
     forwarded_values {
       query_string = false
@@ -110,12 +110,12 @@ resource "aws_cloudfront_distribution" "main" {
 
   # ── Static assets (/_next/static/*) — aggressive caching ──
   ordered_cache_behavior {
-    path_pattern           = "/_next/static/*"
-    target_origin_id       = "frontend"
-    viewer_protocol_policy = "redirect-to-https"
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    compress               = true
+    path_pattern               = "/_next/static/*"
+    target_origin_id           = "frontend"
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
     forwarded_values {
       query_string = false
@@ -153,19 +153,19 @@ resource "aws_cloudfront_response_headers_policy" "security" {
 
   security_headers_config {
     content_type_options {
-      override = true  # X-Content-Type-Options: nosniff
+      override = true # X-Content-Type-Options: nosniff
     }
     frame_options {
-      frame_option = "SAMEORIGIN"  # X-Frame-Options: SAMEORIGIN
+      frame_option = "SAMEORIGIN" # X-Frame-Options: SAMEORIGIN
       override     = true
     }
     xss_protection {
-      mode_block = true  # X-XSS-Protection: 1; mode=block
+      mode_block = true # X-XSS-Protection: 1; mode=block
       protection = true
       override   = true
     }
     strict_transport_security {
-      access_control_max_age_sec = 31536000  # 1 year HSTS
+      access_control_max_age_sec = 31536000 # 1 year HSTS
       include_subdomains         = true
       override                   = true
     }
