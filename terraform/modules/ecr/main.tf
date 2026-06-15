@@ -1,38 +1,95 @@
-# ECR Public repositories (Always Free: 50 GB storage)
-# ECR Public is only available in us-east-1
+# ECR Private repositories (required for Lambda container images)
+#
+# Lambda ONLY supports pulling from private ECR in the same account/region.
+# ECR Private free tier: 500 MB storage/month (first 12 months),
+# then ~$0.10/GB/month — negligible for 3 small images.
+#
+# Lifecycle policies auto-delete old untagged images to minimize storage.
 
-resource "aws_ecrpublic_repository" "api" {
-  repository_name = "${var.project}-api"
+resource "aws_ecr_repository" "api" {
+  name                 = "${var.project}-api"
+  image_tag_mutability = "MUTABLE"
+  force_delete         = true
 
-  catalog_data {
-    description       = "Study Space — Backend API Lambda image"
-    operating_systems = ["Linux"]
-    architectures     = ["x86-64"]
+  image_scanning_configuration {
+    scan_on_push = true
   }
 
   tags = { Name = "${var.project}-api" }
 }
 
-resource "aws_ecrpublic_repository" "worker" {
-  repository_name = "${var.project}-worker"
+resource "aws_ecr_repository" "worker" {
+  name                 = "${var.project}-worker"
+  image_tag_mutability = "MUTABLE"
+  force_delete         = true
 
-  catalog_data {
-    description       = "Study Space — Worker Lambda image (SQS-triggered)"
-    operating_systems = ["Linux"]
-    architectures     = ["x86-64"]
+  image_scanning_configuration {
+    scan_on_push = true
   }
 
   tags = { Name = "${var.project}-worker" }
 }
 
-resource "aws_ecrpublic_repository" "frontend" {
-  repository_name = "${var.project}-frontend"
+resource "aws_ecr_repository" "frontend" {
+  name                 = "${var.project}-frontend"
+  image_tag_mutability = "MUTABLE"
+  force_delete         = true
 
-  catalog_data {
-    description       = "Study Space — Frontend Lambda image (Next.js)"
-    operating_systems = ["Linux"]
-    architectures     = ["x86-64"]
+  image_scanning_configuration {
+    scan_on_push = true
   }
 
   tags = { Name = "${var.project}-frontend" }
+}
+
+# ── Lifecycle Policies — keep only latest 5 images ───────────
+resource "aws_ecr_lifecycle_policy" "api" {
+  repository = aws_ecr_repository.api.name
+
+  policy = jsonencode({
+    rules = [{
+      rulePriority = 1
+      description  = "Keep only last 5 images"
+      selection = {
+        tagStatus   = "any"
+        countType   = "imageCountMoreThan"
+        countNumber = 5
+      }
+      action = { type = "expire" }
+    }]
+  })
+}
+
+resource "aws_ecr_lifecycle_policy" "worker" {
+  repository = aws_ecr_repository.worker.name
+
+  policy = jsonencode({
+    rules = [{
+      rulePriority = 1
+      description  = "Keep only last 5 images"
+      selection = {
+        tagStatus   = "any"
+        countType   = "imageCountMoreThan"
+        countNumber = 5
+      }
+      action = { type = "expire" }
+    }]
+  })
+}
+
+resource "aws_ecr_lifecycle_policy" "frontend" {
+  repository = aws_ecr_repository.frontend.name
+
+  policy = jsonencode({
+    rules = [{
+      rulePriority = 1
+      description  = "Keep only last 5 images"
+      selection = {
+        tagStatus   = "any"
+        countType   = "imageCountMoreThan"
+        countNumber = 5
+      }
+      action = { type = "expire" }
+    }]
+  })
 }

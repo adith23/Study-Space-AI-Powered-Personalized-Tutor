@@ -50,6 +50,22 @@ resource "aws_iam_role_policy" "api_lambda" {
         Resource = "arn:aws:ssm:*:*:parameter/${var.project}/*"
       },
       {
+        Sid    = "ECRPull"
+        Effect = "Allow"
+        Action = [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:BatchCheckLayerAvailability",
+        ]
+        Resource = var.ecr_repo_arns
+      },
+      {
+        Sid      = "ECRAuth"
+        Effect   = "Allow"
+        Action   = ["ecr:GetAuthorizationToken"]
+        Resource = "*"
+      },
+      {
         Sid    = "XRayTracing"
         Effect = "Allow"
         Action = [
@@ -107,6 +123,22 @@ resource "aws_iam_role_policy" "worker_lambda" {
         Resource = "arn:aws:ssm:*:*:parameter/${var.project}/*"
       },
       {
+        Sid    = "ECRPull"
+        Effect = "Allow"
+        Action = [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:BatchCheckLayerAvailability",
+        ]
+        Resource = var.ecr_repo_arns
+      },
+      {
+        Sid      = "ECRAuth"
+        Effect   = "Allow"
+        Action   = ["ecr:GetAuthorizationToken"]
+        Resource = "*"
+      },
+      {
         Sid    = "XRayTracing"
         Effect = "Allow"
         Action = [
@@ -142,6 +174,22 @@ resource "aws_iam_role_policy" "frontend_lambda" {
           "logs:PutLogEvents",
         ]
         Resource = [for arn in var.log_group_arns : "${arn}:*"]
+      },
+      {
+        Sid    = "ECRPull"
+        Effect = "Allow"
+        Action = [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:BatchCheckLayerAvailability",
+        ]
+        Resource = var.ecr_repo_arns
+      },
+      {
+        Sid      = "ECRAuth"
+        Effect   = "Allow"
+        Action   = ["ecr:GetAuthorizationToken"]
+        Resource = "*"
       },
     ]
   })

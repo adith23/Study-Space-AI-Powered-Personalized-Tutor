@@ -12,7 +12,7 @@
 # Required GitHub Secrets:
 #   AWS_ACCESS_KEY_ID
 #   AWS_SECRET_ACCESS_KEY
-#   ECR_API_REPO_URI        — e.g. public.ecr.aws/x9x0m0l8/study-space-api
+#   ECR_API_REPO_URI        — e.g. 580647748431.dkr.ecr.us-east-1.amazonaws.com/study-space-api
 #   ECR_WORKER_REPO_URI
 #   ECR_FRONTEND_REPO_URI
 # ============================================================
@@ -39,10 +39,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to ECR Public
-        run: |
-          aws ecr-public get-login-password --region us-east-1 | \
-          docker login --username AWS --password-stdin public.ecr.aws
+      - name: Login to Amazon ECR Private
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build & push API image
         run: |
@@ -70,7 +68,7 @@ jobs:
 
       - name: Summary
         run: |
-          echo "🎉 All images pushed to ECR Public!"
+          echo "🎉 All images pushed to ECR Private!"
           echo ""
           echo "Next steps:"
           echo "  1. Update terraform/terraform.tfvars with real image URIs"

@@ -8,8 +8,9 @@ aws_region   = "us-east-1"
 environment  = "production"
 project_name = "study-space"
 
-# ECR Public image URIs (from `terraform output` after first ECR creation,
-# then built and pushed via CI/CD or manually)
-api_image_uri      = "public.ecr.aws/YOUR_ALIAS/study-space-api:latest"
-worker_image_uri   = "public.ecr.aws/YOUR_ALIAS/study-space-worker:latest"
-frontend_image_uri = "public.ecr.aws/YOUR_ALIAS/study-space-frontend:latest"
+# ECR Private image URIs (from `terraform output` after ECR creation,
+# then built and pushed via GitHub Actions bootstrap workflow)
+# Format: ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/REPO_NAME:TAG
+api_image_uri      = "580647748431.dkr.ecr.us-east-1.amazonaws.com/study-space-api:latest"
+worker_image_uri   = "580647748431.dkr.ecr.us-east-1.amazonaws.com/study-space-worker:latest"
+frontend_image_uri = "580647748431.dkr.ecr.us-east-1.amazonaws.com/study-space-frontend:latest"

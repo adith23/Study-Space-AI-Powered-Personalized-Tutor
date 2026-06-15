@@ -30,29 +30,11 @@ provider "aws" {
   }
 }
 
-# ── ECR Public requires us-east-1 provider ───────────────────
-provider "aws" {
-  alias  = "us_east_1"
-  region = "us-east-1"
-}
-
 # ── Modules ──────────────────────────────────────────────────
-
-module "iam" {
-  source          = "./modules/iam"
-  environment     = var.environment
-  project         = var.project_name
-  sqs_queue_arn   = module.sqs.queue_arn
-  log_group_arns  = module.monitoring.log_group_arns
-}
 
 module "ecr" {
   source  = "./modules/ecr"
   project = var.project_name
-
-  providers = {
-    aws = aws.us_east_1
-  }
 }
 
 module "sqs" {
@@ -65,6 +47,19 @@ module "monitoring" {
   source      = "./modules/monitoring"
   environment = var.environment
   project     = var.project_name
+}
+
+module "iam" {
+  source          = "./modules/iam"
+  environment     = var.environment
+  project         = var.project_name
+  sqs_queue_arn   = module.sqs.queue_arn
+  log_group_arns  = module.monitoring.log_group_arns
+  ecr_repo_arns   = [
+    module.ecr.api_repo_arn,
+    module.ecr.worker_repo_arn,
+    module.ecr.frontend_repo_arn,
+  ]
 }
 
 module "lambda" {

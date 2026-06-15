@@ -15,3 +15,9 @@ variable "log_group_arns" {
   description = "List of CloudWatch Log Group ARNs"
   type        = list(string)
 }
+
+variable "ecr_repo_arns" {
+  description = "List of ECR Private repository ARNs for Lambda image pull"
+  type        = list(string)
+}
+

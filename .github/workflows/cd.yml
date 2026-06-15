@@ -1,13 +1,14 @@
 # ============================================================
 # CD Pipeline — Deploy to AWS Lambda on push to main
 #
-# Builds Docker images, pushes to ECR Public, updates Lambda
+# Builds Docker images, pushes to ECR Private, updates Lambda
 # functions, and invalidates CloudFront cache.
 #
 # Required GitHub Secrets:
 #   AWS_ACCESS_KEY_ID       — IAM user with ECR/Lambda/CF permissions
 #   AWS_SECRET_ACCESS_KEY
-#   ECR_API_REPO_URI        — e.g. public.ecr.aws/x1y2z3/study-space-api
+#   AWS_ACCOUNT_ID          — e.g. 580647748431
+#   ECR_API_REPO_URI        — e.g. 580647748431.dkr.ecr.us-east-1.amazonaws.com/study-space-api
 #   ECR_WORKER_REPO_URI
 #   ECR_FRONTEND_REPO_URI
 #   CLOUDFRONT_DISTRIBUTION_ID
@@ -42,10 +43,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to ECR Public
-        run: |
-          aws ecr-public get-login-password --region us-east-1 | \
-          docker login --username AWS --password-stdin public.ecr.aws
+      - name: Login to Amazon ECR Private
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build & push API image
         run: |
@@ -81,10 +80,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to ECR Public
-        run: |
-          aws ecr-public get-login-password --region us-east-1 | \
-          docker login --username AWS --password-stdin public.ecr.aws
+      - name: Login to Amazon ECR Private
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build & push Worker image
         run: |
@@ -120,10 +117,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to ECR Public
-        run: |
-          aws ecr-public get-login-password --region us-east-1 | \
-          docker login --username AWS --password-stdin public.ecr.aws
+      - name: Login to Amazon ECR Private
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build & push Frontend image
         run: |
