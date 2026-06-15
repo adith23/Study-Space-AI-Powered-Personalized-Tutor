@@ -16,7 +16,7 @@ from app.schemas.video_schema import (
     VideoStatusResponse,
 )
 from app.services.content_generation_context_service import get_valid_selected_files
-from app.tasks.video_tasks import generate_video_task
+from app.core.task_dispatcher import dispatch_task
 
 router = APIRouter()
 
@@ -56,7 +56,7 @@ async def create_video(
     db.commit()
     db.refresh(video)
 
-    generate_video_task.delay(video.id)
+    dispatch_task("generate_video", {"video_id": video.id})
 
     return VideoGenerateResponse(
         id=video.id,
@@ -143,6 +143,15 @@ async def stream_video(
         raise HTTPException(status_code=404, detail="Video not found or not ready.")
 
     if not os.path.isfile(video.video_path):
+        # Check if it's an R2 key — redirect to presigned URL
+        if video.video_path.startswith("r2://"):
+            from app.core.storage import get_storage
+            from fastapi.responses import RedirectResponse
+
+            storage = get_storage()
+            key = video.video_path.split("//", 1)[1].split("/", 1)[1]
+            presigned_url = storage.get_presigned_url(key, expires_in=3600)
+            return RedirectResponse(url=presigned_url)
         raise HTTPException(status_code=404, detail="Video file missing from storage.")
 
     return FileResponse(
@@ -170,6 +179,15 @@ async def get_thumbnail(
         raise HTTPException(status_code=404, detail="Thumbnail not found.")
 
     if not os.path.isfile(video.thumbnail_path):
+        # Check if it's an R2 key — redirect to presigned URL
+        if video.thumbnail_path.startswith("r2://"):
+            from app.core.storage import get_storage
+            from fastapi.responses import RedirectResponse
+
+            storage = get_storage()
+            key = video.thumbnail_path.split("//", 1)[1].split("/", 1)[1]
+            presigned_url = storage.get_presigned_url(key, expires_in=3600)
+            return RedirectResponse(url=presigned_url)
         raise HTTPException(status_code=404, detail="Thumbnail file missing from storage.")
 
     return FileResponse(video.thumbnail_path, media_type="image/jpeg")
@@ -193,10 +211,21 @@ async def delete_video(
         raise HTTPException(status_code=404, detail="Video not found.")
 
     from app.core.config import settings
+    from app.core.storage import get_storage
 
-    video_dir = os.path.join(settings.VIDEO_STORAGE_PATH, str(video_id))
-    if os.path.isdir(video_dir):
-        shutil.rmtree(video_dir, ignore_errors=True)
+    # Clean up from storage backend
+    if video.video_path and video.video_path.startswith("r2://"):
+        storage = get_storage()
+        for suffix in ["output.mp4", "thumbnail.jpg"]:
+            key = f"videos/{video_id}/{suffix}"
+            try:
+                storage.delete(key)
+            except Exception:
+                pass
+    else:
+        video_dir = os.path.join(settings.VIDEO_STORAGE_PATH, str(video_id))
+        if os.path.isdir(video_dir):
+            shutil.rmtree(video_dir, ignore_errors=True)
 
     db.delete(video)
     db.commit()

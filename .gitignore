@@ -106,3 +106,21 @@ backend/storage/cache/*
 
 # Tooling / misc
 .eslintcache
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/terraform.tfvars
+terraform/.terraform.lock.hcl
+
+# Docker
+docker-compose.override.yml
+
+# Production secrets (NEVER commit)
+.env.production
+*.pem
+
+# Terraform crash logs
+crash.log
+crash.*.log

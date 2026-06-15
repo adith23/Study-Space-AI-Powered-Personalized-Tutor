@@ -1,5 +1,7 @@
 import logging
+import os
 import re
+import tempfile
 import time
 from functools import lru_cache
 from dataclasses import dataclass
@@ -16,6 +18,7 @@ from app.models.material_model import UploadedFile, DocumentChunk, ProcessingSta
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 logger.info("Initializing Pinecone client...")
 pinecone = PineconeClient(api_key=settings.PINECONE_API_KEY)
@@ -86,6 +89,27 @@ def _extract_markdown_with_retry(file_path: str) -> str:
     raise RuntimeError(
         f"Docling extraction failed after {MAX_DOCLING_ATTEMPTS} attempts."
     ) from last_error
+
+
+def _resolve_file_path(stored_path: str) -> str:
+    """
+    If stored_path is an R2/S3 URI, download to a temp file and return the local path.
+    Otherwise, return the path as-is (local storage).
+    """
+    if stored_path.startswith("r2://") or stored_path.startswith("s3://"):
+        from app.core.storage import get_storage
+
+        storage = get_storage()
+        # Extract the key from the URI: "r2://bucket/key" → "key"
+        key = stored_path.split("//", 1)[1].split("/", 1)[1]
+        data = storage.download(key)
+        suffix = "." + key.rsplit(".", 1)[-1] if "." in key else ".pdf"
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
+        tmp.write(data)
+        tmp.close()
+        logger.info("Downloaded %s to temp file %s", stored_path, tmp.name)
+        return tmp.name
+    return stored_path
 
 # Build the token splitter
 def _build_token_splitter() -> RecursiveCharacterTextSplitter:
@@ -209,6 +233,7 @@ def process_and_embed_document(db: Session, file_id: int):
         )
         return
 
+    local_path = None
     try:
         # Update status to PROCESSING
         setattr(file_record, "status", ProcessingStatus.PROCESSING.value)
@@ -216,7 +241,8 @@ def process_and_embed_document(db: Session, file_id: int):
 
         # 1. Extract markdown with Docling and build multi-stage chunks.
         logger.info("Extracting markdown with Docling from file: %s", file_record.stored_path)
-        markdown_text = _extract_markdown_with_retry(str(file_record.stored_path))
+        local_path = _resolve_file_path(str(file_record.stored_path))
+        markdown_text = _extract_markdown_with_retry(local_path)
         final_chunks = _chunk_with_structure(markdown_text)
         texts_to_embed = [chunk.text for chunk in final_chunks]
         logger.info("Created %d text chunks.", len(texts_to_embed))
@@ -266,3 +292,11 @@ def process_and_embed_document(db: Session, file_id: int):
         setattr(file_record, "status", ProcessingStatus.FAILED.value)
         setattr(file_record, "error_message", str(e)[:500])
         db.commit()
+    finally:
+        # Clean up temp files downloaded from R2 to free /tmp space on Lambda
+        if local_path and local_path != str(file_record.stored_path):
+            try:
+                os.unlink(local_path)
+                logger.debug("Cleaned up temp file: %s", local_path)
+            except OSError:
+                pass

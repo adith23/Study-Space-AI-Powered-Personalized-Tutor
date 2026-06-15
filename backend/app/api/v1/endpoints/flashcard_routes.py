@@ -14,7 +14,7 @@ from app.services.flashcard_service import (
     get_flashcard_deck_detail,
     list_flashcard_decks,
 )
-from app.tasks.flashcard_tasks import generate_flashcard_deck_task
+from app.core.task_dispatcher import dispatch_task
 
 router = APIRouter()
 
@@ -26,7 +26,7 @@ def create_flashcard_deck_route(
     current_user: User = Depends(get_current_active_user),
 ):
     deck = create_flashcard_deck(db=db, current_user=current_user, request=request)
-    generate_flashcard_deck_task.delay(deck.id)
+    dispatch_task("generate_flashcard", {"deck_id": deck.id})
     return deck
 
 

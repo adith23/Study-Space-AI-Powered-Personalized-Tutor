@@ -28,9 +28,7 @@ from app.services.quiz_service import create_quiz, list_quizzes
 from app.services.flashcard_service import create_flashcard_deck, list_flashcard_decks
 from app.services.space_service import get_space, touch_space_access
 from app.services.content_generation_context_service import get_valid_selected_files
-from app.tasks.quiz_tasks import generate_quiz_task
-from app.tasks.flashcard_tasks import generate_flashcard_deck_task
-from app.tasks.video_tasks import generate_video_task
+from app.core.task_dispatcher import dispatch_task
 
 router = APIRouter()
 
@@ -117,7 +115,7 @@ def create_space_quiz(
     """Create a quiz scoped to a specific space."""
     get_space(space_id=space_id, db=db, current_user=current_user)
     quiz = create_quiz(db=db, current_user=current_user, request=request, space_id=space_id)
-    generate_quiz_task.delay(quiz.id)
+    dispatch_task("generate_quiz", {"quiz_id": quiz.id})
     return quiz
 
 
@@ -146,7 +144,7 @@ def create_space_flashcard_deck(
     """Create a flashcard deck scoped to a specific space."""
     get_space(space_id=space_id, db=db, current_user=current_user)
     deck = create_flashcard_deck(db=db, current_user=current_user, request=request, space_id=space_id)
-    generate_flashcard_deck_task.delay(deck.id)
+    dispatch_task("generate_flashcard", {"deck_id": deck.id})
     return deck
 
 
@@ -200,7 +198,7 @@ async def create_space_video(
     db.commit()
     db.refresh(video)
 
-    generate_video_task.delay(video.id)
+    dispatch_task("generate_video", {"video_id": video.id})
 
     return VideoGenerateResponse(
         id=video.id,

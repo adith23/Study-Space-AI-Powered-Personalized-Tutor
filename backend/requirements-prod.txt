@@ -1,22 +1,25 @@
+# ============================================================
+# Production-only requirements (slim — saves ~1 GB vs full)
+#
+# Removed: sentence-transformers, faiss-cpu, numpy, pandas,
+#          scipy, openai, anthropic, python-docx, python-pptx,
+#          openpyxl, manim, pytesseract, flower, redis, celery,
+#          python-magic, and all dev/test tools.
+# ============================================================
+
 # Core Framework
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 python-multipart>=0.0.6
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
-# passlib 1.7.4 breaks with bcrypt 4.1+ (72-byte strictness during backend self-test)
+# passlib 1.7.4 breaks with bcrypt 4.1+ (72-byte strictness)
 bcrypt>=4.0.1,<4.1
 
 # Database
 sqlalchemy>=2.0.0
 alembic>=1.13.0
 psycopg2-binary>=2.9.9
-asyncpg>=0.29.0
-redis>=5.0.0
-
-# Celery
-celery>=5.3.0
-flower>=2.0.0
 
 # Validation & Settings
 pydantic>=2.5.0
@@ -27,9 +30,7 @@ email-validator>=2.1.0
 httpx>=0.25.0
 aiohttp>=3.9.0
 
-# AI/ML
-openai>=1.3.0
-anthropic>=0.7.0
+# AI/ML (lightweight — no local embedding models)
 tiktoken>=0.5.0
 langchain>=1.0.0
 langchain-classic>=1.0.0
@@ -37,48 +38,22 @@ langchain-community>=0.4.0
 langchain-text-splitters>=1.0.0
 langchain-google-genai>=0.0.3
 
-# Data Processing
-numpy>=2.0.0
-pandas>=2.2.0
-scipy>=1.11.0
-
 # Document Processing
-python-docx>=1.1.0
-python-pptx>=0.6.23
-PyPDF2>=3.0.0
 docling>=1.0.0
-openpyxl>=3.1.0
+PyPDF2>=3.0.0
+Pillow>=10.0.0
 
-# Search & NLP
-sentence-transformers>=2.2.0
-faiss-cpu>=1.7.0
+# Vector DB
 pinecone-client>=3.0.0
 
 # Google AI
 google-genai>=1.0.0
 
-# Image Processing
-Pillow>=10.0.0
-pytesseract>=0.3.10
-manim>=0.19.0
-
-# Testing
-pytest>=7.4.0
-pytest-asyncio>=0.21.0
-pytest-cov>=4.1.0
-
-# Code Quality
-black>=23.0.0
-isort>=5.12.0
-flake8>=6.1.0
-mypy>=1.7.0
+# AWS SDK (SQS, SSM integration)
+boto3>=1.34.0
 
 # Monitoring
 prometheus-client>=0.19.0
 
 # Utilities
 python-dotenv>=1.0.0
-python-magic>=0.4.27
-
-# AWS SDK (SQS, SSM, R2/S3 integration)
-boto3>=1.34.0

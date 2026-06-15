@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -15,7 +16,12 @@ class VideoWorkspace:
 
     @classmethod
     def build(cls, video_id: int) -> "VideoWorkspace":
-        return cls(video_id=video_id, root=Path(settings.VIDEO_STORAGE_PATH) / str(video_id))
+        # In production (Lambda), use ephemeral /tmp (up to 10 GB)
+        if settings.ENVIRONMENT == "production":
+            base = Path("/tmp/video-workspace")
+        else:
+            base = Path(settings.VIDEO_STORAGE_PATH)
+        return cls(video_id=video_id, root=base / str(video_id))
 
     def ensure_dirs(self) -> None:
         for path in (
@@ -92,3 +98,37 @@ def write_text_artifact(path: str | Path, content: str) -> None:
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(content, encoding="utf-8")
+
+
+def upload_final_artifacts(workspace: VideoWorkspace) -> dict:
+    """Upload output.mp4 and thumbnail.jpg to R2; return storage keys."""
+    import shutil
+    from app.core.storage import get_storage
+
+    storage = get_storage()
+    results = {}
+
+    video_path = workspace.output_video_path()
+    if video_path.exists():
+        key = f"videos/{workspace.video_id}/output.mp4"
+        with open(video_path, "rb") as f:
+            storage.upload(f, key)
+        results["video_key"] = key
+
+    thumb_path = workspace.thumbnail_path()
+    if thumb_path.exists():
+        key = f"videos/{workspace.video_id}/thumbnail.jpg"
+        with open(thumb_path, "rb") as f:
+            storage.upload(f, key)
+        results["thumbnail_key"] = key
+
+    return results
+
+
+def cleanup_workspace(workspace: VideoWorkspace) -> None:
+    """Remove the local workspace after R2 upload to free /tmp."""
+    import shutil
+
+    if workspace.root.exists():
+        shutil.rmtree(workspace.root, ignore_errors=True)
+

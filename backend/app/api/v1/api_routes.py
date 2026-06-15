@@ -5,6 +5,7 @@ from app.api.v1.endpoints import (
     chat_routes,
     flashcard_routes,
     materials_file_routes,
+    metrics_routes,
     quiz_routes,
     space_routes,
     space_scoped_routes,
@@ -32,3 +33,5 @@ api_router.include_router(
 )
 
 api_router.include_router(video_routes.router, prefix="/videos", tags=["videos"])
+
+api_router.include_router(metrics_routes.router, tags=["monitoring"])
