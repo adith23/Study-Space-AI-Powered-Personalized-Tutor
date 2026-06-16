@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir --prefix=/install -r requirements-prod.txt
 FROM public.ecr.aws/lambda/python:3.11 AS runtime
 
 # Install runtime deps
-RUN dnf install -y libpq && dnf clean all
+RUN yum install -y postgresql-libs tar xz && yum clean all
 
 # Install FFmpeg from static build (AL2023 repos don't include ffmpeg)
 RUN curl -L https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz | \

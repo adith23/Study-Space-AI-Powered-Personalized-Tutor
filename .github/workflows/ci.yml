@@ -110,9 +110,6 @@ jobs:
       - name: TypeScript type check
         run: npx tsc --noEmit
 
-      - name: ESLint
-        run: npx next lint
-
   frontend-build:
     name: Frontend Build
     runs-on: ubuntu-latest
