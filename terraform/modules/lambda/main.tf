@@ -153,7 +153,7 @@ resource "aws_lambda_function_event_invoke_config" "worker" {
 # public access to Function URLs, even when auth type is NONE.
 
 resource "aws_lambda_permission" "api_url" {
-  statement_id           = "FunctionURLAllowPublicAccess"
+  statement_id           = "FunctionURLAllowPublicAccessV2"
   action                 = "lambda:InvokeFunctionUrl"
   function_name          = aws_lambda_function.api.function_name
   principal              = "*"
@@ -161,7 +161,7 @@ resource "aws_lambda_permission" "api_url" {
 }
 
 resource "aws_lambda_permission" "frontend_url" {
-  statement_id           = "FunctionURLAllowPublicAccess"
+  statement_id           = "FunctionURLAllowPublicAccessV2"
   action                 = "lambda:InvokeFunctionUrl"
   function_name          = aws_lambda_function.frontend.function_name
   principal              = "*"
