@@ -1,6 +1,5 @@
 from fastapi import HTTPException
-from langchain_classic.chains.combine_documents import \
-    create_stuff_documents_chain
+from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_google_genai import ChatGoogleGenerativeAI

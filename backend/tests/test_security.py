@@ -11,9 +11,15 @@ from datetime import timedelta
 import pytest
 from jose import jwt
 
-from app.core.security import (ALGORITHM, SECRET_KEY, create_access_token,
-                               create_refresh_token, get_password_hash,
-                               security, verify_password)
+from app.core.security import (
+    ALGORITHM,
+    SECRET_KEY,
+    create_access_token,
+    create_refresh_token,
+    get_password_hash,
+    security,
+    verify_password,
+)
 from app.models.user_model import User
 
 # ==========================================================================
@@ -99,8 +105,7 @@ class TestIDEnumeration:
         self, client, db_session, test_user, second_user, second_user_headers
     ):
         """SEC-005: User B cannot view User A's file status by guessing the ID."""
-        from app.models.material_model import (FileType, ProcessingStatus,
-                                               UploadedFile)
+        from app.models.material_model import FileType, ProcessingStatus, UploadedFile
 
         # Create a file belonging to test_user (User A)
         file_record = UploadedFile(

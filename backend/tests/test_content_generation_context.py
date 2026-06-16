@@ -13,8 +13,11 @@ import pytest
 from app.models.material_model import ProcessingStatus
 from app.models.quiz_model import QuizGenerationMode
 from app.services.content_generation_context_service import (
-    _build_broad_context, _extract_hits, build_content_generation_context,
-    get_valid_selected_files)
+    _build_broad_context,
+    _extract_hits,
+    build_content_generation_context,
+    get_valid_selected_files,
+)
 
 # ==========================================================================
 # CTXSVC-UNIT-001, 002, 003: get_valid_selected_files
@@ -111,8 +114,7 @@ class TestBuildBroadContext:
 
     def test_orders_chunks_by_file_position_then_index(self, db_session, test_user):
         """CTXSVC-UNIT-004: Orders chunks by file position then chunk_index."""
-        from app.models.material_model import (DocumentChunk, FileType,
-                                               UploadedFile)
+        from app.models.material_model import DocumentChunk, FileType, UploadedFile
 
         # Create two files
         file_a = UploadedFile(

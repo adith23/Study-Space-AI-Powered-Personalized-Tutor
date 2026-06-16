@@ -12,9 +12,15 @@ from datetime import datetime, timedelta
 import pytest
 from jose import jwt
 
-from app.core.security import (ALGORITHM, SECRET_KEY, create_access_token,
-                               create_refresh_token, get_password_hash,
-                               security, verify_password)
+from app.core.security import (
+    ALGORITHM,
+    SECRET_KEY,
+    create_access_token,
+    create_refresh_token,
+    get_password_hash,
+    security,
+    verify_password,
+)
 from app.models.user_model import User
 
 # ==========================================================================

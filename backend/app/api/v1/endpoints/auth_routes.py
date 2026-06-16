@@ -3,8 +3,13 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.security import (create_access_token, create_refresh_token,
-                               get_password_hash, security, verify_password)
+from app.core.security import (
+    create_access_token,
+    create_refresh_token,
+    get_password_hash,
+    security,
+    verify_password,
+)
 from app.models.user_model import User
 from app.schemas.user_schema import AuthResponse, UserCreate, UserLogin
 

@@ -10,7 +10,10 @@ from __future__ import annotations
 import pytest
 
 from app.services.video.manim_pro_code_generator import (
-    _build_user_prompt, _extract_scene_names, _strip_markdown_fences)
+    _build_user_prompt,
+    _extract_scene_names,
+    _strip_markdown_fences,
+)
 
 # ── _strip_markdown_fences ───────────────────────────────────────────────────
 
@@ -126,8 +129,9 @@ class TestBuildUserPrompt:
     @pytest.fixture()
     def mock_context(self):
         from app.models.quiz_model import QuizGenerationMode
-        from app.services.content_generation_context_service import \
-            ContentGenerationContext
+        from app.services.content_generation_context_service import (
+            ContentGenerationContext,
+        )
 
         return ContentGenerationContext(
             mode=QuizGenerationMode.BROAD_FULL_SOURCE,

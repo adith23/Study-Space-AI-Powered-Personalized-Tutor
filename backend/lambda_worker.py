@@ -75,14 +75,12 @@ def _route_task(task_name: str, payload: dict, db):
         return generate_quiz_for_id(db=db, quiz_id=payload["quiz_id"])
 
     elif task_name == "generate_flashcard":
-        from app.services.flashcard_service import \
-            generate_flashcard_deck_for_id
+        from app.services.flashcard_service import generate_flashcard_deck_for_id
 
         return generate_flashcard_deck_for_id(db=db, deck_id=payload["deck_id"])
 
     elif task_name == "generate_video":
-        from app.services.video.video_generation_service import \
-            run_video_pipeline
+        from app.services.video.video_generation_service import run_video_pipeline
 
         return run_video_pipeline(db=db, video_id=payload["video_id"])
 

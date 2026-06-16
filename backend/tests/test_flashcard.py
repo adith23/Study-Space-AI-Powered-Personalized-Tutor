@@ -12,15 +12,15 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi import HTTPException
 
-from app.models.flashcard_model import (Flashcard, FlashcardDeck,
-                                        FlashcardDeckSource)
+from app.models.flashcard_model import Flashcard, FlashcardDeck, FlashcardDeckSource
 from app.models.material_model import FileType, ProcessingStatus, UploadedFile
-from app.models.quiz_model import (QuizDifficulty, QuizGenerationMode,
-                                   QuizStatus)
+from app.models.quiz_model import QuizDifficulty, QuizGenerationMode, QuizStatus
 from app.schemas.flashcard_schema import CreateFlashcardDeckRequest
-from app.services.flashcard_service import (create_flashcard_deck,
-                                            get_flashcard_deck_or_404,
-                                            list_flashcard_decks)
+from app.services.flashcard_service import (
+    create_flashcard_deck,
+    get_flashcard_deck_or_404,
+    list_flashcard_decks,
+)
 
 # ==========================================================================
 # Helpers

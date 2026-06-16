@@ -30,6 +30,12 @@ celery_app.conf.update(
 )
 
 # Register all SQLAlchemy models so relationship string references resolve correctly
-from app.models import (chat_model, flashcard_model,  # noqa: F401, E402
-                        material_model, quiz_model, space_model, user_model,
-                        video_model)
+from app.models import flashcard_model  # noqa: F401, E402
+from app.models import (
+    chat_model,
+    material_model,
+    quiz_model,
+    space_model,
+    user_model,
+    video_model,
+)

@@ -13,15 +13,22 @@ import pytest
 from fastapi import HTTPException
 
 from app.models.material_model import FileType, ProcessingStatus, UploadedFile
-from app.models.quiz_model import (Quiz, QuizDifficulty, QuizGenerationMode,
-                                   QuizQuestion, QuizSource, QuizStatus)
+from app.models.quiz_model import (
+    Quiz,
+    QuizDifficulty,
+    QuizGenerationMode,
+    QuizQuestion,
+    QuizSource,
+    QuizStatus,
+)
 from app.models.user_model import User
-from app.schemas.quiz_schema import (CreateQuizRequest,
-                                     SubmitQuizAnswerRequest,
-                                     SubmitQuizAttemptRequest)
+from app.schemas.quiz_schema import (
+    CreateQuizRequest,
+    SubmitQuizAnswerRequest,
+    SubmitQuizAttemptRequest,
+)
 from app.services.quiz_attempt_service import submit_quiz_attempt
-from app.services.quiz_service import (create_quiz, get_quiz_or_404,
-                                       list_quizzes)
+from app.services.quiz_service import create_quiz, get_quiz_or_404, list_quizzes
 
 # ==========================================================================
 # Helper to create test materials (shared across quiz/flashcard tests)

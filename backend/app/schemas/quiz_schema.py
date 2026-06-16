@@ -2,8 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.models.quiz_model import (QuizDifficulty, QuizGenerationMode,
-                                   QuizStatus)
+from app.models.quiz_model import QuizDifficulty, QuizGenerationMode, QuizStatus
 
 
 class CreateQuizRequest(BaseModel):

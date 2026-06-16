@@ -5,12 +5,16 @@ from app.core.database import get_db
 from app.core.deps import get_current_active_user
 from app.core.task_dispatcher import dispatch_task
 from app.models.user_model import User
-from app.schemas.flashcard_schema import (CreateFlashcardDeckRequest,
-                                          FlashcardDeckDetailResponse,
-                                          FlashcardDeckResponse)
-from app.services.flashcard_service import (create_flashcard_deck,
-                                            get_flashcard_deck_detail,
-                                            list_flashcard_decks)
+from app.schemas.flashcard_schema import (
+    CreateFlashcardDeckRequest,
+    FlashcardDeckDetailResponse,
+    FlashcardDeckResponse,
+)
+from app.services.flashcard_service import (
+    create_flashcard_deck,
+    get_flashcard_deck_detail,
+    list_flashcard_decks,
+)
 
 router = APIRouter()
 

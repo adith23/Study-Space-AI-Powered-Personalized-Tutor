@@ -15,9 +15,11 @@ import pytest
 from fastapi import HTTPException
 
 from app.services.chat_service import _extract_hits
-from app.services.chat_session_service import (create_chat_session,
-                                               get_chat_session,
-                                               list_user_chat_sessions)
+from app.services.chat_session_service import (
+    create_chat_session,
+    get_chat_session,
+    list_user_chat_sessions,
+)
 
 # ==========================================================================
 # CHAT-UNIT-001, 002, 003: _extract_hits
@@ -157,8 +159,7 @@ class TestRunConversationalChat:
         mock_retrieve,
     ):
         """CHAT-UNIT-006: Returns 429 when Gemini raises resource_exhausted."""
-        from langchain_google_genai.chat_models import \
-            ChatGoogleGenerativeAIError
+        from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
 
         from app.schemas.chat_schema import ConversationalChatRequest
         from app.services.chat_service import run_conversational_chat
@@ -196,8 +197,7 @@ class TestRunConversationalChat:
         mock_retrieve,
     ):
         """CHAT-UNIT-007: Returns 502 on generic Gemini error."""
-        from langchain_google_genai.chat_models import \
-            ChatGoogleGenerativeAIError
+        from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
 
         from app.schemas.chat_schema import ConversationalChatRequest
         from app.services.chat_service import run_conversational_chat

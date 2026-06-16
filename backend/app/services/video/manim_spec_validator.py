@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 from app.core.config import settings
-from app.services.video.manim_spec import (AxesPlotBlock, ComparisonTableBlock,
-                                           EquationStepBlock, FlowDiagramBlock,
-                                           ManimRenderSpec)
+from app.services.video.manim_spec import (
+    AxesPlotBlock,
+    ComparisonTableBlock,
+    EquationStepBlock,
+    FlowDiagramBlock,
+    ManimRenderSpec,
+)
 
 
 class ManimSpecValidator:

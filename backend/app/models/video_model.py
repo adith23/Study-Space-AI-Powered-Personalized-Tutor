@@ -1,7 +1,6 @@
 import enum
 
-from sqlalchemy import (JSON, Column, DateTime, Enum, Float, ForeignKey,
-                        Integer, String)
+from sqlalchemy import JSON, Column, DateTime, Enum, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 

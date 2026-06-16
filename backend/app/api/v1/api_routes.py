@@ -1,9 +1,16 @@
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import (auth_routes, chat_routes, flashcard_routes,
-                                  materials_file_routes, metrics_routes,
-                                  quiz_routes, space_routes,
-                                  space_scoped_routes, video_routes)
+from app.api.v1.endpoints import (
+    auth_routes,
+    chat_routes,
+    flashcard_routes,
+    materials_file_routes,
+    metrics_routes,
+    quiz_routes,
+    space_routes,
+    space_scoped_routes,
+    video_routes,
+)
 
 api_router = APIRouter()
 

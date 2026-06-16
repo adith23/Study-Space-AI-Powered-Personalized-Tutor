@@ -2,8 +2,7 @@
 
 from fastapi import APIRouter
 from fastapi.responses import PlainTextResponse
-from prometheus_client import (CONTENT_TYPE_LATEST, Counter, Histogram,
-                               generate_latest)
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
 router = APIRouter(tags=["monitoring"])
 

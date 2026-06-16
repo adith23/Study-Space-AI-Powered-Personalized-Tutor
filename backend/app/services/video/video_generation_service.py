@@ -13,18 +13,20 @@ from sqlalchemy.orm import Session
 from app.models.video_model import GeneratedVideo, VideoRenderer, VideoStatus
 from app.schemas.video_schema import RenderedVisualResult
 from app.services.content_generation_context_service import (
-    build_content_generation_context, get_valid_selected_files)
-from app.services.video.artifacts import (VideoArtifactRegistry,
-                                          build_artifacts_snapshot)
+    build_content_generation_context,
+    get_valid_selected_files,
+)
+from app.services.video.artifacts import VideoArtifactRegistry, build_artifacts_snapshot
 from app.services.video.renderers.image_renderer import ImageRenderer
 from app.services.video.renderers.manim_pro_renderer import ManimProRenderer
 from app.services.video.renderers.manim_renderer import ManimRenderer
 from app.services.video.script_generator import generate_video_script
 from app.services.video.tts_generator import generate_all_scene_audio
-from app.services.video.video_assembler import (VisualAssemblyService,
-                                                create_scene_clips_from_images)
-from app.services.video.workspace import (build_video_workspace,
-                                          write_json_artifact)
+from app.services.video.video_assembler import (
+    VisualAssemblyService,
+    create_scene_clips_from_images,
+)
+from app.services.video.workspace import build_video_workspace, write_json_artifact
 
 logger = logging.getLogger(__name__)
 

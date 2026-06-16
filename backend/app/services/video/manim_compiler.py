@@ -5,14 +5,16 @@ import textwrap
 from dataclasses import dataclass
 
 from app.services.video.manim_spec import ManimRenderSpec
-from app.services.video.manim_templates import (AxesPlotTemplate,
-                                                BulletBuildTemplate,
-                                                ComparisonTableTemplate,
-                                                CompileContext,
-                                                EquationStepTemplate,
-                                                FlowDiagramTemplate,
-                                                HighlightDefinitionTemplate,
-                                                TitleCardTemplate)
+from app.services.video.manim_templates import (
+    AxesPlotTemplate,
+    BulletBuildTemplate,
+    ComparisonTableTemplate,
+    CompileContext,
+    EquationStepTemplate,
+    FlowDiagramTemplate,
+    HighlightDefinitionTemplate,
+    TitleCardTemplate,
+)
 from app.services.video.workspace import VideoWorkspace, write_text_artifact
 
 

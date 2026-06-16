@@ -12,8 +12,15 @@ from app.core.logging_config import setup_logging
 setup_logging(environment=settings.ENVIRONMENT)
 
 # Import models to register them with SQLAlchemy
-from app.models import (chat_model, flashcard_model, material_model,
-                        quiz_model, space_model, user_model, video_model)
+from app.models import (
+    chat_model,
+    flashcard_model,
+    material_model,
+    quiz_model,
+    space_model,
+    user_model,
+    video_model,
+)
 
 
 @asynccontextmanager

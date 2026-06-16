@@ -14,8 +14,7 @@ from pinecone import Pinecone as PineconeClient
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.models.material_model import (DocumentChunk, ProcessingStatus,
-                                       UploadedFile)
+from app.models.material_model import DocumentChunk, ProcessingStatus, UploadedFile
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

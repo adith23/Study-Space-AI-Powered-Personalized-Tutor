@@ -3,14 +3,27 @@ from typing import Optional
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from app.models.quiz_model import (Quiz, QuizAttempt, QuizGenerationMode,
-                                   QuizQuestion, QuizSource, QuizStatus)
+from app.models.quiz_model import (
+    Quiz,
+    QuizAttempt,
+    QuizGenerationMode,
+    QuizQuestion,
+    QuizSource,
+    QuizStatus,
+)
 from app.models.user_model import User
-from app.schemas.quiz_schema import (CreateQuizRequest, GeneratedQuizPayload,
-                                     QuizDetailResponse, QuizQuestionResponse,
-                                     QuizResponse, QuizSourceResponse)
+from app.schemas.quiz_schema import (
+    CreateQuizRequest,
+    GeneratedQuizPayload,
+    QuizDetailResponse,
+    QuizQuestionResponse,
+    QuizResponse,
+    QuizSourceResponse,
+)
 from app.services.content_generation_context_service import (
-    build_content_generation_context, get_valid_selected_files)
+    build_content_generation_context,
+    get_valid_selected_files,
+)
 from app.services.quiz_generation_service import generate_quiz_payload
 
 

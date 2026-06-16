@@ -9,13 +9,19 @@ from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.core.task_dispatcher import dispatch_task
 from app.models.user_model import User
-from app.models.video_model import (GeneratedVideo, VideoRenderer, VideoStatus,
-                                    VideoStyle)
-from app.schemas.video_schema import (VideoGenerateRequest,
-                                      VideoGenerateResponse, VideoListItem,
-                                      VideoStatusResponse)
-from app.services.content_generation_context_service import \
-    get_valid_selected_files
+from app.models.video_model import (
+    GeneratedVideo,
+    VideoRenderer,
+    VideoStatus,
+    VideoStyle,
+)
+from app.schemas.video_schema import (
+    VideoGenerateRequest,
+    VideoGenerateResponse,
+    VideoListItem,
+    VideoStatusResponse,
+)
+from app.services.content_generation_context_service import get_valid_selected_files
 
 router = APIRouter()
 

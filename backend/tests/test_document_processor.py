@@ -10,14 +10,16 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
-from app.services.document_processor import (MAX_DOCLING_ATTEMPTS,
-                                             SectionChunk,
-                                             _build_metadata_for_chunks,
-                                             _chunk_with_structure,
-                                             _extract_markdown_with_docling,
-                                             _extract_markdown_with_retry,
-                                             _heading_path_to_string,
-                                             _structure_aware_sections)
+from app.services.document_processor import (
+    MAX_DOCLING_ATTEMPTS,
+    SectionChunk,
+    _build_metadata_for_chunks,
+    _chunk_with_structure,
+    _extract_markdown_with_docling,
+    _extract_markdown_with_retry,
+    _heading_path_to_string,
+    _structure_aware_sections,
+)
 
 # ==========================================================================
 # DOC-UNIT-001, 002: _heading_path_to_string

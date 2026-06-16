@@ -14,8 +14,7 @@ import subprocess
 from pathlib import Path
 
 from app.core.config import settings
-from app.schemas.video_schema import (AssemblyResult, AudioClipResult,
-                                      RenderedSceneClip)
+from app.schemas.video_schema import AssemblyResult, AudioClipResult, RenderedSceneClip
 from app.services.video.workspace import VideoWorkspace
 
 logger = logging.getLogger(__name__)

@@ -3,20 +3,22 @@ from typing import Optional
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from app.models.flashcard_model import (Flashcard, FlashcardDeck,
-                                        FlashcardDeckSource)
+from app.models.flashcard_model import Flashcard, FlashcardDeck, FlashcardDeckSource
 from app.models.quiz_model import QuizGenerationMode, QuizStatus
 from app.models.user_model import User
-from app.schemas.flashcard_schema import (CreateFlashcardDeckRequest,
-                                          FlashcardDeckDetailResponse,
-                                          FlashcardDeckResponse,
-                                          FlashcardDeckSourceResponse,
-                                          FlashcardResponse,
-                                          GeneratedFlashcardPayload)
+from app.schemas.flashcard_schema import (
+    CreateFlashcardDeckRequest,
+    FlashcardDeckDetailResponse,
+    FlashcardDeckResponse,
+    FlashcardDeckSourceResponse,
+    FlashcardResponse,
+    GeneratedFlashcardPayload,
+)
 from app.services.content_generation_context_service import (
-    build_content_generation_context, get_valid_selected_files)
-from app.services.flashcard_generation_service import \
-    generate_flashcard_payload
+    build_content_generation_context,
+    get_valid_selected_files,
+)
+from app.services.flashcard_generation_service import generate_flashcard_payload
 
 
 def create_flashcard_deck(

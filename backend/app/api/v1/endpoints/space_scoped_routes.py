@@ -9,30 +9,46 @@ The original non-scoped routes remain functional for backward compatibility.
 
 from typing import List, Optional
 
-from fastapi import (APIRouter, BackgroundTasks, Depends, File, Form,
-                     HTTPException, UploadFile)
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    UploadFile,
+)
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import get_current_active_user
 from app.core.task_dispatcher import dispatch_task
 from app.models.user_model import User
-from app.models.video_model import (GeneratedVideo, VideoRenderer, VideoStatus,
-                                    VideoStyle)
+from app.models.video_model import (
+    GeneratedVideo,
+    VideoRenderer,
+    VideoStatus,
+    VideoStyle,
+)
 from app.schemas.chat_schema import ChatSessionResponse
-from app.schemas.flashcard_schema import (CreateFlashcardDeckRequest,
-                                          FlashcardDeckResponse)
+from app.schemas.flashcard_schema import (
+    CreateFlashcardDeckRequest,
+    FlashcardDeckResponse,
+)
 from app.schemas.material_schema import FileType as SchemaFileType
 from app.schemas.material_schema import UploadedFileResponse
 from app.schemas.quiz_schema import CreateQuizRequest, QuizResponse
-from app.schemas.video_schema import (VideoGenerateRequest,
-                                      VideoGenerateResponse, VideoListItem)
-from app.services.chat_session_service import (create_chat_session,
-                                               list_user_chat_sessions)
-from app.services.content_generation_context_service import \
-    get_valid_selected_files
-from app.services.flashcard_service import (create_flashcard_deck,
-                                            list_flashcard_decks)
+from app.schemas.video_schema import (
+    VideoGenerateRequest,
+    VideoGenerateResponse,
+    VideoListItem,
+)
+from app.services.chat_session_service import (
+    create_chat_session,
+    list_user_chat_sessions,
+)
+from app.services.content_generation_context_service import get_valid_selected_files
+from app.services.flashcard_service import create_flashcard_deck, list_flashcard_decks
 from app.services.material_service import create_uploaded_file, list_user_files
 from app.services.quiz_service import create_quiz, list_quizzes
 from app.services.space_service import get_space, touch_space_access

@@ -10,8 +10,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from app.models.material_model import (DocumentChunk, FileType,
-                                       ProcessingStatus, UploadedFile)
+from app.models.material_model import (
+    DocumentChunk,
+    FileType,
+    ProcessingStatus,
+    UploadedFile,
+)
 from app.services.document_processor import process_and_embed_document
 
 # ==========================================================================

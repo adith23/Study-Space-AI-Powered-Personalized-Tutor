@@ -6,8 +6,7 @@ from pinecone import Pinecone as PineconeClient
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.models.material_model import (DocumentChunk, ProcessingStatus,
-                                       UploadedFile)
+from app.models.material_model import DocumentChunk, ProcessingStatus, UploadedFile
 from app.models.quiz_model import QuizGenerationMode
 from app.models.user_model import User
 
