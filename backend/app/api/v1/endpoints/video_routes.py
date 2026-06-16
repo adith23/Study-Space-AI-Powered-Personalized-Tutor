@@ -7,8 +7,14 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import get_current_user
+from app.core.task_dispatcher import dispatch_task
 from app.models.user_model import User
-from app.models.video_model import GeneratedVideo, VideoRenderer, VideoStatus, VideoStyle
+from app.models.video_model import (
+    GeneratedVideo,
+    VideoRenderer,
+    VideoStatus,
+    VideoStyle,
+)
 from app.schemas.video_schema import (
     VideoGenerateRequest,
     VideoGenerateResponse,
@@ -16,7 +22,6 @@ from app.schemas.video_schema import (
     VideoStatusResponse,
 )
 from app.services.content_generation_context_service import get_valid_selected_files
-from app.core.task_dispatcher import dispatch_task
 
 router = APIRouter()
 
@@ -31,7 +36,9 @@ async def create_video(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    get_valid_selected_files(db=db, current_user=current_user, file_ids=request.file_ids)
+    get_valid_selected_files(
+        db=db, current_user=current_user, file_ids=request.file_ids
+    )
 
     try:
         style = VideoStyle(request.style)
@@ -108,7 +115,9 @@ async def get_video(
         raise HTTPException(status_code=404, detail="Video not found.")
 
     video_url = f"/api/v1/videos/{video.id}/stream" if video.video_path else None
-    thumbnail_url = f"/api/v1/videos/{video.id}/thumbnail" if video.thumbnail_path else None
+    thumbnail_url = (
+        f"/api/v1/videos/{video.id}/thumbnail" if video.thumbnail_path else None
+    )
 
     return VideoStatusResponse(
         id=video.id,
@@ -145,8 +154,9 @@ async def stream_video(
     if not os.path.isfile(video.video_path):
         # Check if it's an R2 key — redirect to presigned URL
         if video.video_path.startswith("r2://"):
-            from app.core.storage import get_storage
             from fastapi.responses import RedirectResponse
+
+            from app.core.storage import get_storage
 
             storage = get_storage()
             key = video.video_path.split("//", 1)[1].split("/", 1)[1]
@@ -181,14 +191,17 @@ async def get_thumbnail(
     if not os.path.isfile(video.thumbnail_path):
         # Check if it's an R2 key — redirect to presigned URL
         if video.thumbnail_path.startswith("r2://"):
-            from app.core.storage import get_storage
             from fastapi.responses import RedirectResponse
+
+            from app.core.storage import get_storage
 
             storage = get_storage()
             key = video.thumbnail_path.split("//", 1)[1].split("/", 1)[1]
             presigned_url = storage.get_presigned_url(key, expires_in=3600)
             return RedirectResponse(url=presigned_url)
-        raise HTTPException(status_code=404, detail="Thumbnail file missing from storage.")
+        raise HTTPException(
+            status_code=404, detail="Thumbnail file missing from storage."
+        )
 
     return FileResponse(video.thumbnail_path, media_type="image/jpeg")
 

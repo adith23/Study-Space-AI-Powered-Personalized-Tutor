@@ -29,22 +29,25 @@ class TitleCardTemplate:
             if block.subtitle
             else "subtitle = None\n"
         )
-        subtitle_anim = "self.play(FadeIn(subtitle, shift=UP * 0.2))\n" if block.subtitle else ""
+        subtitle_anim = (
+            "self.play(FadeIn(subtitle, shift=UP * 0.2))\n" if block.subtitle else ""
+        )
         return (
             f'title = Text("{_escape(block.title)}", font_size=42, color=TEXT_COLOR)\n'
-            + subtitle +
-            "title_group = VGroup(title) if subtitle is None else VGroup(title, subtitle)\n"
+            + subtitle
+            + "title_group = VGroup(title) if subtitle is None else VGroup(title, subtitle)\n"
             "title_group.arrange(DOWN, buff=0.35).move_to(ORIGIN)\n"
-            "self.play(Write(title))\n"
-            + subtitle_anim +
-            "self.wait(0.4)\n"
+            "self.play(Write(title))\n" + subtitle_anim + "self.wait(0.4)\n"
         )
 
 
 class BulletBuildTemplate:
     def render_code(self, block: BulletBuildBlock, context: CompileContext) -> str:
         bullets = ", ".join(
-            [f'Text("\\u2022 {_escape(item)}", font_size=28, color=TEXT_COLOR)' for item in block.bullets]
+            [
+                f'Text("\\u2022 {_escape(item)}", font_size=28, color=TEXT_COLOR)'
+                for item in block.bullets
+            ]
         )
         return (
             f'heading = Text("{_escape(block.heading)}", font_size=36, color=ACCENT_COLOR).to_edge(UP)\n'
@@ -57,7 +60,9 @@ class BulletBuildTemplate:
 
 
 class HighlightDefinitionTemplate:
-    def render_code(self, block: HighlightDefinitionBlock, context: CompileContext) -> str:
+    def render_code(
+        self, block: HighlightDefinitionBlock, context: CompileContext
+    ) -> str:
         return (
             f'term = Text("{_escape(block.term)}", font_size=40, color=ACCENT_COLOR).to_edge(UP)\n'
             f'definition = Paragraph("{_escape(block.definition)}", alignment="left", font_size=28, color=TEXT_COLOR).next_to(term, DOWN, buff=0.5)\n'
@@ -76,7 +81,10 @@ class EquationStepTemplate:
             else ""
         )
         steps = ", ".join(
-            [f'Text("{_escape(step)}", font_size=30, color=TEXT_COLOR)' for step in block.steps]
+            [
+                f'Text("{_escape(step)}", font_size=30, color=TEXT_COLOR)'
+                for step in block.steps
+            ]
         )
         anchor = "title" if block.title else "Text('', font_size=1).to_edge(UP)"
         return (
@@ -90,9 +98,17 @@ class EquationStepTemplate:
 
 class AxesPlotTemplate:
     def render_code(self, block: AxesPlotBlock, context: CompileContext) -> str:
-        x_range = block.x_range or (min(p.x for p in block.points), max(p.x for p in block.points))
-        y_range = block.y_range or (min(p.y for p in block.points), max(p.y for p in block.points))
-        points = ", ".join([f"Dot(axes.c2p({p.x}, {p.y}), color=ACCENT_COLOR)" for p in block.points])
+        x_range = block.x_range or (
+            min(p.x for p in block.points),
+            max(p.x for p in block.points),
+        )
+        y_range = block.y_range or (
+            min(p.y for p in block.points),
+            max(p.y for p in block.points),
+        )
+        points = ", ".join(
+            [f"Dot(axes.c2p({p.x}, {p.y}), color=ACCENT_COLOR)" for p in block.points]
+        )
         title_code = (
             f'title = Text("{_escape(block.title)}", font_size=34, color=ACCENT_COLOR).to_edge(UP)\nself.play(FadeIn(title, shift=DOWN * 0.2))\n'
             if block.title
@@ -129,7 +145,11 @@ class FlowDiagramTemplate:
         return (
             title_code
             + f"nodes = VGroup({nodes}).arrange(RIGHT, buff=0.8)\n"
-            + ("nodes.next_to(title, DOWN, buff=1.0)\n" if block.title else "nodes.move_to(ORIGIN)\n")
+            + (
+                "nodes.next_to(title, DOWN, buff=1.0)\n"
+                if block.title
+                else "nodes.move_to(ORIGIN)\n"
+            )
             + "self.play(LaggedStart(*[FadeIn(node, shift=UP * 0.2) for node in nodes], lag_ratio=0.15))\n"
             + "arrows = VGroup(*[Arrow(nodes[i].get_right(), nodes[i + 1].get_left(), buff=0.15, color=TEXT_COLOR) for i in range(len(nodes) - 1)])\n"
             + "self.play(LaggedStart(*[GrowArrow(arrow) for arrow in arrows], lag_ratio=0.1))\n"
@@ -149,7 +169,11 @@ class ComparisonTableTemplate:
         return (
             title_code
             + f"table = Table({table_repr}, include_outer_lines=True).scale(0.45)\n"
-            + ("table.next_to(title, DOWN, buff=0.6)\n" if block.title else "table.move_to(ORIGIN)\n")
+            + (
+                "table.next_to(title, DOWN, buff=0.6)\n"
+                if block.title
+                else "table.move_to(ORIGIN)\n"
+            )
             + "for cell in table.get_entries():\n"
             + "    cell.set_color(TEXT_COLOR)\n"
             + "self.play(Create(table))\n"

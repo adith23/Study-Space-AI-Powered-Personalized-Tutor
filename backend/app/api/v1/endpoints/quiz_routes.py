@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import get_current_active_user
+from app.core.task_dispatcher import dispatch_task
 from app.models.user_model import User
 from app.schemas.quiz_schema import (
     CreateQuizRequest,
@@ -21,7 +22,6 @@ from app.services.quiz_service import (
     get_quiz_or_404,
     list_quizzes,
 )
-from app.core.task_dispatcher import dispatch_task
 
 router = APIRouter()
 

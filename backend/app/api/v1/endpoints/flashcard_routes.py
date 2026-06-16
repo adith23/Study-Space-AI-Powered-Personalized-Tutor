@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import get_current_active_user
+from app.core.task_dispatcher import dispatch_task
 from app.models.user_model import User
 from app.schemas.flashcard_schema import (
     CreateFlashcardDeckRequest,
@@ -14,7 +15,6 @@ from app.services.flashcard_service import (
     get_flashcard_deck_detail,
     list_flashcard_decks,
 )
-from app.core.task_dispatcher import dispatch_task
 
 router = APIRouter()
 

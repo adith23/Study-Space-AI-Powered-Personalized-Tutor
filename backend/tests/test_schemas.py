@@ -11,13 +11,16 @@ import uuid
 import pytest
 from pydantic import ValidationError
 
+from app.models.quiz_model import QuizDifficulty
+from app.schemas.chat_schema import ConversationalChatRequest
+from app.schemas.flashcard_schema import CreateFlashcardDeckRequest
+from app.schemas.quiz_schema import (
+    CreateQuizRequest,
+    SubmitQuizAnswerRequest,
+    SubmitQuizAttemptRequest,
+)
 from app.schemas.user_schema import UserCreate
 from app.schemas.video_schema import VideoGenerateRequest
-from app.schemas.quiz_schema import CreateQuizRequest, SubmitQuizAttemptRequest, SubmitQuizAnswerRequest
-from app.schemas.flashcard_schema import CreateFlashcardDeckRequest
-from app.schemas.chat_schema import ConversationalChatRequest
-from app.models.quiz_model import QuizDifficulty
-
 
 # ==========================================================================
 # SCHEMA-UNIT-001 through 008
@@ -216,12 +219,16 @@ class TestFlashcardDeckRequestSchema:
     def test_accepts_boundary_values(self):
         """Supplementary: Accepts 1 and 30 cards (inclusive boundaries)."""
         deck_min = CreateFlashcardDeckRequest(
-            file_ids=[1], number_of_cards=1, difficulty_level=QuizDifficulty.EASY,
+            file_ids=[1],
+            number_of_cards=1,
+            difficulty_level=QuizDifficulty.EASY,
         )
         assert deck_min.number_of_cards == 1
 
         deck_max = CreateFlashcardDeckRequest(
-            file_ids=[1], number_of_cards=30, difficulty_level=QuizDifficulty.HARD,
+            file_ids=[1],
+            number_of_cards=30,
+            difficulty_level=QuizDifficulty.HARD,
         )
         assert deck_max.number_of_cards == 30
 

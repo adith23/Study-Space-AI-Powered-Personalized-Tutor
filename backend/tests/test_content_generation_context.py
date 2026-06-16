@@ -6,18 +6,18 @@ Covers: CTXSVC-UNIT-001 through CTXSVC-UNIT-008
 See qa_testing_plan.md Section 6.8.
 """
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from app.models.material_model import ProcessingStatus
 from app.models.quiz_model import QuizGenerationMode
 from app.services.content_generation_context_service import (
-    _extract_hits,
     _build_broad_context,
+    _extract_hits,
     build_content_generation_context,
     get_valid_selected_files,
 )
-
 
 # ==========================================================================
 # CTXSVC-UNIT-001, 002, 003: get_valid_selected_files
@@ -27,9 +27,11 @@ from app.services.content_generation_context_service import (
 class TestGetValidSelectedFiles:
     """CTXSVC-UNIT-001, 002, 003: File validation for content generation."""
 
-    def test_raises_when_file_ids_dont_belong_to_user(self, db_session, test_user, second_user):
+    def test_raises_when_file_ids_dont_belong_to_user(
+        self, db_session, test_user, second_user
+    ):
         """CTXSVC-UNIT-001: Raises ValueError when file_ids don't belong to the user."""
-        from app.models.material_model import UploadedFile, FileType
+        from app.models.material_model import FileType, UploadedFile
 
         # Create a file belonging to test_user
         file_record = UploadedFile(
@@ -50,7 +52,7 @@ class TestGetValidSelectedFiles:
 
     def test_raises_when_files_not_fully_processed(self, db_session, test_user):
         """CTXSVC-UNIT-002: Raises ValueError when files aren't processed (status ≠ SUCCESS)."""
-        from app.models.material_model import UploadedFile, FileType
+        from app.models.material_model import FileType, UploadedFile
 
         file_record = UploadedFile(
             name="pending.pdf",
@@ -69,7 +71,7 @@ class TestGetValidSelectedFiles:
 
     def test_returns_files_in_input_order(self, db_session, test_user):
         """CTXSVC-UNIT-003: Returns files in the same order as input file_ids."""
-        from app.models.material_model import UploadedFile, FileType
+        from app.models.material_model import FileType, UploadedFile
 
         files = []
         for name in ["first.pdf", "second.pdf", "third.pdf"]:
@@ -112,16 +114,20 @@ class TestBuildBroadContext:
 
     def test_orders_chunks_by_file_position_then_index(self, db_session, test_user):
         """CTXSVC-UNIT-004: Orders chunks by file position then chunk_index."""
-        from app.models.material_model import UploadedFile, DocumentChunk, FileType
+        from app.models.material_model import DocumentChunk, FileType, UploadedFile
 
         # Create two files
         file_a = UploadedFile(
-            name="file_a.pdf", file_type=FileType.pdf,
-            status=ProcessingStatus.SUCCESS, user_id=test_user.id,
+            name="file_a.pdf",
+            file_type=FileType.pdf,
+            status=ProcessingStatus.SUCCESS,
+            user_id=test_user.id,
         )
         file_b = UploadedFile(
-            name="file_b.pdf", file_type=FileType.pdf,
-            status=ProcessingStatus.SUCCESS, user_id=test_user.id,
+            name="file_b.pdf",
+            file_type=FileType.pdf,
+            status=ProcessingStatus.SUCCESS,
+            user_id=test_user.id,
         )
         db_session.add_all([file_a, file_b])
         db_session.commit()
@@ -130,14 +136,30 @@ class TestBuildBroadContext:
 
         # Add chunks (insert in non-sequential order to test sorting)
         chunks = [
-            DocumentChunk(content="B chunk 1", vector_id="b1", source_file_id=file_b.id,
-                          metadata_={"chunk_index": 0}),
-            DocumentChunk(content="A chunk 2", vector_id="a2", source_file_id=file_a.id,
-                          metadata_={"chunk_index": 1}),
-            DocumentChunk(content="A chunk 1", vector_id="a1", source_file_id=file_a.id,
-                          metadata_={"chunk_index": 0}),
-            DocumentChunk(content="B chunk 2", vector_id="b2", source_file_id=file_b.id,
-                          metadata_={"chunk_index": 1}),
+            DocumentChunk(
+                content="B chunk 1",
+                vector_id="b1",
+                source_file_id=file_b.id,
+                metadata_={"chunk_index": 0},
+            ),
+            DocumentChunk(
+                content="A chunk 2",
+                vector_id="a2",
+                source_file_id=file_a.id,
+                metadata_={"chunk_index": 1},
+            ),
+            DocumentChunk(
+                content="A chunk 1",
+                vector_id="a1",
+                source_file_id=file_a.id,
+                metadata_={"chunk_index": 0},
+            ),
+            DocumentChunk(
+                content="B chunk 2",
+                vector_id="b2",
+                source_file_id=file_b.id,
+                metadata_={"chunk_index": 1},
+            ),
         ]
         db_session.add_all(chunks)
         db_session.commit()
@@ -156,11 +178,13 @@ class TestBuildBroadContext:
 
     def test_raises_when_no_chunks_exist(self, db_session, test_user):
         """CTXSVC-UNIT-005: Raises ValueError when no chunks exist."""
-        from app.models.material_model import UploadedFile, FileType
+        from app.models.material_model import FileType, UploadedFile
 
         file_record = UploadedFile(
-            name="empty.pdf", file_type=FileType.pdf,
-            status=ProcessingStatus.SUCCESS, user_id=test_user.id,
+            name="empty.pdf",
+            file_type=FileType.pdf,
+            status=ProcessingStatus.SUCCESS,
+            user_id=test_user.id,
         )
         db_session.add(file_record)
         db_session.commit()

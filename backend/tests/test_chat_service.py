@@ -9,9 +9,9 @@ See qa_testing_plan.md Sections 6.3 and 6.9.
 """
 
 import uuid
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
 from fastapi import HTTPException
 
 from app.services.chat_service import _extract_hits
@@ -20,7 +20,6 @@ from app.services.chat_session_service import (
     get_chat_session,
     list_user_chat_sessions,
 )
-
 
 # ==========================================================================
 # CHAT-UNIT-001, 002, 003: _extract_hits
@@ -152,12 +151,18 @@ class TestRunConversationalChat:
     @patch("app.services.chat_service.get_chat_session")
     @patch("app.services.chat_service.create_stuff_documents_chain")
     async def test_returns_429_on_quota_error(
-        self, mock_chain_fn, mock_get_session, mock_llm_class, mock_history_class, mock_retrieve
+        self,
+        mock_chain_fn,
+        mock_get_session,
+        mock_llm_class,
+        mock_history_class,
+        mock_retrieve,
     ):
         """CHAT-UNIT-006: Returns 429 when Gemini raises resource_exhausted."""
-        from app.services.chat_service import run_conversational_chat
-        from app.schemas.chat_schema import ConversationalChatRequest
         from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
+
+        from app.schemas.chat_schema import ConversationalChatRequest
+        from app.services.chat_service import run_conversational_chat
 
         mock_llm = MagicMock()
         mock_llm.invoke.side_effect = ChatGoogleGenerativeAIError(
@@ -184,12 +189,18 @@ class TestRunConversationalChat:
     @patch("app.services.chat_service.get_chat_session")
     @patch("app.services.chat_service.create_stuff_documents_chain")
     async def test_returns_502_on_generic_error(
-        self, mock_chain_fn, mock_get_session, mock_llm_class, mock_history_class, mock_retrieve
+        self,
+        mock_chain_fn,
+        mock_get_session,
+        mock_llm_class,
+        mock_history_class,
+        mock_retrieve,
     ):
         """CHAT-UNIT-007: Returns 502 on generic Gemini error."""
-        from app.services.chat_service import run_conversational_chat
-        from app.schemas.chat_schema import ConversationalChatRequest
         from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
+
+        from app.schemas.chat_schema import ConversationalChatRequest
+        from app.services.chat_service import run_conversational_chat
 
         mock_llm = MagicMock()
         mock_llm.invoke.side_effect = ChatGoogleGenerativeAIError(
@@ -226,7 +237,9 @@ class TestChatSessionService:
         assert session.user_id == test_user.id
         assert session.name == "New Chat"
 
-    def test_get_session_raises_for_other_user(self, db_session, test_user, second_user):
+    def test_get_session_raises_for_other_user(
+        self, db_session, test_user, second_user
+    ):
         """CHATSESS-UNIT-002: get_chat_session raises 404 when session doesn't belong to user."""
         session = create_chat_session(db=db_session, current_user=test_user)
 
@@ -236,7 +249,9 @@ class TestChatSessionService:
             )
         assert exc_info.value.status_code == 404
 
-    def test_list_returns_only_current_user_sessions(self, db_session, test_user, second_user):
+    def test_list_returns_only_current_user_sessions(
+        self, db_session, test_user, second_user
+    ):
         """CHATSESS-UNIT-003: list_user_chat_sessions returns only current user's sessions."""
         create_chat_session(db=db_session, current_user=test_user)
         create_chat_session(db=db_session, current_user=test_user)
@@ -258,8 +273,8 @@ class TestChatMessageHistory:
 
     def test_add_user_message(self, db_session, test_user):
         """CHATHISTORY-UNIT-001: add_user_message persists a human message."""
-        from app.services.chat_history import PostgresChatMessageHistory
         from app.models.chat_model import ChatMessage
+        from app.services.chat_history import PostgresChatMessageHistory
 
         session = create_chat_session(db=db_session, current_user=test_user)
         history = PostgresChatMessageHistory(
@@ -279,8 +294,8 @@ class TestChatMessageHistory:
 
     def test_add_ai_message(self, db_session, test_user):
         """CHATHISTORY-UNIT-002: add_ai_message persists an AI message."""
-        from app.services.chat_history import PostgresChatMessageHistory
         from app.models.chat_model import ChatMessage
+        from app.services.chat_history import PostgresChatMessageHistory
 
         session = create_chat_session(db=db_session, current_user=test_user)
         history = PostgresChatMessageHistory(

@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.models.quiz_model import (
     Quiz,
-    QuizGenerationMode,
     QuizAttempt,
+    QuizGenerationMode,
     QuizQuestion,
     QuizSource,
     QuizStatus,
@@ -28,7 +28,11 @@ from app.services.quiz_generation_service import generate_quiz_payload
 
 
 def create_quiz(
-    *, db: Session, current_user: User, request: CreateQuizRequest, space_id: Optional[int] = None
+    *,
+    db: Session,
+    current_user: User,
+    request: CreateQuizRequest,
+    space_id: Optional[int] = None,
 ) -> QuizResponse:
     try:
         files = get_valid_selected_files(
@@ -66,7 +70,9 @@ def create_quiz(
     return QuizResponse.model_validate(quiz)
 
 
-def list_quizzes(*, db: Session, current_user: User, space_id: Optional[int] = None) -> list[QuizResponse]:
+def list_quizzes(
+    *, db: Session, current_user: User, space_id: Optional[int] = None
+) -> list[QuizResponse]:
     query = db.query(Quiz).filter(Quiz.user_id == current_user.id)
     if space_id is not None:
         query = query.filter(Quiz.space_id == space_id)

@@ -45,7 +45,9 @@ class ManimSpecValidator:
     def _validate_block_count(self, spec: ManimRenderSpec) -> None:
         for scene in spec.scenes:
             if len(scene.visual_blocks) == 0:
-                raise ValueError(f"Scene {scene.scene_number} contains no visual blocks.")
+                raise ValueError(
+                    f"Scene {scene.scene_number} contains no visual blocks."
+                )
             if len(scene.visual_blocks) > settings.MANIM_MAX_BLOCKS_PER_SCENE:
                 raise ValueError(
                     f"Scene {scene.scene_number} exceeds maximum visual block count."
@@ -63,16 +65,24 @@ class ManimSpecValidator:
             for block in scene.visual_blocks:
                 for key, value in block.model_dump().items():
                     if isinstance(value, str) and len(value) > max_block_text_length:
-                        raise ValueError(f"Block field '{key}' exceeds text length limit.")
+                        raise ValueError(
+                            f"Block field '{key}' exceeds text length limit."
+                        )
                     if isinstance(value, list):
                         for item in value:
-                            if isinstance(item, str) and len(item) > max_block_text_length:
+                            if (
+                                isinstance(item, str)
+                                and len(item) > max_block_text_length
+                            ):
                                 raise ValueError(
                                     f"Block field '{key}' contains oversized text."
                                 )
                             if isinstance(item, list):
                                 for nested in item:
-                                    if isinstance(nested, str) and len(nested) > max_block_text_length:
+                                    if (
+                                        isinstance(nested, str)
+                                        and len(nested) > max_block_text_length
+                                    ):
                                         raise ValueError(
                                             f"Block field '{key}' contains oversized table cell text."
                                         )
@@ -85,7 +95,9 @@ class ManimSpecValidator:
                         raise ValueError("Axes plot exceeds maximum point count.")
                 if isinstance(block, ComparisonTableBlock):
                     if len(block.headers) > settings.MANIM_MAX_TABLE_COLUMNS:
-                        raise ValueError("Comparison table exceeds maximum column count.")
+                        raise ValueError(
+                            "Comparison table exceeds maximum column count."
+                        )
                     if len(block.rows) > settings.MANIM_MAX_TABLE_ROWS:
                         raise ValueError("Comparison table exceeds maximum row count.")
                 if isinstance(block, FlowDiagramBlock):
@@ -101,4 +113,6 @@ class ManimSpecValidator:
             for block in scene.visual_blocks:
                 flattened = str(block.model_dump()).lower()
                 if any(token in flattened for token in forbidden_tokens):
-                    raise ValueError("Unsafe or ungrounded content detected in render spec.")
+                    raise ValueError(
+                        "Unsafe or ungrounded content detected in render spec."
+                    )

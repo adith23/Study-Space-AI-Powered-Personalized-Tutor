@@ -21,28 +21,38 @@ def _get_owned_chat_session(
         raise HTTPException(status_code=404, detail="Chat session not found")
     return session
 
-# Create a chat session 
-def create_chat_session(*, db: Session, current_user: User, space_id: Optional[int] = None) -> ChatSession:
+
+# Create a chat session
+def create_chat_session(
+    *, db: Session, current_user: User, space_id: Optional[int] = None
+) -> ChatSession:
     new_session = ChatSession(user_id=current_user.id, space_id=space_id)
     db.add(new_session)
     db.commit()
     db.refresh(new_session)
     return new_session
 
+
 # List all chat sessions for a user
-def list_user_chat_sessions(*, db: Session, current_user: User, space_id: Optional[int] = None) -> List[ChatSession]:
+def list_user_chat_sessions(
+    *, db: Session, current_user: User, space_id: Optional[int] = None
+) -> List[ChatSession]:
     query = db.query(ChatSession).filter(ChatSession.user_id == current_user.id)
     if space_id is not None:
         query = query.filter(ChatSession.space_id == space_id)
     return query.order_by(ChatSession.created_at.desc()).all()
 
+
 # Get a chat session
-def get_chat_session(*, session_id: UUID, db: Session, current_user: User) -> ChatSession:
+def get_chat_session(
+    *, session_id: UUID, db: Session, current_user: User
+) -> ChatSession:
     return _get_owned_chat_session(
         session_id=session_id,
         db=db,
         current_user=current_user,
     )
+
 
 # List all messages for a chat session
 def list_chat_session_messages(

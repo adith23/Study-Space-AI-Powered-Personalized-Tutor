@@ -9,6 +9,7 @@ Works both locally and on Lambda. CloudWatch captures these via
 the /metrics Prometheus endpoint, or they can be scraped by
 any Prometheus-compatible system.
 """
+
 import time
 
 from starlette.middleware.base import BaseHTTPMiddleware

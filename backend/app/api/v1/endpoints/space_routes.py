@@ -47,7 +47,9 @@ def list_spaces(
 
 @router.get("/explore", response_model=List[ExploreSpaceResponse])
 def explore_spaces(
-    query: Optional[str] = Query(None, description="Search query to filter public spaces by name"),
+    query: Optional[str] = Query(
+        None, description="Search query to filter public spaces by name"
+    ),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),

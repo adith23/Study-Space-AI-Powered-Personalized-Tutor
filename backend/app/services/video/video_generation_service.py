@@ -18,8 +18,8 @@ from app.services.content_generation_context_service import (
 )
 from app.services.video.artifacts import VideoArtifactRegistry, build_artifacts_snapshot
 from app.services.video.renderers.image_renderer import ImageRenderer
-from app.services.video.renderers.manim_renderer import ManimRenderer
 from app.services.video.renderers.manim_pro_renderer import ManimProRenderer
+from app.services.video.renderers.manim_renderer import ManimRenderer
 from app.services.video.script_generator import generate_video_script
 from app.services.video.tts_generator import generate_all_scene_audio
 from app.services.video.video_assembler import (
@@ -115,7 +115,9 @@ class VideoPipelineOrchestrator:
             stage_timings["visuals_seconds"] = time.perf_counter() - visual_start
             renderer_value = self._renderer_value(video)
             if renderer_value == VideoRenderer.MANIM.value:
-                video.render_spec_json = self._read_json_file_if_exists(str(workspace.spec_path()))
+                video.render_spec_json = self._read_json_file_if_exists(
+                    str(workspace.spec_path())
+                )
             for name, meta in visual_result.artifacts.items():
                 artifacts.record(name, meta.path, meta.kind, meta.metadata)
             self._persist_artifacts(video, artifacts, stage_timings, workspace)
@@ -168,11 +170,15 @@ class VideoPipelineOrchestrator:
             self._persist_artifacts(video, artifacts, stage_timings, workspace)
             self.db.commit()
         except Exception as exc:
-            logger.error("Video pipeline failed for %d: %s", video_id, exc, exc_info=True)
+            logger.error(
+                "Video pipeline failed for %d: %s", video_id, exc, exc_info=True
+            )
             self._fail(video, str(exc), artifacts, stage_timings, workspace)
 
     def _load_video(self, video_id: int) -> GeneratedVideo | None:
-        return self.db.query(GeneratedVideo).filter(GeneratedVideo.id == video_id).first()
+        return (
+            self.db.query(GeneratedVideo).filter(GeneratedVideo.id == video_id).first()
+        )
 
     def _resolve_renderer(self, video: GeneratedVideo):
         renderer_value = self._renderer_value(video)

@@ -17,8 +17,7 @@ from google import genai
 from google.genai import types
 
 from app.core.config import settings
-from app.schemas.video_schema import AudioClipResult
-from app.schemas.video_schema import VideoScene
+from app.schemas.video_schema import AudioClipResult, VideoScene
 from app.services.video.workspace import VideoWorkspace
 
 logger = logging.getLogger(__name__)
@@ -125,7 +124,9 @@ def generate_all_scene_audio(
     results: list[AudioClipResult] = []
 
     for scene in scenes:
-        result = generate_scene_audio(scene=scene, output_dir=str(workspace.audio_dir()))
+        result = generate_scene_audio(
+            scene=scene, output_dir=str(workspace.audio_dir())
+        )
         results.append(result)
 
     total = sum(item.duration_seconds for item in results)

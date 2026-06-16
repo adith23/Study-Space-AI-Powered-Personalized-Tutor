@@ -6,20 +6,20 @@ Covers: DOC-UNIT-001 through DOC-UNIT-012
 See qa_testing_plan.md Section 6.2.
 """
 
+from unittest.mock import MagicMock, PropertyMock, patch
+
 import pytest
-from unittest.mock import MagicMock, patch, PropertyMock
 
 from app.services.document_processor import (
+    MAX_DOCLING_ATTEMPTS,
+    SectionChunk,
+    _build_metadata_for_chunks,
+    _chunk_with_structure,
+    _extract_markdown_with_docling,
+    _extract_markdown_with_retry,
     _heading_path_to_string,
     _structure_aware_sections,
-    _chunk_with_structure,
-    _build_metadata_for_chunks,
-    _extract_markdown_with_retry,
-    _extract_markdown_with_docling,
-    SectionChunk,
-    MAX_DOCLING_ATTEMPTS,
 )
-
 
 # ==========================================================================
 # DOC-UNIT-001, 002: _heading_path_to_string
@@ -172,8 +172,14 @@ class TestBuildMetadataForChunks:
             chunks, file_id=42, user_id=7, source="test.pdf"
         )
         required_keys = {
-            "user_id", "source_file_id", "chunk_index", "total_chunks",
-            "section_title", "heading_path", "source", "pipeline_version",
+            "user_id",
+            "source_file_id",
+            "chunk_index",
+            "total_chunks",
+            "section_title",
+            "heading_path",
+            "source",
+            "pipeline_version",
         }
         for meta in metadata_list:
             assert required_keys.issubset(set(meta.keys()))

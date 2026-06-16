@@ -111,15 +111,15 @@ terraform output ecr_frontend_repo
 
 Before pushing images, configure GitHub Secrets in your repository (Settings → Secrets → Actions):
 
-| Secret Name | Value |
-|---|---|
-| `AWS_ACCESS_KEY_ID` | Your IAM user access key |
-| `AWS_SECRET_ACCESS_KEY` | Your IAM user secret key |
-| `ECR_API_REPO_URI` | `ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/study-space-api` |
-| `ECR_WORKER_REPO_URI` | `ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/study-space-worker` |
+| Secret Name             | Value                                                             |
+| ----------------------- | ----------------------------------------------------------------- |
+| `AWS_ACCESS_KEY_ID`     | Your IAM user access key                                          |
+| `AWS_SECRET_ACCESS_KEY` | Your IAM user secret key                                          |
+| `ECR_API_REPO_URI`      | `ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/study-space-api`      |
+| `ECR_WORKER_REPO_URI`   | `ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/study-space-worker`   |
 | `ECR_FRONTEND_REPO_URI` | `ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/study-space-frontend` |
 
-*(Replace `ACCOUNT_ID` with your AWS Account ID, or use the exact `terraform output ecr_api_repo` values from Step 2.)*
+_(Replace `ACCOUNT_ID` with your AWS Account ID, or use the exact `terraform output ecr_api_repo` values from Step 2.)_
 
 ---
 
@@ -171,10 +171,10 @@ terraform output cloudfront_distribution_id
 
 Add these as GitHub Secrets too:
 
-| Secret Name | Value |
-|---|---|
-| `CLOUDFRONT_DISTRIBUTION_ID` | From terraform output |
-| `CLOUDFRONT_DOMAIN` | From terraform output (without `https://`) |
+| Secret Name                  | Value                                      |
+| ---------------------------- | ------------------------------------------ |
+| `CLOUDFRONT_DISTRIBUTION_ID` | From terraform output                      |
+| `CLOUDFRONT_DOMAIN`          | From terraform output (without `https://`) |
 
 ---
 
@@ -246,6 +246,7 @@ After all secrets are configured (Steps 3 & 5), **every push to `main` will auto
 ### Cold Starts Are Slow (5-15s)
 
 This is expected for Docker-based Lambda functions. Mitigations:
+
 1. CloudFront caches static assets → most requests don't hit Lambda
 2. Health check endpoint has 10s CloudFront cache → keeps the function warm
 3. If unacceptable, uncomment provisioned concurrency in `terraform/modules/lambda/main.tf` (not free)

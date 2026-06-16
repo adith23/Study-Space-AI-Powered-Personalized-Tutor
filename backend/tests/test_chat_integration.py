@@ -8,10 +8,9 @@ See qa_testing_plan.md Sections 7.3 and 7.4.
 """
 
 import uuid
+from unittest.mock import MagicMock, patch
 
 import pytest
-from unittest.mock import patch, MagicMock
-
 
 # ==========================================================================
 # CHATSESS-INT-001 through 004: Chat Session API
@@ -44,17 +43,15 @@ class TestChatSessionAPI:
         client.post("/api/v1/materials/chat/sessions", headers=second_user_headers)
 
         # List as test_user
-        response = client.get(
-            "/api/v1/materials/chat/sessions", headers=auth_headers
-        )
+        response = client.get("/api/v1/materials/chat/sessions", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 2
 
     def test_list_session_messages(self, client, db_session, test_user, auth_headers):
         """CHATSESS-INT-003: GET /chat/sessions/{id}/messages returns messages."""
-        from app.services.chat_session_service import create_chat_session
         from app.services.chat_history import PostgresChatMessageHistory
+        from app.services.chat_session_service import create_chat_session
 
         session = create_chat_session(db=db_session, current_user=test_user)
         history = PostgresChatMessageHistory(
@@ -100,8 +97,14 @@ class TestChatAPI:
     @patch("app.services.chat_service.create_stuff_documents_chain")
     @patch("app.services.chat_service.ChatGoogleGenerativeAI")
     def test_chat_with_valid_session_returns_response(
-        self, mock_llm_class, mock_chain_fn, mock_retrieve,
-        client, db_session, test_user, auth_headers
+        self,
+        mock_llm_class,
+        mock_chain_fn,
+        mock_retrieve,
+        client,
+        db_session,
+        test_user,
+        auth_headers,
     ):
         """CHAT-INT-001: POST /chat with valid session returns AI response."""
         from app.services.chat_session_service import create_chat_session
@@ -135,8 +138,13 @@ class TestChatAPI:
     @patch("app.services.chat_service.create_stuff_documents_chain")
     @patch("app.services.chat_service.ChatGoogleGenerativeAI")
     def test_chat_with_invalid_session_returns_404(
-        self, mock_llm_class, mock_chain_fn, mock_retrieve,
-        client, test_user, auth_headers
+        self,
+        mock_llm_class,
+        mock_chain_fn,
+        mock_retrieve,
+        client,
+        test_user,
+        auth_headers,
     ):
         """CHAT-INT-004: POST /chat with invalid session_id returns 404."""
         fake_session_id = str(uuid.uuid4())

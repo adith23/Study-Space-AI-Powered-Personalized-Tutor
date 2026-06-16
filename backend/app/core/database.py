@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import QueuePool, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.core.config import settings
@@ -11,16 +11,17 @@ if settings.DATABASE_SSL_MODE and settings.DATABASE_SSL_MODE != "disable":
 engine = create_engine(
     settings.DATABASE_URL,
     connect_args=connect_args,
-    pool_size=5,           # Neon free tier: limited connections
-    max_overflow=2,        # Small overflow for burst
+    pool_size=5,  # Neon free tier: limited connections
+    max_overflow=2,  # Small overflow for burst
     pool_timeout=30,
-    pool_recycle=300,      # Recycle connections every 5 min (Neon idle timeout)
-    pool_pre_ping=True,    # Detect stale connections from Neon's auto-suspend
+    pool_recycle=300,  # Recycle connections every 5 min (Neon idle timeout)
+    pool_pre_ping=True,  # Detect stale connections from Neon's auto-suspend
     poolclass=QueuePool,
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
 
 # Dependency
 def get_db():

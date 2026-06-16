@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from app.schemas.video_schema import RenderedVisualResult
-from app.schemas.video_schema import VideoScript
+from app.schemas.video_schema import RenderedVisualResult, VideoScript
 from app.services.content_generation_context_service import ContentGenerationContext
 from app.services.video.manim_compiler import ManimTemplateCompiler
 from app.services.video.manim_plan_generator import ManimPlanGenerator
@@ -83,6 +82,8 @@ class ManimRenderer:
             }
         return RenderedVisualResult(
             scene_clips=execution.scene_clips,
-            preview_path=execution.scene_clips[0].clip_path if execution.scene_clips else None,
+            preview_path=(
+                execution.scene_clips[0].clip_path if execution.scene_clips else None
+            ),
             artifacts=artifacts,
         )

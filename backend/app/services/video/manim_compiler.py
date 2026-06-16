@@ -47,7 +47,9 @@ class ManimTemplateCompiler:
         buffer: list[str] = [self._emit_imports(), self._emit_theme_constants(spec)]
 
         for scene in spec.scenes:
-            class_name = self._normalize_scene_name(scene.scene_name, scene.scene_number)
+            class_name = self._normalize_scene_name(
+                scene.scene_name, scene.scene_number
+            )
             scene_names.append(class_name)
             buffer.append(self._emit_scene_class(class_name, scene))
 
@@ -90,11 +92,7 @@ class ManimTemplateCompiler:
             body_parts.append(renderer.render_code(block, ctx).rstrip())
         body_parts.append("self.wait(0.2)")
         body = "\n".join(textwrap.indent(part, "        ") for part in body_parts)
-        return (
-            f"class {class_name}(Scene):\n"
-            f"    def construct(self):\n"
-            f"{body}\n"
-        )
+        return f"class {class_name}(Scene):\n" f"    def construct(self):\n" f"{body}\n"
 
     def _normalize_scene_name(self, scene_title: str, scene_number: int) -> str:
         cleaned = re.sub(r"[^0-9a-zA-Z]+", " ", scene_title).title().replace(" ", "")

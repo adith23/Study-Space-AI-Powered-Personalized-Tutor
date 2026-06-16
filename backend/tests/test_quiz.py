@@ -7,24 +7,33 @@ Covers: QUIZ-UNIT-001 through QUIZ-UNIT-007
 See qa_testing_plan.md Sections 6.4 and 7.5.
 """
 
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 from fastapi import HTTPException
 
-from app.models.material_model import UploadedFile, FileType, ProcessingStatus
+from app.models.material_model import FileType, ProcessingStatus, UploadedFile
 from app.models.quiz_model import (
-    Quiz, QuizQuestion, QuizSource, QuizStatus,
-    QuizDifficulty, QuizGenerationMode,
+    Quiz,
+    QuizDifficulty,
+    QuizGenerationMode,
+    QuizQuestion,
+    QuizSource,
+    QuizStatus,
 )
 from app.models.user_model import User
-from app.schemas.quiz_schema import CreateQuizRequest, SubmitQuizAttemptRequest, SubmitQuizAnswerRequest
-from app.services.quiz_service import create_quiz, list_quizzes, get_quiz_or_404
+from app.schemas.quiz_schema import (
+    CreateQuizRequest,
+    SubmitQuizAnswerRequest,
+    SubmitQuizAttemptRequest,
+)
 from app.services.quiz_attempt_service import submit_quiz_attempt
-
+from app.services.quiz_service import create_quiz, get_quiz_or_404, list_quizzes
 
 # ==========================================================================
 # Helper to create test materials (shared across quiz/flashcard tests)
 # ==========================================================================
+
 
 def _create_processed_file(db_session, user, name="test.pdf"):
     """Helper: create a fully processed UploadedFile for a user."""
@@ -56,16 +65,18 @@ def _create_quiz_with_questions(db_session, user, file_record, num_questions=3):
     db_session.add(QuizSource(quiz_id=quiz.id, uploaded_file_id=file_record.id))
 
     for i in range(1, num_questions + 1):
-        db_session.add(QuizQuestion(
-            quiz_id=quiz.id,
-            question_text=f"Question {i}?",
-            option_a=f"Option A{i}",
-            option_b=f"Option B{i}",
-            option_c=f"Option C{i}",
-            option_d=f"Option D{i}",
-            correct_option="A",
-            question_order=i,
-        ))
+        db_session.add(
+            QuizQuestion(
+                quiz_id=quiz.id,
+                question_text=f"Question {i}?",
+                option_a=f"Option A{i}",
+                option_b=f"Option B{i}",
+                option_c=f"Option C{i}",
+                option_d=f"Option D{i}",
+                correct_option="A",
+                question_order=i,
+            )
+        )
 
     db_session.commit()
     db_session.refresh(quiz)
@@ -81,7 +92,9 @@ class TestCreateQuiz:
     """QUIZ-UNIT-001: create_quiz creates a quiz with PENDING status."""
 
     @patch("app.services.quiz_service.get_valid_selected_files")
-    def test_creates_quiz_with_pending_status(self, mock_validate, db_session, test_user):
+    def test_creates_quiz_with_pending_status(
+        self, mock_validate, db_session, test_user
+    ):
         """QUIZ-UNIT-001: create_quiz creates a quiz record with PENDING status."""
         file_record = _create_processed_file(db_session, test_user)
         mock_validate.return_value = [file_record]
@@ -99,7 +112,9 @@ class TestCreateQuiz:
 class TestListQuizzes:
     """QUIZ-UNIT-002: list_quizzes returns only current user's quizzes."""
 
-    def test_returns_only_current_user_quizzes(self, db_session, test_user, second_user):
+    def test_returns_only_current_user_quizzes(
+        self, db_session, test_user, second_user
+    ):
         """QUIZ-UNIT-002: Only current user's quizzes are returned."""
         file_a = _create_processed_file(db_session, test_user, "a.pdf")
         file_b = _create_processed_file(db_session, second_user, "b.pdf")
@@ -137,16 +152,24 @@ class TestSubmitQuizAttempt:
     def test_calculates_score_correctly(self, db_session, test_user):
         """QUIZ-UNIT-005: Score is calculated correctly for known answers."""
         file_record = _create_processed_file(db_session, test_user)
-        quiz = _create_quiz_with_questions(db_session, test_user, file_record, num_questions=3)
+        quiz = _create_quiz_with_questions(
+            db_session, test_user, file_record, num_questions=3
+        )
 
         questions = sorted(quiz.questions, key=lambda q: q.question_order)
 
         # Answer: 2 correct (A), 1 wrong (B)
         request = SubmitQuizAttemptRequest(
             answers=[
-                SubmitQuizAnswerRequest(question_id=questions[0].id, selected_option="A"),
-                SubmitQuizAnswerRequest(question_id=questions[1].id, selected_option="A"),
-                SubmitQuizAnswerRequest(question_id=questions[2].id, selected_option="B"),
+                SubmitQuizAnswerRequest(
+                    question_id=questions[0].id, selected_option="A"
+                ),
+                SubmitQuizAnswerRequest(
+                    question_id=questions[1].id, selected_option="A"
+                ),
+                SubmitQuizAnswerRequest(
+                    question_id=questions[2].id, selected_option="B"
+                ),
             ]
         )
 
@@ -160,15 +183,21 @@ class TestSubmitQuizAttempt:
     def test_rejects_incomplete_answers(self, db_session, test_user):
         """QUIZ-UNIT-006: submit_quiz_attempt rejects partial answers."""
         file_record = _create_processed_file(db_session, test_user)
-        quiz = _create_quiz_with_questions(db_session, test_user, file_record, num_questions=3)
+        quiz = _create_quiz_with_questions(
+            db_session, test_user, file_record, num_questions=3
+        )
 
         questions = sorted(quiz.questions, key=lambda q: q.question_order)
 
         # Only answer 2 of 3 questions
         request = SubmitQuizAttemptRequest(
             answers=[
-                SubmitQuizAnswerRequest(question_id=questions[0].id, selected_option="A"),
-                SubmitQuizAnswerRequest(question_id=questions[1].id, selected_option="A"),
+                SubmitQuizAnswerRequest(
+                    question_id=questions[0].id, selected_option="A"
+                ),
+                SubmitQuizAnswerRequest(
+                    question_id=questions[1].id, selected_option="A"
+                ),
             ]
         )
 
@@ -215,8 +244,13 @@ class TestQuizAPIList:
     """QUIZ-INT-002, 003: GET /api/v1/materials/quizzes."""
 
     def test_list_quizzes_returns_only_current_user(
-        self, client, db_session, test_user, second_user,
-        auth_headers, second_user_headers
+        self,
+        client,
+        db_session,
+        test_user,
+        second_user,
+        auth_headers,
+        second_user_headers,
     ):
         """QUIZ-INT-002: GET /quizzes returns only current user's quizzes."""
         file_a = _create_processed_file(db_session, test_user, "a.pdf")
@@ -251,7 +285,9 @@ class TestQuizAPIAttempts:
     ):
         """QUIZ-INT-004: POST /quizzes/{id}/attempts calculates and persists score."""
         file_record = _create_processed_file(db_session, test_user)
-        quiz = _create_quiz_with_questions(db_session, test_user, file_record, num_questions=2)
+        quiz = _create_quiz_with_questions(
+            db_session, test_user, file_record, num_questions=2
+        )
         questions = sorted(quiz.questions, key=lambda q: q.question_order)
 
         response = client.post(
@@ -270,12 +306,12 @@ class TestQuizAPIAttempts:
         assert data["total_questions"] == 2
         assert "attempt_id" in data
 
-    def test_get_attempt_result(
-        self, client, db_session, test_user, auth_headers
-    ):
+    def test_get_attempt_result(self, client, db_session, test_user, auth_headers):
         """QUIZ-INT-005: GET /quizzes/{id}/attempts/{aid} returns correct result."""
         file_record = _create_processed_file(db_session, test_user)
-        quiz = _create_quiz_with_questions(db_session, test_user, file_record, num_questions=2)
+        quiz = _create_quiz_with_questions(
+            db_session, test_user, file_record, num_questions=2
+        )
         questions = sorted(quiz.questions, key=lambda q: q.question_order)
 
         # First submit

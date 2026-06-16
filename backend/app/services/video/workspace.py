@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -103,6 +102,7 @@ def write_text_artifact(path: str | Path, content: str) -> None:
 def upload_final_artifacts(workspace: VideoWorkspace) -> dict:
     """Upload output.mp4 and thumbnail.jpg to R2; return storage keys."""
     import shutil
+
     from app.core.storage import get_storage
 
     storage = get_storage()
@@ -131,4 +131,3 @@ def cleanup_workspace(workspace: VideoWorkspace) -> None:
 
     if workspace.root.exists():
         shutil.rmtree(workspace.root, ignore_errors=True)
-

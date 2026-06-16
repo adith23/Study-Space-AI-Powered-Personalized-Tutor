@@ -3,18 +3,18 @@ import os
 import re
 import tempfile
 import time
-from functools import lru_cache
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import List, Optional, Tuple
+from uuid import uuid4
 
 from docling.document_converter import DocumentConverter
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pinecone import Pinecone as PineconeClient
 from sqlalchemy.orm import Session
-from uuid import uuid4
 
 from app.core.config import settings
-from app.models.material_model import UploadedFile, DocumentChunk, ProcessingStatus
+from app.models.material_model import DocumentChunk, ProcessingStatus, UploadedFile
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -31,6 +31,7 @@ CHUNK_SEPARATORS = ["\n\n", "\n", ". ", " ", ""]
 PIPELINE_VERSION = "v2"
 HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
 
+
 # Section chunk data class
 @dataclass
 class SectionChunk:
@@ -38,11 +39,13 @@ class SectionChunk:
     section_title: str
     heading_path: str
 
+
 # Get the Docling converter
 @lru_cache(maxsize=1)
 def get_docling_converter() -> DocumentConverter:
     logger.info("Initializing Docling converter...")
     return DocumentConverter()
+
 
 # Get the Pinecone index
 @lru_cache(maxsize=1)
@@ -52,6 +55,7 @@ def get_pinecone_index():
     if settings.PINECONE_INDEX_NAME:
         return pinecone.Index(settings.PINECONE_INDEX_NAME)
     raise ValueError("PINECONE_INDEX_HOST or PINECONE_INDEX_NAME must be configured.")
+
 
 # Extract the markdown with Docling
 def _extract_markdown_with_docling(file_path: str) -> str:
@@ -65,6 +69,7 @@ def _extract_markdown_with_docling(file_path: str) -> str:
         raise ValueError("Docling returned empty markdown output.")
 
     return markdown_text
+
 
 # Extract the markdown with retry
 def _extract_markdown_with_retry(file_path: str) -> str:
@@ -111,6 +116,7 @@ def _resolve_file_path(stored_path: str) -> str:
         return tmp.name
     return stored_path
 
+
 # Build the token splitter
 def _build_token_splitter() -> RecursiveCharacterTextSplitter:
     return RecursiveCharacterTextSplitter.from_tiktoken_encoder(
@@ -119,11 +125,13 @@ def _build_token_splitter() -> RecursiveCharacterTextSplitter:
         separators=CHUNK_SEPARATORS,
     )
 
+
 # Heading path to string
 def _heading_path_to_string(active_headings: List[Tuple[int, str]]) -> str:
     if not active_headings:
         return ""
     return " > ".join([heading for _, heading in active_headings])
+
 
 # Structure aware sections
 def _structure_aware_sections(markdown_text: str) -> List[SectionChunk]:
@@ -171,6 +179,7 @@ def _structure_aware_sections(markdown_text: str) -> List[SectionChunk]:
 
     return sections
 
+
 # Chunk with structure
 def _chunk_with_structure(markdown_text: str) -> List[SectionChunk]:
     sections = _structure_aware_sections(markdown_text)
@@ -194,6 +203,7 @@ def _chunk_with_structure(markdown_text: str) -> List[SectionChunk]:
 
     return final_chunks
 
+
 # Build metadata for chunks
 def _build_metadata_for_chunks(
     chunks: List[SectionChunk], *, file_id: int, user_id: int, source: Optional[str]
@@ -212,6 +222,7 @@ def _build_metadata_for_chunks(
         }
         for idx, chunk in enumerate(chunks)
     ]
+
 
 # Process and embed document
 def process_and_embed_document(db: Session, file_id: int):
@@ -240,7 +251,9 @@ def process_and_embed_document(db: Session, file_id: int):
         db.commit()
 
         # 1. Extract markdown with Docling and build multi-stage chunks.
-        logger.info("Extracting markdown with Docling from file: %s", file_record.stored_path)
+        logger.info(
+            "Extracting markdown with Docling from file: %s", file_record.stored_path
+        )
         local_path = _resolve_file_path(str(file_record.stored_path))
         markdown_text = _extract_markdown_with_retry(local_path)
         final_chunks = _chunk_with_structure(markdown_text)
@@ -275,7 +288,7 @@ def process_and_embed_document(db: Session, file_id: int):
         for i, chunk_text in enumerate(texts_to_embed):
             new_chunk = DocumentChunk(
                 content=chunk_text,
-                vector_id=vector_ids[i], 
+                vector_id=vector_ids[i],
                 metadata_=metadata_list[i],
                 source_file_id=file_id,
             )

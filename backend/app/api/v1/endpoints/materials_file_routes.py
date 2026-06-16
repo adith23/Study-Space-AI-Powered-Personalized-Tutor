@@ -1,7 +1,15 @@
 import os
 from typing import List, Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    UploadFile,
+)
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
@@ -9,16 +17,21 @@ from app.core.database import get_db
 from app.core.deps import get_current_active_user
 from app.models.user_model import User
 from app.schemas.material_schema import FileType as SchemaFileType
-from app.schemas.material_schema import StatusResponse, UploadedFileResponse, UploadedFileUpdate
+from app.schemas.material_schema import (
+    StatusResponse,
+    UploadedFileResponse,
+    UploadedFileUpdate,
+)
 from app.services.material_service import (
     create_uploaded_file,
+    delete_uploaded_file,
     get_user_file_status,
     list_user_files,
     rename_uploaded_file,
-    delete_uploaded_file,
 )
 
 router = APIRouter()
+
 
 # Upload a file
 @router.post("/file", response_model=UploadedFileResponse)
@@ -38,6 +51,7 @@ async def upload_file(
         current_user=current_user,
     )
 
+
 # Get all files for a user
 @router.get("/files", response_model=List[UploadedFileResponse])
 def get_files(
@@ -45,6 +59,7 @@ def get_files(
     current_user: User = Depends(get_current_active_user),
 ):
     return list_user_files(db=db, current_user=current_user)
+
 
 # Get the status of a file
 @router.get("/{file_id}/status", response_model=StatusResponse)
@@ -55,6 +70,7 @@ def get_file_status(
 ):
     return get_user_file_status(file_id=file_id, db=db, current_user=current_user)
 
+
 # Serve raw file content for the document viewer
 @router.get("/files/{file_id}/content")
 def download_file_content(
@@ -62,7 +78,9 @@ def download_file_content(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    file_record = get_user_file_status(file_id=file_id, db=db, current_user=current_user)
+    file_record = get_user_file_status(
+        file_id=file_id, db=db, current_user=current_user
+    )
 
     if not file_record.stored_path or not os.path.exists(file_record.stored_path):
         raise HTTPException(status_code=404, detail="File content not found on disk")
@@ -72,6 +90,7 @@ def download_file_content(
         filename=file_record.name or "document",
         media_type="application/octet-stream",
     )
+
 
 # Rename a file
 @router.put("/files/{file_id}/rename", response_model=UploadedFileResponse)
@@ -84,6 +103,7 @@ def rename_file(
     return rename_uploaded_file(
         file_id=file_id, new_name=payload.name, db=db, current_user=current_user
     )
+
 
 # Delete a file
 @router.delete("/files/{file_id}", status_code=204)

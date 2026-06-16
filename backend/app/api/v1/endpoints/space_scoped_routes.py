@@ -9,26 +9,49 @@ The original non-scoped routes remain functional for backward compatibility.
 
 from typing import List, Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    UploadFile,
+)
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import get_current_active_user
+from app.core.task_dispatcher import dispatch_task
 from app.models.user_model import User
-from app.models.video_model import GeneratedVideo, VideoRenderer, VideoStatus, VideoStyle
+from app.models.video_model import (
+    GeneratedVideo,
+    VideoRenderer,
+    VideoStatus,
+    VideoStyle,
+)
+from app.schemas.chat_schema import ChatSessionResponse
+from app.schemas.flashcard_schema import (
+    CreateFlashcardDeckRequest,
+    FlashcardDeckResponse,
+)
 from app.schemas.material_schema import FileType as SchemaFileType
 from app.schemas.material_schema import UploadedFileResponse
-from app.schemas.chat_schema import ChatSessionResponse
 from app.schemas.quiz_schema import CreateQuizRequest, QuizResponse
-from app.schemas.flashcard_schema import CreateFlashcardDeckRequest, FlashcardDeckResponse
-from app.schemas.video_schema import VideoGenerateRequest, VideoGenerateResponse, VideoListItem
-from app.services.material_service import create_uploaded_file, list_user_files
-from app.services.chat_session_service import create_chat_session, list_user_chat_sessions
-from app.services.quiz_service import create_quiz, list_quizzes
-from app.services.flashcard_service import create_flashcard_deck, list_flashcard_decks
-from app.services.space_service import get_space, touch_space_access
+from app.schemas.video_schema import (
+    VideoGenerateRequest,
+    VideoGenerateResponse,
+    VideoListItem,
+)
+from app.services.chat_session_service import (
+    create_chat_session,
+    list_user_chat_sessions,
+)
 from app.services.content_generation_context_service import get_valid_selected_files
-from app.core.task_dispatcher import dispatch_task
+from app.services.flashcard_service import create_flashcard_deck, list_flashcard_decks
+from app.services.material_service import create_uploaded_file, list_user_files
+from app.services.quiz_service import create_quiz, list_quizzes
+from app.services.space_service import get_space, touch_space_access
 
 router = APIRouter()
 
@@ -40,6 +63,7 @@ def _enum_value(value):
 # ──────────────────────────────────────────
 # Materials (Files) — scoped to a space
 # ──────────────────────────────────────────
+
 
 @router.post("/{space_id}/materials/file", response_model=UploadedFileResponse)
 async def upload_file_to_space(
@@ -79,7 +103,12 @@ def list_space_files(
 # Chat Sessions — scoped to a space
 # ──────────────────────────────────────────
 
-@router.post("/{space_id}/materials/chat/sessions", response_model=ChatSessionResponse, status_code=201)
+
+@router.post(
+    "/{space_id}/materials/chat/sessions",
+    response_model=ChatSessionResponse,
+    status_code=201,
+)
 def create_space_chat_session(
     space_id: int,
     db: Session = Depends(get_db),
@@ -90,7 +119,9 @@ def create_space_chat_session(
     return create_chat_session(db=db, current_user=current_user, space_id=space_id)
 
 
-@router.get("/{space_id}/materials/chat/sessions", response_model=List[ChatSessionResponse])
+@router.get(
+    "/{space_id}/materials/chat/sessions", response_model=List[ChatSessionResponse]
+)
 def list_space_chat_sessions(
     space_id: int,
     db: Session = Depends(get_db),
@@ -105,6 +136,7 @@ def list_space_chat_sessions(
 # Quizzes — scoped to a space
 # ──────────────────────────────────────────
 
+
 @router.post("/{space_id}/materials/quizzes", response_model=QuizResponse)
 def create_space_quiz(
     space_id: int,
@@ -114,7 +146,9 @@ def create_space_quiz(
 ):
     """Create a quiz scoped to a specific space."""
     get_space(space_id=space_id, db=db, current_user=current_user)
-    quiz = create_quiz(db=db, current_user=current_user, request=request, space_id=space_id)
+    quiz = create_quiz(
+        db=db, current_user=current_user, request=request, space_id=space_id
+    )
     dispatch_task("generate_quiz", {"quiz_id": quiz.id})
     return quiz
 
@@ -134,6 +168,7 @@ def list_space_quizzes(
 # Flashcards — scoped to a space
 # ──────────────────────────────────────────
 
+
 @router.post("/{space_id}/materials/flashcards", response_model=FlashcardDeckResponse)
 def create_space_flashcard_deck(
     space_id: int,
@@ -143,12 +178,16 @@ def create_space_flashcard_deck(
 ):
     """Create a flashcard deck scoped to a specific space."""
     get_space(space_id=space_id, db=db, current_user=current_user)
-    deck = create_flashcard_deck(db=db, current_user=current_user, request=request, space_id=space_id)
+    deck = create_flashcard_deck(
+        db=db, current_user=current_user, request=request, space_id=space_id
+    )
     dispatch_task("generate_flashcard", {"deck_id": deck.id})
     return deck
 
 
-@router.get("/{space_id}/materials/flashcards", response_model=list[FlashcardDeckResponse])
+@router.get(
+    "/{space_id}/materials/flashcards", response_model=list[FlashcardDeckResponse]
+)
 def list_space_flashcard_decks(
     space_id: int,
     db: Session = Depends(get_db),
@@ -163,6 +202,7 @@ def list_space_flashcard_decks(
 # Videos — scoped to a space
 # ──────────────────────────────────────────
 
+
 @router.post("/{space_id}/videos/generate", response_model=VideoGenerateResponse)
 async def create_space_video(
     space_id: int,
@@ -172,7 +212,9 @@ async def create_space_video(
 ):
     """Generate a video scoped to a specific space."""
     get_space(space_id=space_id, db=db, current_user=current_user)
-    get_valid_selected_files(db=db, current_user=current_user, file_ids=request.file_ids)
+    get_valid_selected_files(
+        db=db, current_user=current_user, file_ids=request.file_ids
+    )
 
     try:
         style = VideoStyle(request.style)

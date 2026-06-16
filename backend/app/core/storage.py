@@ -5,14 +5,16 @@ Selected via STORAGE_BACKEND env var ("local" | "r2").
 R2 is S3-compatible, so the same boto3 code works with a custom endpoint_url.
 Zero egress fees. 10 GB free forever.
 """
+
 import logging
 from pathlib import Path
 from typing import BinaryIO, Union
 
+from app.core.config import settings
+
 # boto3 is imported lazily inside R2Storage to avoid crashing in
 # development environments where it may not be installed.
 
-from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 

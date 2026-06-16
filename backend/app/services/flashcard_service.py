@@ -22,7 +22,11 @@ from app.services.flashcard_generation_service import generate_flashcard_payload
 
 
 def create_flashcard_deck(
-    *, db: Session, current_user: User, request: CreateFlashcardDeckRequest, space_id: Optional[int] = None
+    *,
+    db: Session,
+    current_user: User,
+    request: CreateFlashcardDeckRequest,
+    space_id: Optional[int] = None,
 ) -> FlashcardDeckResponse:
     try:
         files = get_valid_selected_files(
@@ -66,7 +70,9 @@ def list_flashcard_decks(
     query = db.query(FlashcardDeck).filter(FlashcardDeck.user_id == current_user.id)
     if space_id is not None:
         query = query.filter(FlashcardDeck.space_id == space_id)
-    decks = query.order_by(FlashcardDeck.created_at.desc(), FlashcardDeck.id.desc()).all()
+    decks = query.order_by(
+        FlashcardDeck.created_at.desc(), FlashcardDeck.id.desc()
+    ).all()
     return [FlashcardDeckResponse.model_validate(deck) for deck in decks]
 
 

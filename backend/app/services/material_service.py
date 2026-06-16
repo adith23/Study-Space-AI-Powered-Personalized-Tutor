@@ -6,12 +6,12 @@ from fastapi import HTTPException, UploadFile
 from pydantic import AnyUrl, ValidationError
 from sqlalchemy.orm import Session
 
+from app.core.storage import get_storage
+from app.core.task_dispatcher import dispatch_task
 from app.models.material_model import FileType as ModelFileType
 from app.models.material_model import UploadedFile
 from app.models.user_model import User
 from app.schemas.material_schema import FileType as SchemaFileType
-from app.core.task_dispatcher import dispatch_task
-from app.core.storage import get_storage
 
 UPLOAD_PREFIX = "uploads"
 
@@ -140,9 +140,9 @@ def delete_uploaded_file(*, file_id: int, db: Session, current_user: User) -> No
         raise HTTPException(status_code=404, detail="File not found")
 
     # 1. Clean up Pinecone vectors if the file has chunks
+    from app.core.config import settings
     from app.models.material_model import DocumentChunk
     from app.services.document_processor import get_pinecone_index
-    from app.core.config import settings
 
     chunks = (
         db.query(DocumentChunk).filter(DocumentChunk.source_file_id == file_id).all()

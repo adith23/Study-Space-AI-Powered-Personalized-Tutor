@@ -26,7 +26,9 @@ def check_manim_health() -> HealthCheckResult:
     if result.returncode != 0:
         return HealthCheckResult(
             ok=False,
-            message=(result.stderr or result.stdout or "manim checkhealth failed")[-500:],
+            message=(result.stderr or result.stdout or "manim checkhealth failed")[
+                -500:
+            ],
         )
     return HealthCheckResult(ok=True, message=(result.stdout or "ok")[-500:])
 
@@ -40,7 +42,9 @@ def check_ffmpeg_available() -> HealthCheckResult:
             timeout=30,
         )
     except Exception as exc:
-        return HealthCheckResult(ok=False, message=f"FFmpeg availability check failed: {exc}")
+        return HealthCheckResult(
+            ok=False, message=f"FFmpeg availability check failed: {exc}"
+        )
 
     if result.returncode != 0:
         return HealthCheckResult(

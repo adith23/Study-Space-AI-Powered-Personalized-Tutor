@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from app.schemas.video_schema import RenderedVisualResult
-from app.schemas.video_schema import VideoScript
+from app.schemas.video_schema import RenderedVisualResult, VideoScript
 from app.services.video.image_generator import generate_all_scene_images
 from app.services.video.workspace import VideoWorkspace
 

@@ -214,7 +214,7 @@ def _build_user_prompt(
     )
 
     scenes_description = "\n".join(
-        f"Scene {s.scene_number}: \"{s.narration_text}\" "
+        f'Scene {s.scene_number}: "{s.narration_text}" '
         f"(duration: ~{s.duration_seconds}s, key concept: {s.key_concept})"
         for s in script.scenes
     )

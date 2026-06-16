@@ -25,5 +25,7 @@ class VideoArtifactRegistry:
         return dict(self.artifacts)
 
 
-def build_artifacts_snapshot(registry: VideoArtifactRegistry) -> dict[str, dict[str, Any]]:
+def build_artifacts_snapshot(
+    registry: VideoArtifactRegistry,
+) -> dict[str, dict[str, Any]]:
     return registry.snapshot()

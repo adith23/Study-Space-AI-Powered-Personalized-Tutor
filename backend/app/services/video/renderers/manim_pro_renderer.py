@@ -80,9 +80,7 @@ class ManimProRenderer:
         return RenderedVisualResult(
             scene_clips=compiled.scene_clips,
             preview_path=(
-                compiled.scene_clips[0].clip_path
-                if compiled.scene_clips
-                else None
+                compiled.scene_clips[0].clip_path if compiled.scene_clips else None
             ),
             artifacts=artifacts,
         )

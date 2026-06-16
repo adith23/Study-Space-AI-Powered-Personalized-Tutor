@@ -6,21 +6,21 @@ Covers: SEC-001 through SEC-007
 See qa_testing_plan.md Section 10.1.
 """
 
+from datetime import timedelta
+
 import pytest
 from jose import jwt
 
 from app.core.security import (
+    ALGORITHM,
+    SECRET_KEY,
     create_access_token,
     create_refresh_token,
     get_password_hash,
-    verify_password,
     security,
-    SECRET_KEY,
-    ALGORITHM,
+    verify_password,
 )
 from app.models.user_model import User
-from datetime import timedelta
-
 
 # ==========================================================================
 # SEC-001 through SEC-007: Authentication & Authorization Security
@@ -86,9 +86,7 @@ class TestDeletedUserToken:
         db_session.refresh(user)
 
         # Create a valid token for this user
-        token = create_access_token(
-            data={"sub": user.email, "user_id": str(user.id)}
-        )
+        token = create_access_token(data={"sub": user.email, "user_id": str(user.id)})
 
         # Delete the user
         db_session.delete(user)
@@ -107,7 +105,7 @@ class TestIDEnumeration:
         self, client, db_session, test_user, second_user, second_user_headers
     ):
         """SEC-005: User B cannot view User A's file status by guessing the ID."""
-        from app.models.material_model import UploadedFile, FileType, ProcessingStatus
+        from app.models.material_model import FileType, ProcessingStatus, UploadedFile
 
         # Create a file belonging to test_user (User A)
         file_record = UploadedFile(
@@ -164,6 +162,8 @@ class TestPasswordStorageSecurity:
     def test_password_stored_as_bcrypt(self, db_session, test_user):
         """SEC-007: The hashed_password field in the DB uses bcrypt."""
         user = db_session.query(User).filter(User.id == test_user.id).first()
-        assert user.hashed_password.startswith("$2b$") or user.hashed_password.startswith("$2a$")
+        assert user.hashed_password.startswith(
+            "$2b$"
+        ) or user.hashed_password.startswith("$2a$")
         # It should NOT be the plaintext password
         assert user.hashed_password != "TestPassword123"

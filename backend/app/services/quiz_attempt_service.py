@@ -1,7 +1,13 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.models.quiz_model import Quiz, QuizAnswer, QuizAttempt, QuizQuestion, QuizStatus
+from app.models.quiz_model import (
+    Quiz,
+    QuizAnswer,
+    QuizAttempt,
+    QuizQuestion,
+    QuizStatus,
+)
 from app.models.user_model import User
 from app.schemas.quiz_schema import (
     QuizAttemptAnswerResultResponse,
@@ -27,7 +33,9 @@ def submit_quiz_attempt(
 
     submitted_ids = [answer.question_id for answer in request.answers]
     expected_ids = [question.id for question in questions]
-    if set(submitted_ids) != set(expected_ids) or len(submitted_ids) != len(expected_ids):
+    if set(submitted_ids) != set(expected_ids) or len(submitted_ids) != len(
+        expected_ids
+    ):
         raise HTTPException(
             status_code=422,
             detail="Answers must be provided for every quiz question exactly once.",
@@ -47,7 +55,9 @@ def submit_quiz_attempt(
     for submitted_answer in request.answers:
         question = question_map.get(submitted_answer.question_id)
         if question is None:
-            raise HTTPException(status_code=422, detail="Answer contains an unknown question_id.")
+            raise HTTPException(
+                status_code=422, detail="Answer contains an unknown question_id."
+            )
 
         is_correct = submitted_answer.selected_option == question.correct_option
         if is_correct:
@@ -61,7 +71,11 @@ def submit_quiz_attempt(
                 is_correct=is_correct,
             )
         )
-        answer_results.append(_serialize_attempt_answer(question, submitted_answer.selected_option, is_correct))
+        answer_results.append(
+            _serialize_attempt_answer(
+                question, submitted_answer.selected_option, is_correct
+            )
+        )
 
     attempt.score = score
     attempt.percentage = round((score / len(questions)) * 100, 2)
