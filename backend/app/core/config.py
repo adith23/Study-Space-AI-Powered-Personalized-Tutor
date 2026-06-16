@@ -1,5 +1,5 @@
 import os
-from typing import List, Any
+from typing import Any, List
 
 from pydantic import ConfigDict, field_validator
 from pydantic_settings import BaseSettings
@@ -21,10 +21,10 @@ class Settings(BaseSettings):
     DATABASE_URL: str = os.getenv("DATABASE_URL")
     DATABASE_SSL_MODE: str = os.getenv("DATABASE_SSL_MODE", "disable")
 
-    CELERY_BROKER_URL: str = os.getenv("CELERY_BROKER_URL")
-    CELERY_RESULT_BACKEND: str = os.getenv("CELERY_RESULT_BACKEND")
+    CELERY_BROKER_URL: str = os.getenv("CELERY_BROKER_URL", "")
+    CELERY_RESULT_BACKEND: str = os.getenv("CELERY_RESULT_BACKEND", "")
 
-    EMBEDDING_MODEL_NAME: str = os.getenv("EMBEDDING_MODEL_NAME")
+    EMBEDDING_MODEL_NAME: str = os.getenv("EMBEDDING_MODEL_NAME", "")
 
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY")
     GEMINI_CHAT_MODEL: str = "gemini-3.1-flash-lite"
