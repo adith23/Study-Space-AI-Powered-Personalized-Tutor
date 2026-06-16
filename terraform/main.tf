@@ -80,7 +80,9 @@ module "cloudfront" {
   source                = "./modules/cloudfront"
   environment           = var.environment
   project               = var.project_name
-  api_function_url      = module.lambda.api_function_url
-  frontend_function_url = module.lambda.frontend_function_url
+  api_function_url       = module.lambda.api_function_url
+  frontend_function_url  = module.lambda.frontend_function_url
+  api_function_name      = module.lambda.api_function_name
+  frontend_function_name = module.lambda.frontend_function_name
 }
 

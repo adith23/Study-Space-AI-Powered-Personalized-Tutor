@@ -7,11 +7,21 @@ variable "project" {
 }
 
 variable "api_function_url" {
-  description = "API Lambda Function URL (origin)"
+  description = "The Lambda Function URL for the API"
   type        = string
 }
 
 variable "frontend_function_url" {
-  description = "Frontend Lambda Function URL (origin)"
+  description = "The Lambda Function URL for the Frontend"
+  type        = string
+}
+
+variable "api_function_name" {
+  description = "The Lambda Function Name for the API"
+  type        = string
+}
+
+variable "frontend_function_name" {
+  description = "The Lambda Function Name for the Frontend"
   type        = string
 }

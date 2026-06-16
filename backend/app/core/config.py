@@ -4,6 +4,11 @@ from typing import List
 from pydantic import ConfigDict, field_validator
 from pydantic_settings import BaseSettings
 
+# Load SSM secrets in production before settings initialization
+from app.core.secrets import load_ssm_secrets
+
+load_ssm_secrets()
+
 
 class Settings(BaseSettings):
     model_config = ConfigDict(env_file=".env", case_sensitive=True, extra="ignore")
