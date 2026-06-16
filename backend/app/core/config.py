@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Any
 
 from pydantic import ConfigDict, field_validator
 from pydantic_settings import BaseSettings
@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     )
     REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 
-    CORS_ORIGINS: List[str] = os.getenv(
+    CORS_ORIGINS: Any = os.getenv(
         "CORS_ORIGINS",
         "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000",
     )
