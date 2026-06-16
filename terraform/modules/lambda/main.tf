@@ -148,3 +148,22 @@ resource "aws_lambda_function_event_invoke_config" "worker" {
   maximum_retry_attempts = 2 # Allow 2 retries for failed tasks (before DLQ)
 }
 
+# ── Function URL Public Permissions ──────────────────────────
+# Terraform requires explicit resource-based policies to allow
+# public access to Function URLs, even when auth type is NONE.
+
+resource "aws_lambda_permission" "api_url" {
+  statement_id           = "FunctionURLAllowPublicAccessV2"
+  action                 = "lambda:InvokeFunctionUrl"
+  function_name          = aws_lambda_function.api.function_name
+  principal              = "*"
+  function_url_auth_type = "NONE"
+}
+
+resource "aws_lambda_permission" "frontend_url" {
+  statement_id           = "FunctionURLAllowPublicAccessV2"
+  action                 = "lambda:InvokeFunctionUrl"
+  function_name          = aws_lambda_function.frontend.function_name
+  principal              = "*"
+  function_url_auth_type = "NONE"
+}
