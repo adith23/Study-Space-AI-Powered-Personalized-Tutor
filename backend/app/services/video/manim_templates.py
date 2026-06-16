@@ -2,15 +2,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from app.services.video.manim_spec import (
-    AxesPlotBlock,
-    BulletBuildBlock,
-    ComparisonTableBlock,
-    EquationStepBlock,
-    FlowDiagramBlock,
-    HighlightDefinitionBlock,
-    TitleCardBlock,
-)
+from app.services.video.manim_spec import (AxesPlotBlock, BulletBuildBlock,
+                                           ComparisonTableBlock,
+                                           EquationStepBlock, FlowDiagramBlock,
+                                           HighlightDefinitionBlock,
+                                           TitleCardBlock)
 
 
 def _escape(value: str) -> str:

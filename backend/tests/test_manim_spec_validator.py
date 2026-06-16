@@ -1,8 +1,5 @@
-from app.services.video.manim_spec import (
-    BulletBuildBlock,
-    ManimRenderSpec,
-    ManimSceneSpec,
-)
+from app.services.video.manim_spec import (BulletBuildBlock, ManimRenderSpec,
+                                           ManimSceneSpec)
 from app.services.video.manim_spec_validator import ManimSpecValidator
 
 

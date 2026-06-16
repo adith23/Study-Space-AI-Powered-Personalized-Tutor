@@ -1,19 +1,12 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.models.quiz_model import (
-    Quiz,
-    QuizAnswer,
-    QuizAttempt,
-    QuizQuestion,
-    QuizStatus,
-)
+from app.models.quiz_model import (Quiz, QuizAnswer, QuizAttempt, QuizQuestion,
+                                   QuizStatus)
 from app.models.user_model import User
-from app.schemas.quiz_schema import (
-    QuizAttemptAnswerResultResponse,
-    QuizAttemptResultResponse,
-    SubmitQuizAttemptRequest,
-)
+from app.schemas.quiz_schema import (QuizAttemptAnswerResultResponse,
+                                     QuizAttemptResultResponse,
+                                     SubmitQuizAttemptRequest)
 
 
 def submit_quiz_attempt(

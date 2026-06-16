@@ -11,7 +11,8 @@ and ``ImageRenderer`` without modifying either.
 from __future__ import annotations
 
 from app.schemas.video_schema import RenderedVisualResult, VideoScript
-from app.services.content_generation_context_service import ContentGenerationContext
+from app.services.content_generation_context_service import \
+    ContentGenerationContext
 from app.services.video.manim_pro_code_generator import ManimProCodeGenerator
 from app.services.video.manim_runner import ManimCliRunner
 from app.services.video.workspace import VideoWorkspace

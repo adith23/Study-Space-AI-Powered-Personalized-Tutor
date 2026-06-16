@@ -21,7 +21,8 @@ from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
 
 from app.core.config import settings
 from app.schemas.video_schema import RenderedSceneClip, VideoScript
-from app.services.content_generation_context_service import ContentGenerationContext
+from app.services.content_generation_context_service import \
+    ContentGenerationContext
 from app.services.video.manim_runner import ManimCliRunner
 from app.services.video.workspace import VideoWorkspace, write_text_artifact
 

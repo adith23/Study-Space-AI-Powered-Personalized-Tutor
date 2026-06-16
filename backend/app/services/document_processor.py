@@ -3,18 +3,19 @@ import os
 import re
 import tempfile
 import time
-from functools import lru_cache
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import List, Optional, Tuple
+from uuid import uuid4
 
 from docling.document_converter import DocumentConverter
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pinecone import Pinecone as PineconeClient
 from sqlalchemy.orm import Session
-from uuid import uuid4
 
 from app.core.config import settings
-from app.models.material_model import UploadedFile, DocumentChunk, ProcessingStatus
+from app.models.material_model import (DocumentChunk, ProcessingStatus,
+                                       UploadedFile)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

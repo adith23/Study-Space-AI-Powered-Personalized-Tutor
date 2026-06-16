@@ -68,9 +68,9 @@ def _dispatch_sqs(task_name: str, payload: Dict[str, Any], delay_seconds: int) -
 
 def _dispatch_celery(task_name: str, payload: Dict[str, Any]) -> str:
     """Fall back to Celery for local development."""
+    from app.tasks.flashcard_tasks import generate_flashcard_deck_task
     from app.tasks.material_tasks import process_document_task
     from app.tasks.quiz_tasks import generate_quiz_task
-    from app.tasks.flashcard_tasks import generate_flashcard_deck_task
     from app.tasks.video_tasks import generate_video_task
 
     task_map = {

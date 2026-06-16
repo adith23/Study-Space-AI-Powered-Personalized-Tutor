@@ -6,20 +6,15 @@ Covers: SEC-001 through SEC-007
 See qa_testing_plan.md Section 10.1.
 """
 
+from datetime import timedelta
+
 import pytest
 from jose import jwt
 
-from app.core.security import (
-    create_access_token,
-    create_refresh_token,
-    get_password_hash,
-    verify_password,
-    security,
-    SECRET_KEY,
-    ALGORITHM,
-)
+from app.core.security import (ALGORITHM, SECRET_KEY, create_access_token,
+                               create_refresh_token, get_password_hash,
+                               security, verify_password)
 from app.models.user_model import User
-from datetime import timedelta
 
 # ==========================================================================
 # SEC-001 through SEC-007: Authentication & Authorization Security
@@ -104,7 +99,8 @@ class TestIDEnumeration:
         self, client, db_session, test_user, second_user, second_user_headers
     ):
         """SEC-005: User B cannot view User A's file status by guessing the ID."""
-        from app.models.material_model import UploadedFile, FileType, ProcessingStatus
+        from app.models.material_model import (FileType, ProcessingStatus,
+                                               UploadedFile)
 
         # Create a file belonging to test_user (User A)
         file_record = UploadedFile(

@@ -11,16 +11,14 @@ import uuid
 import pytest
 from pydantic import ValidationError
 
+from app.models.quiz_model import QuizDifficulty
+from app.schemas.chat_schema import ConversationalChatRequest
+from app.schemas.flashcard_schema import CreateFlashcardDeckRequest
+from app.schemas.quiz_schema import (CreateQuizRequest,
+                                     SubmitQuizAnswerRequest,
+                                     SubmitQuizAttemptRequest)
 from app.schemas.user_schema import UserCreate
 from app.schemas.video_schema import VideoGenerateRequest
-from app.schemas.quiz_schema import (
-    CreateQuizRequest,
-    SubmitQuizAttemptRequest,
-    SubmitQuizAnswerRequest,
-)
-from app.schemas.flashcard_schema import CreateFlashcardDeckRequest
-from app.schemas.chat_schema import ConversationalChatRequest
-from app.models.quiz_model import QuizDifficulty
 
 # ==========================================================================
 # SCHEMA-UNIT-001 through 008

@@ -112,8 +112,8 @@ def delete_space(*, space_id: int, db: Session, current_user: User) -> None:
         if chunks:
             vector_ids = [chunk.vector_id for chunk in chunks]
             try:
-                from app.services.document_processor import get_pinecone_index
                 from app.core.config import settings
+                from app.services.document_processor import get_pinecone_index
 
                 index = get_pinecone_index()
                 index.delete(ids=vector_ids, namespace=settings.PINECONE_NAMESPACE)
@@ -132,8 +132,8 @@ def delete_space(*, space_id: int, db: Session, current_user: User) -> None:
                 )
 
     # 3. Clean up video files on disk
-    from app.models.video_model import GeneratedVideo
     from app.core.config import settings
+    from app.models.video_model import GeneratedVideo
 
     videos = db.query(GeneratedVideo).filter(GeneratedVideo.space_id == space_id).all()
     for video in videos:

@@ -1,9 +1,11 @@
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, JSON, String, Text
+from sqlalchemy import (JSON, Column, DateTime, Enum, ForeignKey, Integer,
+                        String, Text)
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.core.database import Base
-from app.models.quiz_model import QuizDifficulty, QuizGenerationMode, QuizStatus
+from app.models.quiz_model import (QuizDifficulty, QuizGenerationMode,
+                                   QuizStatus)
 
 
 class FlashcardDeck(Base):

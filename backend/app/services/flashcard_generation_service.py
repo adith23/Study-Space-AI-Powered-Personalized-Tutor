@@ -8,7 +8,8 @@ from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
 from app.core.config import settings
 from app.models.quiz_model import QuizDifficulty, QuizGenerationMode
 from app.schemas.flashcard_schema import GeneratedFlashcardPayload
-from app.services.content_generation_context_service import ContentGenerationContext
+from app.services.content_generation_context_service import \
+    ContentGenerationContext
 
 
 def _build_system_prompt(mode: QuizGenerationMode) -> str:

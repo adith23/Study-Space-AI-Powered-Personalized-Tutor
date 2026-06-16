@@ -7,21 +7,15 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import get_current_user
-from app.models.user_model import User
-from app.models.video_model import (
-    GeneratedVideo,
-    VideoRenderer,
-    VideoStatus,
-    VideoStyle,
-)
-from app.schemas.video_schema import (
-    VideoGenerateRequest,
-    VideoGenerateResponse,
-    VideoListItem,
-    VideoStatusResponse,
-)
-from app.services.content_generation_context_service import get_valid_selected_files
 from app.core.task_dispatcher import dispatch_task
+from app.models.user_model import User
+from app.models.video_model import (GeneratedVideo, VideoRenderer, VideoStatus,
+                                    VideoStyle)
+from app.schemas.video_schema import (VideoGenerateRequest,
+                                      VideoGenerateResponse, VideoListItem,
+                                      VideoStatusResponse)
+from app.services.content_generation_context_service import \
+    get_valid_selected_files
 
 router = APIRouter()
 
@@ -154,8 +148,9 @@ async def stream_video(
     if not os.path.isfile(video.video_path):
         # Check if it's an R2 key — redirect to presigned URL
         if video.video_path.startswith("r2://"):
-            from app.core.storage import get_storage
             from fastapi.responses import RedirectResponse
+
+            from app.core.storage import get_storage
 
             storage = get_storage()
             key = video.video_path.split("//", 1)[1].split("/", 1)[1]
@@ -190,8 +185,9 @@ async def get_thumbnail(
     if not os.path.isfile(video.thumbnail_path):
         # Check if it's an R2 key — redirect to presigned URL
         if video.thumbnail_path.startswith("r2://"):
-            from app.core.storage import get_storage
             from fastapi.responses import RedirectResponse
+
+            from app.core.storage import get_storage
 
             storage = get_storage()
             key = video.thumbnail_path.split("//", 1)[1].split("/", 1)[1]

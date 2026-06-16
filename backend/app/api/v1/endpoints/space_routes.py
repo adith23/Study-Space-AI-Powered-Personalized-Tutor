@@ -6,22 +6,13 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.deps import get_current_active_user
 from app.models.user_model import User
-from app.schemas.space_schema import (
-    ExploreSpaceResponse,
-    SpaceCreate,
-    SpaceListResponse,
-    SpaceResponse,
-    SpaceUpdate,
-)
-from app.services.space_service import (
-    create_space,
-    delete_space,
-    explore_public_spaces,
-    get_space,
-    list_user_spaces,
-    touch_space_access,
-    update_space,
-)
+from app.schemas.space_schema import (ExploreSpaceResponse, SpaceCreate,
+                                      SpaceListResponse, SpaceResponse,
+                                      SpaceUpdate)
+from app.services.space_service import (create_space, delete_space,
+                                        explore_public_spaces, get_space,
+                                        list_user_spaces, touch_space_access,
+                                        update_space)
 
 router = APIRouter()
 

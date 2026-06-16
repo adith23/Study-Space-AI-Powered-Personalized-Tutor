@@ -6,10 +6,11 @@ Covers: MAT-INT-001 through MAT-INT-006
 See qa_testing_plan.md Section 7.2.
 """
 
-import pytest
 from unittest.mock import patch
 
-from app.models.material_model import ProcessingStatus, UploadedFile, FileType
+import pytest
+
+from app.models.material_model import FileType, ProcessingStatus, UploadedFile
 
 # ==========================================================================
 # MAT-INT-001 through 006: Materials API

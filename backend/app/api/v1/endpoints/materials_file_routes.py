@@ -1,15 +1,8 @@
 import os
 from typing import List, Optional
 
-from fastapi import (
-    APIRouter,
-    BackgroundTasks,
-    Depends,
-    File,
-    Form,
-    HTTPException,
-    UploadFile,
-)
+from fastapi import (APIRouter, BackgroundTasks, Depends, File, Form,
+                     HTTPException, UploadFile)
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
@@ -17,18 +10,13 @@ from app.core.database import get_db
 from app.core.deps import get_current_active_user
 from app.models.user_model import User
 from app.schemas.material_schema import FileType as SchemaFileType
-from app.schemas.material_schema import (
-    StatusResponse,
-    UploadedFileResponse,
-    UploadedFileUpdate,
-)
-from app.services.material_service import (
-    create_uploaded_file,
-    get_user_file_status,
-    list_user_files,
-    rename_uploaded_file,
-    delete_uploaded_file,
-)
+from app.schemas.material_schema import (StatusResponse, UploadedFileResponse,
+                                         UploadedFileUpdate)
+from app.services.material_service import (create_uploaded_file,
+                                           delete_uploaded_file,
+                                           get_user_file_status,
+                                           list_user_files,
+                                           rename_uploaded_file)
 
 router = APIRouter()
 

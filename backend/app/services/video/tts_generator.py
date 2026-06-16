@@ -17,8 +17,7 @@ from google import genai
 from google.genai import types
 
 from app.core.config import settings
-from app.schemas.video_schema import AudioClipResult
-from app.schemas.video_schema import VideoScene
+from app.schemas.video_schema import AudioClipResult, VideoScene
 from app.services.video.workspace import VideoWorkspace
 
 logger = logging.getLogger(__name__)

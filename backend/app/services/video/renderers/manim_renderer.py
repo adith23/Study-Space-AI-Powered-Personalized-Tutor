@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from app.schemas.video_schema import RenderedVisualResult
-from app.schemas.video_schema import VideoScript
-from app.services.content_generation_context_service import ContentGenerationContext
+from app.schemas.video_schema import RenderedVisualResult, VideoScript
+from app.services.content_generation_context_service import \
+    ContentGenerationContext
 from app.services.video.manim_compiler import ManimTemplateCompiler
 from app.services.video.manim_plan_generator import ManimPlanGenerator
 from app.services.video.manim_runner import ManimCliRunner

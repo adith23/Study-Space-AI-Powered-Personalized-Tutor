@@ -8,9 +8,9 @@ See qa_testing_plan.md Sections 7.3 and 7.4.
 """
 
 import uuid
+from unittest.mock import MagicMock, patch
 
 import pytest
-from unittest.mock import patch, MagicMock
 
 # ==========================================================================
 # CHATSESS-INT-001 through 004: Chat Session API
@@ -50,8 +50,8 @@ class TestChatSessionAPI:
 
     def test_list_session_messages(self, client, db_session, test_user, auth_headers):
         """CHATSESS-INT-003: GET /chat/sessions/{id}/messages returns messages."""
-        from app.services.chat_session_service import create_chat_session
         from app.services.chat_history import PostgresChatMessageHistory
+        from app.services.chat_session_service import create_chat_session
 
         session = create_chat_session(db=db_session, current_user=test_user)
         history = PostgresChatMessageHistory(

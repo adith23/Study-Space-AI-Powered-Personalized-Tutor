@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy.ext.declarative import as_declarative, declared_attr
 from sqlalchemy import Column, DateTime
+from sqlalchemy.ext.declarative import as_declarative, declared_attr
 
 
 @as_declarative()

@@ -5,8 +5,8 @@ In production, logs are output as single-line JSON for easy parsing.
 In development, logs use a human-readable format.
 """
 
-import logging
 import json
+import logging
 import sys
 from datetime import datetime, timezone
 

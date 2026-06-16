@@ -1,7 +1,9 @@
-from celery import Celery
-from app.core.config import settings
-from dotenv import load_dotenv
 import os
+
+from celery import Celery
+from dotenv import load_dotenv
+
+from app.core.config import settings
 
 load_dotenv()
 
@@ -28,12 +30,6 @@ celery_app.conf.update(
 )
 
 # Register all SQLAlchemy models so relationship string references resolve correctly
-from app.models import (
-    user_model,
-    material_model,
-    chat_model,
-    flashcard_model,
-    quiz_model,
-    video_model,
-    space_model,
-)  # noqa: F401, E402
+from app.models import (chat_model, flashcard_model,  # noqa: F401, E402
+                        material_model, quiz_model, space_model, user_model,
+                        video_model)

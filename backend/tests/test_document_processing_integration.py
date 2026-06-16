@@ -6,15 +6,12 @@ Covers: DOCPROC-INT-001 through DOCPROC-INT-006
 See qa_testing_plan.md Section 7.8.
 """
 
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-from app.models.material_model import (
-    UploadedFile,
-    DocumentChunk,
-    FileType,
-    ProcessingStatus,
-)
+import pytest
+
+from app.models.material_model import (DocumentChunk, FileType,
+                                       ProcessingStatus, UploadedFile)
 from app.services.document_processor import process_and_embed_document
 
 # ==========================================================================

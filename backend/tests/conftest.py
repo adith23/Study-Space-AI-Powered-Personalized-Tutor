@@ -30,11 +30,8 @@ from sqlalchemy.pool import StaticPool
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.core.database import Base, get_db
-from app.core.security import (
-    create_access_token,
-    create_refresh_token,
-    get_password_hash,
-)
+from app.core.security import (create_access_token, create_refresh_token,
+                               get_password_hash)
 from app.main import app
 from app.models.user_model import User
 
@@ -72,14 +69,9 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 def _create_tables():
     """Create all tables once for the entire test session."""
     # Import every model module so SQLAlchemy registers them on Base.metadata
-    from app.models import (  # noqa: F401
-        chat_model,
-        flashcard_model,
-        material_model,
-        quiz_model,
-        user_model,
-        video_model,
-    )
+    from app.models import (chat_model, flashcard_model,  # noqa: F401
+                            material_model, quiz_model, user_model,
+                            video_model)
 
     Base.metadata.create_all(bind=engine)
     yield

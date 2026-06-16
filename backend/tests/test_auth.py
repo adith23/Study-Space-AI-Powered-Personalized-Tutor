@@ -7,19 +7,14 @@ Covers: AUTH-UNIT-001 through AUTH-UNIT-012
 See qa_testing_plan.md Sections 6.1 and 7.1.
 """
 
-import pytest
 from datetime import datetime, timedelta
+
+import pytest
 from jose import jwt
 
-from app.core.security import (
-    create_access_token,
-    create_refresh_token,
-    get_password_hash,
-    verify_password,
-    security,
-    SECRET_KEY,
-    ALGORITHM,
-)
+from app.core.security import (ALGORITHM, SECRET_KEY, create_access_token,
+                               create_refresh_token, get_password_hash,
+                               security, verify_password)
 from app.models.user_model import User
 
 # ==========================================================================

@@ -9,17 +9,15 @@ See qa_testing_plan.md Sections 6.3 and 6.9.
 """
 
 import uuid
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
 from fastapi import HTTPException
 
 from app.services.chat_service import _extract_hits
-from app.services.chat_session_service import (
-    create_chat_session,
-    get_chat_session,
-    list_user_chat_sessions,
-)
+from app.services.chat_session_service import (create_chat_session,
+                                               get_chat_session,
+                                               list_user_chat_sessions)
 
 # ==========================================================================
 # CHAT-UNIT-001, 002, 003: _extract_hits
@@ -159,9 +157,11 @@ class TestRunConversationalChat:
         mock_retrieve,
     ):
         """CHAT-UNIT-006: Returns 429 when Gemini raises resource_exhausted."""
-        from app.services.chat_service import run_conversational_chat
+        from langchain_google_genai.chat_models import \
+            ChatGoogleGenerativeAIError
+
         from app.schemas.chat_schema import ConversationalChatRequest
-        from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
+        from app.services.chat_service import run_conversational_chat
 
         mock_llm = MagicMock()
         mock_llm.invoke.side_effect = ChatGoogleGenerativeAIError(
@@ -196,9 +196,11 @@ class TestRunConversationalChat:
         mock_retrieve,
     ):
         """CHAT-UNIT-007: Returns 502 on generic Gemini error."""
-        from app.services.chat_service import run_conversational_chat
+        from langchain_google_genai.chat_models import \
+            ChatGoogleGenerativeAIError
+
         from app.schemas.chat_schema import ConversationalChatRequest
-        from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
+        from app.services.chat_service import run_conversational_chat
 
         mock_llm = MagicMock()
         mock_llm.invoke.side_effect = ChatGoogleGenerativeAIError(
@@ -271,8 +273,8 @@ class TestChatMessageHistory:
 
     def test_add_user_message(self, db_session, test_user):
         """CHATHISTORY-UNIT-001: add_user_message persists a human message."""
-        from app.services.chat_history import PostgresChatMessageHistory
         from app.models.chat_model import ChatMessage
+        from app.services.chat_history import PostgresChatMessageHistory
 
         session = create_chat_session(db=db_session, current_user=test_user)
         history = PostgresChatMessageHistory(
@@ -292,8 +294,8 @@ class TestChatMessageHistory:
 
     def test_add_ai_message(self, db_session, test_user):
         """CHATHISTORY-UNIT-002: add_ai_message persists an AI message."""
-        from app.services.chat_history import PostgresChatMessageHistory
         from app.models.chat_model import ChatMessage
+        from app.services.chat_history import PostgresChatMessageHistory
 
         session = create_chat_session(db=db_session, current_user=test_user)
         history = PostgresChatMessageHistory(

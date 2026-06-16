@@ -7,8 +7,8 @@ and TTS generation.
 """
 
 import json
-import re
 import logging
+import re
 from typing import Any
 
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -16,7 +16,8 @@ from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
 
 from app.core.config import settings
 from app.schemas.video_schema import VideoScript
-from app.services.content_generation_context_service import ContentGenerationContext
+from app.services.content_generation_context_service import \
+    ContentGenerationContext
 
 logger = logging.getLogger(__name__)
 

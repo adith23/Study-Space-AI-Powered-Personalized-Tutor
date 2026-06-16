@@ -1,11 +1,8 @@
 from pathlib import Path
 
 from app.services.video.manim_compiler import ManimTemplateCompiler
-from app.services.video.manim_spec import (
-    BulletBuildBlock,
-    ManimRenderSpec,
-    ManimSceneSpec,
-)
+from app.services.video.manim_spec import (BulletBuildBlock, ManimRenderSpec,
+                                           ManimSceneSpec)
 from app.services.video.workspace import VideoWorkspace
 
 

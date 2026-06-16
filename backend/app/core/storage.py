@@ -10,10 +10,11 @@ import logging
 from pathlib import Path
 from typing import BinaryIO, Union
 
+from app.core.config import settings
+
 # boto3 is imported lazily inside R2Storage to avoid crashing in
 # development environments where it may not be installed.
 
-from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 

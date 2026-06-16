@@ -7,18 +7,13 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.deps import get_current_active_user
 from app.models.user_model import User
-from app.schemas.chat_schema import (
-    ChatMessageResponse,
-    ChatResponse,
-    ChatSessionResponse,
-    ConversationalChatRequest,
-)
+from app.schemas.chat_schema import (ChatMessageResponse, ChatResponse,
+                                     ChatSessionResponse,
+                                     ConversationalChatRequest)
 from app.services.chat_service import run_conversational_chat
-from app.services.chat_session_service import (
-    create_chat_session,
-    list_chat_session_messages,
-    list_user_chat_sessions,
-)
+from app.services.chat_session_service import (create_chat_session,
+                                               list_chat_session_messages,
+                                               list_user_chat_sessions)
 
 router = APIRouter()
 

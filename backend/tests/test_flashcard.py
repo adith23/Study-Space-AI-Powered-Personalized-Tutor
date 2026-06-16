@@ -7,19 +7,20 @@ Covers: FLASH-UNIT-001 through FLASH-UNIT-005
 See qa_testing_plan.md Sections 6.5 and 7.6.
 """
 
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 from fastapi import HTTPException
 
-from app.models.material_model import UploadedFile, FileType, ProcessingStatus
-from app.models.flashcard_model import FlashcardDeck, FlashcardDeckSource, Flashcard
-from app.models.quiz_model import QuizDifficulty, QuizGenerationMode, QuizStatus
+from app.models.flashcard_model import (Flashcard, FlashcardDeck,
+                                        FlashcardDeckSource)
+from app.models.material_model import FileType, ProcessingStatus, UploadedFile
+from app.models.quiz_model import (QuizDifficulty, QuizGenerationMode,
+                                   QuizStatus)
 from app.schemas.flashcard_schema import CreateFlashcardDeckRequest
-from app.services.flashcard_service import (
-    create_flashcard_deck,
-    list_flashcard_decks,
-    get_flashcard_deck_or_404,
-)
+from app.services.flashcard_service import (create_flashcard_deck,
+                                            get_flashcard_deck_or_404,
+                                            list_flashcard_decks)
 
 # ==========================================================================
 # Helpers

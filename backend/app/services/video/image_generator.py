@@ -13,10 +13,9 @@ import textwrap
 import time
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
-
 from google import genai
 from google.genai import types
+from PIL import Image, ImageDraw, ImageFont
 
 from app.core.config import settings
 from app.schemas.video_schema import VideoScene

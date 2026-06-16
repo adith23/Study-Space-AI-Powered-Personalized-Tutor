@@ -1,16 +1,12 @@
-from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy.orm import Session
-from app.core.database import get_db
-from app.models.user_model import User
-from app.schemas.user_schema import UserCreate, UserLogin, AuthResponse
-from app.core.security import (
-    get_password_hash,
-    verify_password,
-    create_access_token,
-    create_refresh_token,
-    security,
-)
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db
+from app.core.security import (create_access_token, create_refresh_token,
+                               get_password_hash, security, verify_password)
+from app.models.user_model import User
+from app.schemas.user_schema import AuthResponse, UserCreate, UserLogin
 
 
 class RefreshRequest(BaseModel):

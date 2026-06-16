@@ -1,4 +1,5 @@
 import logging
+
 from app.core.celery_worker import celery_app
 from app.core.database import SessionLocal
 from app.services.document_processor import process_and_embed_document

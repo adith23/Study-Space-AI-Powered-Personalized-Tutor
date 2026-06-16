@@ -6,19 +6,18 @@ Covers: DOC-UNIT-001 through DOC-UNIT-012
 See qa_testing_plan.md Section 6.2.
 """
 
-import pytest
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, PropertyMock, patch
 
-from app.services.document_processor import (
-    _heading_path_to_string,
-    _structure_aware_sections,
-    _chunk_with_structure,
-    _build_metadata_for_chunks,
-    _extract_markdown_with_retry,
-    _extract_markdown_with_docling,
-    SectionChunk,
-    MAX_DOCLING_ATTEMPTS,
-)
+import pytest
+
+from app.services.document_processor import (MAX_DOCLING_ATTEMPTS,
+                                             SectionChunk,
+                                             _build_metadata_for_chunks,
+                                             _chunk_with_structure,
+                                             _extract_markdown_with_docling,
+                                             _extract_markdown_with_retry,
+                                             _heading_path_to_string,
+                                             _structure_aware_sections)
 
 # ==========================================================================
 # DOC-UNIT-001, 002: _heading_path_to_string
