@@ -171,7 +171,7 @@ def explore_public_spaces(
     q = (
         db.query(Space, User.username)
         .join(User, Space.user_id == User.id)
-        .filter(Space.is_public == True)
+        .filter(Space.is_public == True)  # noqa: E712
     )
     if query:
         q = q.filter(Space.name.ilike(f"%{query}%"))

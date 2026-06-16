@@ -106,7 +106,8 @@ class Settings(BaseSettings):
     MANIM_PRO_MAX_RETRIES: int = int(os.getenv("MANIM_PRO_MAX_RETRIES", "3"))
     MANIM_PRO_MAX_SCENES: int = int(os.getenv("MANIM_PRO_MAX_SCENES", "5"))
 
-    @validator("CORS_ORIGINS", pre=True)
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
     def assemble_cors_origins(cls, v: str | List[str]) -> List[str] | str:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]

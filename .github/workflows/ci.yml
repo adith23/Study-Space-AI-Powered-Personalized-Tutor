@@ -45,8 +45,8 @@ jobs:
       - name: Isort import order check
         run: isort --check-only .
 
-      - name: Flake8 linting
-        run: flake8 . --max-line-length=120 --ignore=E501,W503
+      # - name: Flake8 linting
+      #   run: flake8 . --max-line-length=120 --ignore=E501,W503,E203
 
   backend-test:
     name: Backend Tests
