@@ -15,7 +15,6 @@ from app.services.video.manim_pro_code_generator import (
     _strip_markdown_fences,
 )
 
-
 # ── _strip_markdown_fences ───────────────────────────────────────────────────
 
 

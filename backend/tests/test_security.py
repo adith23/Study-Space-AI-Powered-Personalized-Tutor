@@ -21,7 +21,6 @@ from app.core.security import (
 from app.models.user_model import User
 from datetime import timedelta
 
-
 # ==========================================================================
 # SEC-001 through SEC-007: Authentication & Authorization Security
 # ==========================================================================
@@ -86,9 +85,7 @@ class TestDeletedUserToken:
         db_session.refresh(user)
 
         # Create a valid token for this user
-        token = create_access_token(
-            data={"sub": user.email, "user_id": str(user.id)}
-        )
+        token = create_access_token(data={"sub": user.email, "user_id": str(user.id)})
 
         # Delete the user
         db_session.delete(user)
@@ -164,6 +161,8 @@ class TestPasswordStorageSecurity:
     def test_password_stored_as_bcrypt(self, db_session, test_user):
         """SEC-007: The hashed_password field in the DB uses bcrypt."""
         user = db_session.query(User).filter(User.id == test_user.id).first()
-        assert user.hashed_password.startswith("$2b$") or user.hashed_password.startswith("$2a$")
+        assert user.hashed_password.startswith(
+            "$2b$"
+        ) or user.hashed_password.startswith("$2a$")
         # It should NOT be the plaintext password
         assert user.hashed_password != "TestPassword123"

@@ -8,6 +8,7 @@ service function. Each SQS message contains:
 This handler creates its own database session per task, matching
 the pattern used by the existing Celery tasks.
 """
+
 import json
 import logging
 import os
@@ -48,12 +49,12 @@ def handler(event, context):
         db = SessionLocal()
         try:
             result = _route_task(task_name, payload, db)
-            results.append({"task": task_name, "status": "success", "result": str(result)})
+            results.append(
+                {"task": task_name, "status": "success", "result": str(result)}
+            )
             logger.info("Task %s completed successfully", task_name)
         except Exception as e:
-            logger.error(
-                "Task %s failed: %s\n%s", task_name, e, traceback.format_exc()
-            )
+            logger.error("Task %s failed: %s\n%s", task_name, e, traceback.format_exc())
             results.append({"task": task_name, "status": "error", "error": str(e)})
         finally:
             db.close()

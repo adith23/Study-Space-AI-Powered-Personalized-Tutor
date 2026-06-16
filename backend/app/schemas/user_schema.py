@@ -1,15 +1,18 @@
 from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
+
 # User create schema
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
     password: str = Field(..., min_length=8)
 
+
 # User login schema
 class UserLogin(BaseModel):
     username: str
     password: str
+
 
 # User response schema
 class UserResponse(BaseModel):
@@ -19,11 +22,13 @@ class UserResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 # Auth response schema
 class AuthResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+
 
 # Token data schema
 class TokenData(BaseModel):

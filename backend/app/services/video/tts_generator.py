@@ -125,7 +125,9 @@ def generate_all_scene_audio(
     results: list[AudioClipResult] = []
 
     for scene in scenes:
-        result = generate_scene_audio(scene=scene, output_dir=str(workspace.audio_dir()))
+        result = generate_scene_audio(
+            scene=scene, output_dir=str(workspace.audio_dir())
+        )
         results.append(result)
 
     total = sum(item.duration_seconds for item in results)

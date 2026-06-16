@@ -19,7 +19,7 @@ celery_app = Celery(
         "app.tasks.quiz_tasks",
         "app.tasks.flashcard_tasks",
         "app.tasks.video_tasks",
-    ], 
+    ],
 )
 
 # Optional configuration
@@ -28,4 +28,12 @@ celery_app.conf.update(
 )
 
 # Register all SQLAlchemy models so relationship string references resolve correctly
-from app.models import user_model, material_model, chat_model, flashcard_model, quiz_model, video_model, space_model  # noqa: F401, E402
+from app.models import (
+    user_model,
+    material_model,
+    chat_model,
+    flashcard_model,
+    quiz_model,
+    video_model,
+    space_model,
+)  # noqa: F401, E402

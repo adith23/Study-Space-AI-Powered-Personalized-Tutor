@@ -131,4 +131,3 @@ def cleanup_workspace(workspace: VideoWorkspace) -> None:
 
     if workspace.root.exists():
         shutil.rmtree(workspace.root, ignore_errors=True)
-

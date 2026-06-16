@@ -20,4 +20,3 @@ def process_document_task(file_id: int):
         logger.info(f"Celery task finished for file_id: {file_id}")
     finally:
         db.close()
-

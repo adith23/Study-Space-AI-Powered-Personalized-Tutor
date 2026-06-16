@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.core.database import Base
 
+
 # Chat session model
 class ChatSession(Base):
     __tablename__ = "chat_sessions"
@@ -27,6 +28,7 @@ class ChatSession(Base):
         cascade="all, delete-orphan",
         order_by="ChatMessage.created_at",
     )
+
 
 # Chat message model
 class ChatMessage(Base):

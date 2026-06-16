@@ -9,9 +9,13 @@ See qa_testing_plan.md Section 7.8.
 import pytest
 from unittest.mock import patch, MagicMock
 
-from app.models.material_model import UploadedFile, DocumentChunk, FileType, ProcessingStatus
+from app.models.material_model import (
+    UploadedFile,
+    DocumentChunk,
+    FileType,
+    ProcessingStatus,
+)
 from app.services.document_processor import process_and_embed_document
-
 
 # ==========================================================================
 # Helpers
@@ -56,7 +60,9 @@ class TestProcessAndEmbedDocument:
 
     @patch("app.services.document_processor.get_pinecone_index")
     @patch("app.services.document_processor._extract_markdown_with_retry")
-    def test_transitions_to_success(self, mock_extract, mock_index_fn, db_session, test_user):
+    def test_transitions_to_success(
+        self, mock_extract, mock_index_fn, db_session, test_user
+    ):
         """DOCPROC-INT-001: File transitions PENDING → PROCESSING → SUCCESS."""
         mock_extract.return_value = SAMPLE_MARKDOWN
         mock_index = MagicMock()
@@ -72,7 +78,9 @@ class TestProcessAndEmbedDocument:
 
     @patch("app.services.document_processor.get_pinecone_index")
     @patch("app.services.document_processor._extract_markdown_with_retry")
-    def test_creates_document_chunks(self, mock_extract, mock_index_fn, db_session, test_user):
+    def test_creates_document_chunks(
+        self, mock_extract, mock_index_fn, db_session, test_user
+    ):
         """DOCPROC-INT-002: Processing creates correct number of DocumentChunk records."""
         mock_extract.return_value = SAMPLE_MARKDOWN
         mock_index = MagicMock()
@@ -95,7 +103,9 @@ class TestProcessAndEmbedDocument:
 
     @patch("app.services.document_processor.get_pinecone_index")
     @patch("app.services.document_processor._extract_markdown_with_retry")
-    def test_calls_pinecone_upsert(self, mock_extract, mock_index_fn, db_session, test_user):
+    def test_calls_pinecone_upsert(
+        self, mock_extract, mock_index_fn, db_session, test_user
+    ):
         """DOCPROC-INT-003: Processing calls Pinecone upsert_records with correct namespace."""
         mock_extract.return_value = SAMPLE_MARKDOWN
         mock_index = MagicMock()
@@ -116,7 +126,9 @@ class TestProcessAndEmbedDocument:
         self, mock_extract, mock_index_fn, db_session, test_user
     ):
         """DOCPROC-INT-004: Failed processing sets status to FAILED with error message."""
-        mock_extract.side_effect = RuntimeError("Docling extraction failed after 3 attempts.")
+        mock_extract.side_effect = RuntimeError(
+            "Docling extraction failed after 3 attempts."
+        )
         mock_index_fn.return_value = MagicMock()
 
         file_record = _create_pending_file(db_session, test_user)

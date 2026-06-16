@@ -83,6 +83,8 @@ class ManimRenderer:
             }
         return RenderedVisualResult(
             scene_clips=execution.scene_clips,
-            preview_path=execution.scene_clips[0].clip_path if execution.scene_clips else None,
+            preview_path=(
+                execution.scene_clips[0].clip_path if execution.scene_clips else None
+            ),
             artifacts=artifacts,
         )

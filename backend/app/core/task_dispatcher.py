@@ -5,6 +5,7 @@ This abstraction allows the same API code to work in both environments:
 - Production (Lambda): sends a JSON message to SQS → triggers Worker Lambda
 - Development (local): calls Celery task.delay() as before
 """
+
 import json
 import logging
 from typing import Any, Dict, Optional
@@ -38,16 +39,16 @@ def dispatch_task(
         return _dispatch_celery(task_name, payload)
 
 
-def _dispatch_sqs(
-    task_name: str, payload: Dict[str, Any], delay_seconds: int
-) -> str:
+def _dispatch_sqs(task_name: str, payload: Dict[str, Any], delay_seconds: int) -> str:
     import boto3
 
     sqs = boto3.client("sqs", region_name=settings.AWS_REGION)
-    message_body = json.dumps({
-        "task_name": task_name,
-        "payload": payload,
-    })
+    message_body = json.dumps(
+        {
+            "task_name": task_name,
+            "payload": payload,
+        }
+    )
 
     response = sqs.send_message(
         QueueUrl=settings.SQS_QUEUE_URL,

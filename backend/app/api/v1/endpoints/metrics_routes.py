@@ -1,4 +1,5 @@
 """Prometheus metrics endpoint for optional external monitoring."""
+
 from fastapi import APIRouter
 from fastapi.responses import PlainTextResponse
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
@@ -26,6 +27,4 @@ TASK_COUNT = Counter(
 @router.get("/metrics", response_class=PlainTextResponse)
 async def metrics():
     """Prometheus-compatible metrics scrape endpoint."""
-    return PlainTextResponse(
-        generate_latest(), media_type=CONTENT_TYPE_LATEST
-    )
+    return PlainTextResponse(generate_latest(), media_type=CONTENT_TYPE_LATEST)

@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class SpaceCreate(BaseModel):
     """Schema for creating a new space."""
+
     name: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
     icon: Optional[str] = "layout-grid"
@@ -15,6 +16,7 @@ class SpaceCreate(BaseModel):
 
 class SpaceUpdate(BaseModel):
     """Schema for updating an existing space."""
+
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = None
     icon: Optional[str] = None
@@ -24,6 +26,7 @@ class SpaceUpdate(BaseModel):
 
 class SpaceResponse(BaseModel):
     """Full space detail response."""
+
     id: int
     user_id: int
     name: str
@@ -41,6 +44,7 @@ class SpaceResponse(BaseModel):
 
 class SpaceListResponse(BaseModel):
     """Lightweight space listing response."""
+
     id: int
     name: str
     icon: str
@@ -54,6 +58,7 @@ class SpaceListResponse(BaseModel):
 
 class ExploreSpaceResponse(BaseModel):
     """Public space listing for explore/discovery."""
+
     id: int
     user_id: int
     name: str

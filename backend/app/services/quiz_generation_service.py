@@ -11,8 +11,6 @@ from app.schemas.quiz_schema import GeneratedQuizPayload
 from app.services.content_generation_context_service import ContentGenerationContext
 
 
-
-
 def _build_system_prompt(mode: QuizGenerationMode) -> str:
     mode_instruction = (
         "Create a broad, representative quiz that covers the selected source material."
@@ -143,7 +141,9 @@ def generate_quiz_payload(
                     )
                 )
                 continue
-            raise ValueError(f"Quiz generation returned invalid structured output: {exc}") from exc
+            raise ValueError(
+                f"Quiz generation returned invalid structured output: {exc}"
+            ) from exc
         except ChatGoogleGenerativeAIError:
             raise
 

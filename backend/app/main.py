@@ -11,12 +11,22 @@ from app.api.v1.api_routes import api_router
 setup_logging(environment=settings.ENVIRONMENT)
 
 # Import models to register them with SQLAlchemy
-from app.models import user_model, material_model, chat_model, flashcard_model, quiz_model, video_model, space_model  
+from app.models import (
+    user_model,
+    material_model,
+    chat_model,
+    flashcard_model,
+    quiz_model,
+    video_model,
+    space_model,
+)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     yield
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -31,7 +41,7 @@ app = FastAPI(
 # Set up CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,  
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -46,7 +56,8 @@ app.add_middleware(MetricsMiddleware)
 # Include API router
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
-@app.get("/")   
+
+@app.get("/")
 async def root():
     return {
         "message": "Welcome to Study Space API",

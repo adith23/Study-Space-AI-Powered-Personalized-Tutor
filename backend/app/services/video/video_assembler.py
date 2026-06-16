@@ -82,7 +82,9 @@ def create_scene_clips_from_images(
     workspace: VideoWorkspace,
 ) -> list[RenderedSceneClip]:
     clips: list[RenderedSceneClip] = []
-    for image_path, audio in zip(image_paths, sorted(audio_results, key=lambda item: item.scene_number)):
+    for image_path, audio in zip(
+        image_paths, sorted(audio_results, key=lambda item: item.scene_number)
+    ):
         clip_path = workspace.scene_clip_dir() / f"scene_{audio.scene_number:03d}.mp4"
         zoom_filter = (
             f"zoompan=z='min(zoom+0.0005,1.1)':x='iw/2-(iw/zoom/2)':"
@@ -137,7 +139,9 @@ def _freeze_last_frame(
             "-i",
             clip_path,
             "-vf",
-            "tpad=stop_mode=clone:stop_duration={:.3f}".format(max(target_duration, 0.0)),
+            "tpad=stop_mode=clone:stop_duration={:.3f}".format(
+                max(target_duration, 0.0)
+            ),
             "-c:v",
             "libx264",
             "-an",
@@ -277,7 +281,9 @@ def _concatenate_aligned_clips(
         pass
 
 
-def _generate_thumbnail(video_path: str, thumbnail_path: str, workspace: VideoWorkspace) -> None:
+def _generate_thumbnail(
+    video_path: str, thumbnail_path: str, workspace: VideoWorkspace
+) -> None:
     _run_ffmpeg(
         ["-y", "-i", video_path, "-vframes", "1", "-q:v", "2", thumbnail_path],
         description="generate thumbnail",
@@ -302,9 +308,15 @@ class VisualAssemblyService:
         total_duration = 0.0
         for clip, audio in zip(ordered_clips, ordered_audio):
             if clip.scene_number != audio.scene_number:
-                raise ValueError("Scene clips and audio clips are not aligned by scene number.")
-            aligned_clip = _align_clip_to_audio(clip=clip, audio=audio, workspace=workspace)
-            muxed_path = workspace.assembled_dir() / f"muxed_{clip.scene_number:03d}.mp4"
+                raise ValueError(
+                    "Scene clips and audio clips are not aligned by scene number."
+                )
+            aligned_clip = _align_clip_to_audio(
+                clip=clip, audio=audio, workspace=workspace
+            )
+            muxed_path = (
+                workspace.assembled_dir() / f"muxed_{clip.scene_number:03d}.mp4"
+            )
             _attach_audio_to_clip(
                 clip_path=aligned_clip,
                 audio=audio,
@@ -320,7 +332,9 @@ class VisualAssemblyService:
             output_path=str(output_path),
             workspace=workspace,
         )
-        _generate_thumbnail(str(output_path), str(workspace.thumbnail_path()), workspace)
+        _generate_thumbnail(
+            str(output_path), str(workspace.thumbnail_path()), workspace
+        )
         return AssemblyResult(
             video_path=str(output_path),
             thumbnail_path=str(workspace.thumbnail_path()),

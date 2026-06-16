@@ -11,7 +11,6 @@ from unittest.mock import patch
 
 from app.models.material_model import ProcessingStatus, UploadedFile, FileType
 
-
 # ==========================================================================
 # MAT-INT-001 through 006: Materials API
 # ==========================================================================
@@ -77,8 +76,15 @@ class TestMaterialList:
 
     @patch("app.services.material_service.process_document_task")
     def test_returns_only_current_user_materials(
-        self, mock_task, client, db_session, test_user, second_user,
-        auth_headers, second_user_headers, sample_pdf
+        self,
+        mock_task,
+        client,
+        db_session,
+        test_user,
+        second_user,
+        auth_headers,
+        second_user_headers,
+        sample_pdf,
     ):
         """MAT-INT-002: GET /files returns only the current user's materials."""
         _, pdf_bytes = sample_pdf

@@ -4,6 +4,7 @@ Structured JSON logging for CloudWatch Logs Insights queries.
 In production, logs are output as single-line JSON for easy parsing.
 In development, logs use a human-readable format.
 """
+
 import logging
 import json
 import sys
@@ -43,9 +44,7 @@ def setup_logging(environment: str = "development"):
         handler.setFormatter(JSONFormatter())
     else:
         handler.setFormatter(
-            logging.Formatter(
-                "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
-            )
+            logging.Formatter("%(asctime)s | %(levelname)-8s | %(name)s | %(message)s")
         )
 
     root.handlers.clear()

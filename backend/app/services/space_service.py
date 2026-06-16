@@ -78,7 +78,9 @@ def get_space_or_public(*, space_id: int, db: Session) -> Space:
     return space
 
 
-def update_space(*, space_id: int, data: dict, db: Session, current_user: User) -> Space:
+def update_space(
+    *, space_id: int, data: dict, db: Session, current_user: User
+) -> Space:
     """Update space metadata."""
     space = get_space(space_id=space_id, db=db, current_user=current_user)
     for key, value in data.items():
@@ -102,23 +104,32 @@ def delete_space(*, space_id: int, db: Session, current_user: User) -> None:
     # 1. Clean up Pinecone vectors for all files in the space
     files = db.query(UploadedFile).filter(UploadedFile.space_id == space_id).all()
     for file_record in files:
-        chunks = db.query(DocumentChunk).filter(DocumentChunk.source_file_id == file_record.id).all()
+        chunks = (
+            db.query(DocumentChunk)
+            .filter(DocumentChunk.source_file_id == file_record.id)
+            .all()
+        )
         if chunks:
             vector_ids = [chunk.vector_id for chunk in chunks]
             try:
                 from app.services.document_processor import get_pinecone_index
                 from app.core.config import settings
+
                 index = get_pinecone_index()
                 index.delete(ids=vector_ids, namespace=settings.PINECONE_NAMESPACE)
             except Exception as e:
-                logger.error(f"Failed to delete Pinecone vectors for file {file_record.id}: {e}")
+                logger.error(
+                    f"Failed to delete Pinecone vectors for file {file_record.id}: {e}"
+                )
 
         # 2. Clean up physical file on disk
         if file_record.stored_path and os.path.exists(file_record.stored_path):
             try:
                 os.remove(file_record.stored_path)
             except Exception as e:
-                logger.error(f"Failed to delete physical file {file_record.stored_path}: {e}")
+                logger.error(
+                    f"Failed to delete physical file {file_record.stored_path}: {e}"
+                )
 
     # 3. Clean up video files on disk
     from app.models.video_model import GeneratedVideo

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.models.chat_model import ChatMessage
 
+
 # Postgres chat message history
 class PostgresChatMessageHistory(BaseChatMessageHistory):
     """

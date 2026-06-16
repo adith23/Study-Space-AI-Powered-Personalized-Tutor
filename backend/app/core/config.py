@@ -99,8 +99,7 @@ class Settings(BaseSettings):
     SQS_QUEUE_URL: str = os.getenv("SQS_QUEUE_URL", "")
 
     # ── Environment ──────────────────────────────────────────────
-    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development"
-    )
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
 
     # ── Manim Pro (direct code generation) ────────────────────────
     MANIM_PRO_MAX_RETRIES: int = int(os.getenv("MANIM_PRO_MAX_RETRIES", "3"))

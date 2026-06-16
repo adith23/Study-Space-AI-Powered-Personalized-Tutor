@@ -21,10 +21,10 @@ from app.services.flashcard_service import (
     get_flashcard_deck_or_404,
 )
 
-
 # ==========================================================================
 # Helpers
 # ==========================================================================
+
 
 def _create_processed_file(db_session, user, name="test.pdf"):
     """Helper: create a fully processed UploadedFile for a user."""
@@ -53,15 +53,19 @@ def _create_flashcard_deck_with_cards(db_session, user, file_record, num_cards=5
     db_session.add(deck)
     db_session.flush()
 
-    db_session.add(FlashcardDeckSource(deck_id=deck.id, uploaded_file_id=file_record.id))
+    db_session.add(
+        FlashcardDeckSource(deck_id=deck.id, uploaded_file_id=file_record.id)
+    )
 
     for i in range(1, num_cards + 1):
-        db_session.add(Flashcard(
-            deck_id=deck.id,
-            front_text=f"Term {i}",
-            back_text=f"Definition {i}",
-            card_order=i,
-        ))
+        db_session.add(
+            Flashcard(
+                deck_id=deck.id,
+                front_text=f"Term {i}",
+                back_text=f"Definition {i}",
+                card_order=i,
+            )
+        )
 
     db_session.commit()
     db_session.refresh(deck)
@@ -77,7 +81,9 @@ class TestCreateFlashcardDeck:
     """FLASH-UNIT-001: Flashcard deck is created with correct metadata."""
 
     @patch("app.services.flashcard_service.get_valid_selected_files")
-    def test_creates_deck_with_correct_metadata(self, mock_validate, db_session, test_user):
+    def test_creates_deck_with_correct_metadata(
+        self, mock_validate, db_session, test_user
+    ):
         """FLASH-UNIT-001: Deck has correct title, difficulty, and PENDING status."""
         file_record = _create_processed_file(db_session, test_user)
         mock_validate.return_value = [file_record]
@@ -188,8 +194,13 @@ class TestFlashcardAPIList:
     """FLASH-INT-002, 003: GET /api/v1/materials/flashcards."""
 
     def test_list_returns_only_current_user_decks(
-        self, client, db_session, test_user, second_user,
-        auth_headers, second_user_headers
+        self,
+        client,
+        db_session,
+        test_user,
+        second_user,
+        auth_headers,
+        second_user_headers,
     ):
         """FLASH-INT-002: GET /flashcards returns only current user's decks."""
         file_a = _create_processed_file(db_session, test_user, "a.pdf")

@@ -242,9 +242,7 @@ def generate_all_scene_images(
     use_placeholders = False
 
     for scene in scenes:
-        output_path = os.path.join(
-            output_dir, f"scene_{scene.scene_number:03d}.png"
-        )
+        output_path = os.path.join(output_dir, f"scene_{scene.scene_number:03d}.png")
 
         if use_placeholders:
             # Skip AI entirely — already know it's unavailable

@@ -18,7 +18,6 @@ from app.services.content_generation_context_service import (
     get_valid_selected_files,
 )
 
-
 # ==========================================================================
 # CTXSVC-UNIT-001, 002, 003: get_valid_selected_files
 # ==========================================================================
@@ -27,7 +26,9 @@ from app.services.content_generation_context_service import (
 class TestGetValidSelectedFiles:
     """CTXSVC-UNIT-001, 002, 003: File validation for content generation."""
 
-    def test_raises_when_file_ids_dont_belong_to_user(self, db_session, test_user, second_user):
+    def test_raises_when_file_ids_dont_belong_to_user(
+        self, db_session, test_user, second_user
+    ):
         """CTXSVC-UNIT-001: Raises ValueError when file_ids don't belong to the user."""
         from app.models.material_model import UploadedFile, FileType
 
@@ -116,12 +117,16 @@ class TestBuildBroadContext:
 
         # Create two files
         file_a = UploadedFile(
-            name="file_a.pdf", file_type=FileType.pdf,
-            status=ProcessingStatus.SUCCESS, user_id=test_user.id,
+            name="file_a.pdf",
+            file_type=FileType.pdf,
+            status=ProcessingStatus.SUCCESS,
+            user_id=test_user.id,
         )
         file_b = UploadedFile(
-            name="file_b.pdf", file_type=FileType.pdf,
-            status=ProcessingStatus.SUCCESS, user_id=test_user.id,
+            name="file_b.pdf",
+            file_type=FileType.pdf,
+            status=ProcessingStatus.SUCCESS,
+            user_id=test_user.id,
         )
         db_session.add_all([file_a, file_b])
         db_session.commit()
@@ -130,14 +135,30 @@ class TestBuildBroadContext:
 
         # Add chunks (insert in non-sequential order to test sorting)
         chunks = [
-            DocumentChunk(content="B chunk 1", vector_id="b1", source_file_id=file_b.id,
-                          metadata_={"chunk_index": 0}),
-            DocumentChunk(content="A chunk 2", vector_id="a2", source_file_id=file_a.id,
-                          metadata_={"chunk_index": 1}),
-            DocumentChunk(content="A chunk 1", vector_id="a1", source_file_id=file_a.id,
-                          metadata_={"chunk_index": 0}),
-            DocumentChunk(content="B chunk 2", vector_id="b2", source_file_id=file_b.id,
-                          metadata_={"chunk_index": 1}),
+            DocumentChunk(
+                content="B chunk 1",
+                vector_id="b1",
+                source_file_id=file_b.id,
+                metadata_={"chunk_index": 0},
+            ),
+            DocumentChunk(
+                content="A chunk 2",
+                vector_id="a2",
+                source_file_id=file_a.id,
+                metadata_={"chunk_index": 1},
+            ),
+            DocumentChunk(
+                content="A chunk 1",
+                vector_id="a1",
+                source_file_id=file_a.id,
+                metadata_={"chunk_index": 0},
+            ),
+            DocumentChunk(
+                content="B chunk 2",
+                vector_id="b2",
+                source_file_id=file_b.id,
+                metadata_={"chunk_index": 1},
+            ),
         ]
         db_session.add_all(chunks)
         db_session.commit()
@@ -159,8 +180,10 @@ class TestBuildBroadContext:
         from app.models.material_model import UploadedFile, FileType
 
         file_record = UploadedFile(
-            name="empty.pdf", file_type=FileType.pdf,
-            status=ProcessingStatus.SUCCESS, user_id=test_user.id,
+            name="empty.pdf",
+            file_type=FileType.pdf,
+            status=ProcessingStatus.SUCCESS,
+            user_id=test_user.id,
         )
         db_session.add(file_record)
         db_session.commit()

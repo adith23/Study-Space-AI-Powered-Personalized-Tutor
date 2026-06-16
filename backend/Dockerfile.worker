@@ -17,7 +17,7 @@ FROM public.ecr.aws/lambda/python:3.11 AS runtime
 RUN yum install -y postgresql-libs tar xz && yum clean all
 
 # Install FFmpeg from static build (AL2023 repos don't include ffmpeg)
-RUN curl -L https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz | \
+RUN curl -L https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz | \
     tar xJ --strip-components=1 -C /usr/local/bin/ --wildcards '*/ffmpeg' '*/ffprobe'
 
 # Copy Python packages from builder (--prefix creates lib/ and bin/ subdirs)

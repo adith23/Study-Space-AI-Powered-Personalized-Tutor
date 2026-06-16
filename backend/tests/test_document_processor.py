@@ -20,7 +20,6 @@ from app.services.document_processor import (
     MAX_DOCLING_ATTEMPTS,
 )
 
-
 # ==========================================================================
 # DOC-UNIT-001, 002: _heading_path_to_string
 # ==========================================================================
@@ -172,8 +171,14 @@ class TestBuildMetadataForChunks:
             chunks, file_id=42, user_id=7, source="test.pdf"
         )
         required_keys = {
-            "user_id", "source_file_id", "chunk_index", "total_chunks",
-            "section_title", "heading_path", "source", "pipeline_version",
+            "user_id",
+            "source_file_id",
+            "chunk_index",
+            "total_chunks",
+            "section_title",
+            "heading_path",
+            "source",
+            "pipeline_version",
         }
         for meta in metadata_list:
             assert required_keys.issubset(set(meta.keys()))
