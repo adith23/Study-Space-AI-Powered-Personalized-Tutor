@@ -6,6 +6,7 @@ from pydantic_settings import BaseSettings
 
 # Load SSM secrets in production before settings initialization
 from app.core.secrets import load_ssm_secrets
+
 load_ssm_secrets()
 
 

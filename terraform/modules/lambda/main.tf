@@ -29,10 +29,11 @@ resource "aws_lambda_function" "api" {
   tags = { Name = "${var.project}-api" }
 }
 
-# API Lambda Function URL (free — no API Gateway charges)
+# API Lambda Function URL
 resource "aws_lambda_function_url" "api" {
   function_name      = aws_lambda_function.api.function_name
-  authorization_type = "NONE" # Public (CORS handled by FastAPI middleware)
+  authorization_type = "AWS_IAM" # Changed from NONE to use CloudFront OAC
+  invoke_mode        = "RESPONSE_STREAM"
 
   cors {
     allow_origins     = ["*"]
@@ -115,7 +116,8 @@ resource "aws_lambda_function" "frontend" {
 # Frontend Lambda Function URL
 resource "aws_lambda_function_url" "frontend" {
   function_name      = aws_lambda_function.frontend.function_name
-  authorization_type = "NONE"
+  authorization_type = "AWS_IAM" # Changed from NONE to use CloudFront OAC
+  invoke_mode        = "RESPONSE_STREAM"
 
   cors {
     allow_origins = ["*"]
@@ -124,14 +126,6 @@ resource "aws_lambda_function_url" "frontend" {
     max_age       = 86400
   }
 }
-
-# ── Provisioned Concurrency (optional, costs $) ─────────────
-# Uncomment only if cold starts are unacceptable. Not free tier.
-# resource "aws_lambda_provisioned_concurrency_config" "api" {
-#   function_name                  = aws_lambda_function.api.function_name
-#   provisioned_concurrent_executions = 1
-#   qualifier                      = aws_lambda_function.api.version
-# }
 
 # ── API Invoke Config (no retries for HTTP requests) ─────────
 resource "aws_lambda_function_event_invoke_config" "api" {
@@ -146,24 +140,4 @@ resource "aws_lambda_function_event_invoke_config" "api" {
 resource "aws_lambda_function_event_invoke_config" "worker" {
   function_name          = aws_lambda_function.worker.function_name
   maximum_retry_attempts = 2 # Allow 2 retries for failed tasks (before DLQ)
-}
-
-# ── Function URL Public Permissions ──────────────────────────
-# Terraform requires explicit resource-based policies to allow
-# public access to Function URLs, even when auth type is NONE.
-
-resource "aws_lambda_permission" "api_url" {
-  statement_id           = "FunctionURLAllowPublicAccessV2"
-  action                 = "lambda:InvokeFunctionUrl"
-  function_name          = aws_lambda_function.api.function_name
-  principal              = "*"
-  function_url_auth_type = "NONE"
-}
-
-resource "aws_lambda_permission" "frontend_url" {
-  statement_id           = "FunctionURLAllowPublicAccessV2"
-  action                 = "lambda:InvokeFunctionUrl"
-  function_name          = aws_lambda_function.frontend.function_name
-  principal              = "*"
-  function_url_auth_type = "NONE"
 }
