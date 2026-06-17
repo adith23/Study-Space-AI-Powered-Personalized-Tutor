@@ -10,13 +10,7 @@ locals {
   frontend_origin_domain = replace(replace(var.frontend_function_url, "https://", ""), "/", "")
 }
 
-resource "aws_cloudfront_origin_access_control" "lambda" {
-  name                              = "${var.project}-${var.environment}-lambda-oac"
-  description                       = "OAC for Lambda Function URLs"
-  origin_access_control_origin_type = "lambda"
-  signing_behavior                  = "always"
-  signing_protocol                  = "sigv4"
-}
+
 
 resource "aws_cloudfront_distribution" "main" {
   enabled             = true
@@ -27,9 +21,13 @@ resource "aws_cloudfront_distribution" "main" {
 
   # ── Frontend Origin (default) ─────────────────────────────
   origin {
-    domain_name              = local.frontend_origin_domain
-    origin_id                = "frontend"
-    origin_access_control_id = aws_cloudfront_origin_access_control.lambda.id
+    domain_name = local.frontend_origin_domain
+    origin_id   = "frontend"
+
+    custom_header {
+      name  = "x-forwarded-host"
+      value = "dlre2fiteh59k.cloudfront.net"
+    }
 
     custom_origin_config {
       http_port              = 80
@@ -41,9 +39,8 @@ resource "aws_cloudfront_distribution" "main" {
 
   # ── API Origin ────────────────────────────────────────────
   origin {
-    domain_name              = local.api_origin_domain
-    origin_id                = "api"
-    origin_access_control_id = aws_cloudfront_origin_access_control.lambda.id
+    domain_name = local.api_origin_domain
+    origin_id   = "api"
 
     custom_origin_config {
       http_port                = 80
@@ -66,8 +63,9 @@ resource "aws_cloudfront_distribution" "main" {
 
     forwarded_values {
       query_string = true
+      headers      = ["Origin", "Authorization", "Content-Type", "Accept", "Next-Action", "Next-Router-State-Tree", "Next-Url"]
       cookies {
-        forward = "none"
+        forward = "all"
       }
     }
 
@@ -85,6 +83,7 @@ resource "aws_cloudfront_distribution" "main" {
     cached_methods             = ["GET", "HEAD"]
     compress                   = true
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+    
     forwarded_values {
       query_string = true
       headers      = ["Authorization", "Content-Type", "Origin", "Accept"]
@@ -189,42 +188,3 @@ resource "aws_cloudfront_response_headers_policy" "security" {
     }
   }
 }
-
-# ── CloudFront to Lambda Permissions ─────────────────────────
-# Grants CloudFront the permission to securely invoke the 
-# Lambda Function URLs using IAM (OAC) instead of public access.
-
-# 1. InvokeFunctionUrl Permissions
-resource "aws_lambda_permission" "api_cloudfront" {
-  statement_id  = "AllowCloudFrontServicePrincipal"
-  action        = "lambda:InvokeFunctionUrl"
-  function_name = var.api_function_name
-  principal     = "cloudfront.amazonaws.com"
-  source_arn    = aws_cloudfront_distribution.main.arn
-}
-
-resource "aws_lambda_permission" "frontend_cloudfront" {
-  statement_id  = "AllowCloudFrontServicePrincipal"
-  action        = "lambda:InvokeFunctionUrl"
-  function_name = var.frontend_function_name
-  principal     = "cloudfront.amazonaws.com"
-  source_arn    = aws_cloudfront_distribution.main.arn
-}
-
-# 2. InvokeFunction Permissions (Required for OAC signature validation)
-resource "aws_lambda_permission" "api_cloudfront_invoke" {
-  statement_id  = "AllowCloudFrontInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = var.api_function_name
-  principal     = "cloudfront.amazonaws.com"
-  source_arn    = aws_cloudfront_distribution.main.arn
-}
-
-resource "aws_lambda_permission" "frontend_cloudfront_invoke" {
-  statement_id  = "AllowCloudFrontInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = var.frontend_function_name
-  principal     = "cloudfront.amazonaws.com"
-  source_arn    = aws_cloudfront_distribution.main.arn
-}
-
