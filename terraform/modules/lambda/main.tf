@@ -32,7 +32,7 @@ resource "aws_lambda_function" "api" {
 # API Lambda Function URL
 resource "aws_lambda_function_url" "api" {
   function_name      = aws_lambda_function.api.function_name
-  authorization_type = "AWS_IAM" # Changed from NONE to use CloudFront OAC
+  authorization_type = "NONE"
   invoke_mode        = "RESPONSE_STREAM"
 
   cors {
@@ -102,7 +102,9 @@ resource "aws_lambda_function" "frontend" {
     variables = {
       ENVIRONMENT              = var.environment
       AWS_LWA_PORT             = "3000"
-      NEXT_PUBLIC_API_BASE_URL = "PLACEHOLDER" # Set after CloudFront is created
+      HOSTNAME                 = "0.0.0.0"
+      NEXT_PUBLIC_API_BASE_URL = "https://l7jt35xplizbzf6gykysykwkdm0zjutw.lambda-url.us-east-1.on.aws/api/v1"
+      INTERNAL_BACKEND_URL     = "https://l7jt35xplizbzf6gykysykwkdm0zjutw.lambda-url.us-east-1.on.aws/api/v1"
     }
   }
 
@@ -116,14 +118,16 @@ resource "aws_lambda_function" "frontend" {
 # Frontend Lambda Function URL
 resource "aws_lambda_function_url" "frontend" {
   function_name      = aws_lambda_function.frontend.function_name
-  authorization_type = "AWS_IAM" # Changed from NONE to use CloudFront OAC
+  authorization_type = "NONE"
   invoke_mode        = "RESPONSE_STREAM"
 
   cors {
-    allow_origins = ["*"]
-    allow_methods = ["GET", "HEAD"]
-    allow_headers = ["*"]
-    max_age       = 86400
+    allow_origins     = ["*"]
+    allow_methods     = ["*"]
+    allow_headers     = ["*"]
+    expose_headers    = ["*"]
+    max_age           = 86400
+    allow_credentials = true
   }
 }
 
