@@ -14,11 +14,27 @@ import logging
 import os
 import traceback
 
+# Redirect caches to writeable /tmp directory for AWS Lambda execution
+os.environ["HF_HOME"] = "/tmp/huggingface"
+os.environ["TORCH_HOME"] = "/tmp/torch"
+os.environ["XDG_CACHE_HOME"] = "/tmp/cache"
+
 # Load secrets from SSM at cold start (before importing app modules)
 os.environ.setdefault("ENVIRONMENT", "production")
 from app.core.secrets import load_ssm_secrets  # noqa: E402
 
 load_ssm_secrets()
+
+# Register all SQLAlchemy models so relationship string references resolve correctly
+from app.models import (  # noqa: F401, E402
+    chat_model,
+    flashcard_model,
+    material_model,
+    quiz_model,
+    space_model,
+    user_model,
+    video_model,
+)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -38,6 +54,7 @@ def handler(event, context):
     from app.core.database import SessionLocal
 
     results = []
+    failures = []
 
     for record in event.get("Records", []):
         message_body = json.loads(record["body"])
@@ -56,8 +73,13 @@ def handler(event, context):
         except Exception as e:
             logger.error("Task %s failed: %s\n%s", task_name, e, traceback.format_exc())
             results.append({"task": task_name, "status": "error", "error": str(e)})
+            failures.append((task_name, e))
         finally:
             db.close()
+
+    if failures:
+        # Re-raise the first exception to signal Lambda failure to SQS (enables SQS retries & DLQ routing)
+        raise failures[0][1]
 
     return {"processed": len(results), "results": results}
 

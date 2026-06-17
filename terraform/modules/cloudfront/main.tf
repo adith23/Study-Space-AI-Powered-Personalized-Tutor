@@ -74,9 +74,9 @@ resource "aws_cloudfront_distribution" "main" {
     max_ttl     = 86400 # 1 day max
   }
 
-  # ── /api/* → API Lambda (no caching) ──────────────────────
+  # ── /api/v1/* → API Lambda (no caching) ──────────────────
   ordered_cache_behavior {
-    path_pattern               = "/api/*"
+    path_pattern               = "/api/v1/*"
     target_origin_id           = "api"
     viewer_protocol_policy     = "redirect-to-https"
     allowed_methods            = ["GET", "HEAD", "OPTIONS", "PUT", "PATCH", "POST", "DELETE"]
