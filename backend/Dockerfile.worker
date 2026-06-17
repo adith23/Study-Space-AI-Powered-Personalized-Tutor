@@ -3,7 +3,7 @@ FROM public.ecr.aws/lambda/python:3.11 AS builder
 
 WORKDIR /app
 
-RUN yum install -y gcc gcc-c++ postgresql-devel libffi-devel
+RUN yum install -y gcc gcc-c++ postgresql-devel libffi-devel cairo-devel pango-devel
 
 COPY requirements-prod.txt .
 RUN pip install --no-cache-dir --prefix=/install -r requirements-prod.txt
@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir --prefix=/install -r requirements-prod.txt
 FROM public.ecr.aws/lambda/python:3.11 AS runtime
 
 # Install runtime deps
-RUN yum install -y postgresql-libs tar xz && yum clean all
+RUN yum install -y postgresql-libs tar xz cairo pango && yum clean all
 
 # Install FFmpeg from static docker image (much more reliable than downloading from the web)
 COPY --from=mwader/static-ffmpeg:latest /ffmpeg /usr/local/bin/
