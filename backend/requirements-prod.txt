@@ -1,10 +1,9 @@
 # ============================================================
 # Production-only requirements (slim — saves ~1 GB vs full)
 #
-# Removed: sentence-transformers, faiss-cpu, numpy, pandas,
-#          scipy, openai, anthropic, python-docx, python-pptx,
-#          openpyxl, manim, pytesseract, flower, redis, celery,
-#          python-magic, and all dev/test tools.
+# Removed: sentence-transformers, faiss-cpu, openai, anthropic,
+#          pytesseract, flower, redis, celery, python-magic,
+#          and all dev/test tools.
 # ============================================================
 
 # Core Framework
@@ -42,6 +41,15 @@ langchain-google-genai>=0.0.3
 docling>=1.0.0
 PyPDF2>=3.0.0
 Pillow>=10.0.0
+numpy>=1.26.2,<2.0
+scipy>=1.6.0,<1.13.0
+pandas>=2.2.0,<2.3.0
+python-docx>=1.1.2
+python-pptx>=1.0.2
+openpyxl>=3.1.5
+
+# Video Generation
+manim>=0.18.0,<0.20.0
 
 # Vector DB
 pinecone>=3.0.0

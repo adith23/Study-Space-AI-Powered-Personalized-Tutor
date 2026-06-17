@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Install build-time system deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc g++ libpq-dev libffi-dev \
+    gcc g++ libpq-dev libffi-dev libcairo2-dev libpango1.0-dev \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements-prod.txt .
@@ -18,7 +18,7 @@ WORKDIR /app
 
 # Install runtime system deps + FFmpeg for video pipeline
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 ffmpeg curl \
+    libpq5 ffmpeg curl libcairo2 libpango-1.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy Lambda Web Adapter extension

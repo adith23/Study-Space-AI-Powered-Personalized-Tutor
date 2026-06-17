@@ -1,25 +1,25 @@
 # ── Stage 1: Builder ──────────────────────────────────────────
-FROM public.ecr.aws/lambda/python:3.11 AS builder
+FROM public.ecr.aws/lambda/python:3.12 AS builder
 
 WORKDIR /app
 
-RUN yum install -y gcc gcc-c++ postgresql-devel libffi-devel
+RUN dnf install -y gcc gcc-c++ postgresql-devel libffi-devel cairo-devel pango-devel
 
 COPY requirements-prod.txt .
 RUN pip install --no-cache-dir --prefix=/install -r requirements-prod.txt
 
 # ── Stage 2: Runtime (Lambda Python base image) ──────────────
-FROM public.ecr.aws/lambda/python:3.11 AS runtime
+FROM public.ecr.aws/lambda/python:3.12 AS runtime
 
 # Install runtime deps
-RUN yum install -y postgresql-libs tar xz && yum clean all
+RUN dnf install -y postgresql-libs tar xz cairo pango && dnf clean all
 
 # Install FFmpeg from static docker image (much more reliable than downloading from the web)
 COPY --from=mwader/static-ffmpeg:latest /ffmpeg /usr/local/bin/
 COPY --from=mwader/static-ffmpeg:latest /ffprobe /usr/local/bin/
 
 # Copy Python packages from builder (--prefix creates lib/ and bin/ subdirs)
-COPY --from=builder /install/lib/python3.11/site-packages/ /var/lang/lib/python3.11/site-packages/
+COPY --from=builder /install/lib/python3.12/site-packages/ /var/lang/lib/python3.12/site-packages/
 COPY --from=builder /install/bin/ /var/lang/bin/
 
 # Copy application code
