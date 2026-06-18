@@ -238,11 +238,25 @@ class TestExtractMarkdownWithRetry:
 
     @patch("app.services.document_processor.time.sleep")
     @patch("app.services.document_processor._extract_markdown_with_docling")
-    def test_raises_after_max_attempts(self, mock_extract, mock_sleep):
-        """DOC-UNIT-011: Raises RuntimeError after MAX_DOCLING_ATTEMPTS failures."""
+    @patch("app.services.document_processor._extract_text_with_pypdf")
+    def test_uses_pdf_fallback_after_max_attempts(
+        self, mock_fallback, mock_extract, mock_sleep
+    ):
+        """DOC-UNIT-011: Falls back to PyPDF2 after Docling failures for PDFs."""
+        mock_extract.side_effect = RuntimeError("Always fails")
+        mock_fallback.return_value = "## Page 1\n\nFallback text content"
+        result = _extract_markdown_with_retry("test.pdf")
+        assert result == "## Page 1\n\nFallback text content"
+        assert mock_extract.call_count == MAX_DOCLING_ATTEMPTS
+        mock_fallback.assert_called_once_with("test.pdf")
+
+    @patch("app.services.document_processor.time.sleep")
+    @patch("app.services.document_processor._extract_markdown_with_docling")
+    def test_raises_after_max_attempts_for_non_pdf(self, mock_extract, mock_sleep):
+        """DOC-UNIT-011: Raises RuntimeError when no fallback is available."""
         mock_extract.side_effect = RuntimeError("Always fails")
         with pytest.raises(RuntimeError, match="failed after"):
-            _extract_markdown_with_retry("test.pdf")
+            _extract_markdown_with_retry("test.docx")
         assert mock_extract.call_count == MAX_DOCLING_ATTEMPTS
 
 
