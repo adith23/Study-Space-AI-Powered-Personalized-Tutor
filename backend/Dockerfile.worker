@@ -3,10 +3,13 @@ FROM public.ecr.aws/lambda/python:3.12 AS builder
 
 WORKDIR /app
 
-RUN dnf install -y gcc gcc-c++ postgresql-devel libffi-devel cairo-devel pango-devel
+RUN dnf install -y gcc gcc-c++ postgresql-devel libffi-devel cairo-devel pango-devel mesa-libGL
 
 COPY requirements-prod.txt .
 RUN pip install --no-cache-dir --prefix=/install -r requirements-prod.txt
+
+# Pre-download all default Docling and RapidOCR models (both PyTorch and ONNX models for English/Chinese)
+RUN PYTHONPATH=/install/lib/python3.12/site-packages python -m docling.cli.models download --output-dir /install/docling-artifacts
 
 # ── Stage 2: Runtime (Lambda Python base image) ──────────────
 FROM public.ecr.aws/lambda/python:3.12 AS runtime
@@ -21,6 +24,9 @@ COPY --from=mwader/static-ffmpeg:latest /ffprobe /usr/local/bin/
 # Copy Python packages from builder (--prefix creates lib/ and bin/ subdirs)
 COPY --from=builder /install/lib/python3.12/site-packages/ /var/lang/lib/python3.12/site-packages/
 COPY --from=builder /install/bin/ /var/lang/bin/
+
+# Copy pre-downloaded Docling models
+COPY --from=builder /install/docling-artifacts/ /var/task/docling-artifacts/
 
 # Copy application code
 COPY app/ ${LAMBDA_TASK_ROOT}/app/
