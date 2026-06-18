@@ -19,6 +19,7 @@ os.environ["HF_HOME"] = "/tmp/huggingface"
 os.environ["TORCH_HOME"] = "/tmp/torch"
 os.environ["XDG_CACHE_HOME"] = "/tmp/cache"
 os.environ["DOCLING_ARTIFACTS_PATH"] = "/var/task/docling-artifacts"
+os.environ["TIKTOKEN_CACHE_DIR"] = "/var/task/tiktoken_cache"
 
 # Load secrets from SSM at cold start (before importing app modules)
 os.environ.setdefault("ENVIRONMENT", "production")

@@ -156,13 +156,26 @@ class VideoPipelineOrchestrator:
             artifacts.record("output_video", assembly.video_path, "video", {})
             artifacts.record("thumbnail", assembly.thumbnail_path, "image", {})
 
+            video_uri = str(assembly.video_path)
+            thumbnail_uri = str(assembly.thumbnail_path)
+
+            from app.core.config import settings
+            if settings.STORAGE_BACKEND == "r2":
+                logger.info("Uploading video artifacts to R2...")
+                from app.services.video.workspace import upload_final_artifacts
+                upload_res = upload_final_artifacts(workspace)
+                if "video_key" in upload_res:
+                    video_uri = f"r2://{settings.R2_BUCKET_NAME}/{upload_res['video_key']}"
+                if "thumbnail_key" in upload_res:
+                    thumbnail_uri = f"r2://{settings.R2_BUCKET_NAME}/{upload_res['thumbnail_key']}"
+
             _update_status(
                 self.db,
                 video,
                 VideoStatus.COMPLETED,
                 100,
-                video_path=assembly.video_path,
-                thumbnail_path=assembly.thumbnail_path,
+                video_path=video_uri,
+                thumbnail_path=thumbnail_uri,
                 duration_seconds=assembly.duration_seconds,
                 completed_at=datetime.now(timezone.utc),
                 artifacts_json=build_artifacts_snapshot(artifacts),
@@ -174,6 +187,9 @@ class VideoPipelineOrchestrator:
                 "Video pipeline failed for %d: %s", video_id, exc, exc_info=True
             )
             self._fail(video, str(exc), artifacts, stage_timings, workspace)
+        finally:
+            from app.services.video.workspace import cleanup_workspace
+            cleanup_workspace(workspace)
 
     def _load_video(self, video_id: int) -> GeneratedVideo | None:
         return (
