@@ -28,4 +28,3 @@ COPY lambda_worker.py ${LAMBDA_TASK_ROOT}/
 
 # Lambda handler: lambda_worker.handler
 CMD ["lambda_worker.handler"]
-
