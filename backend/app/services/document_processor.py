@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 import re
 import tempfile
 import time
@@ -11,6 +12,7 @@ from uuid import uuid4
 from docling.document_converter import DocumentConverter
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pinecone import Pinecone as PineconeClient
+from PyPDF2 import PdfReader
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -25,6 +27,7 @@ pinecone = PineconeClient(api_key=settings.PINECONE_API_KEY)
 
 MAX_DOCLING_ATTEMPTS = 3
 DOCLING_RETRY_BASE_DELAY_SECONDS = 1
+MIN_FALLBACK_TEXT_LENGTH = 25
 CHUNK_SIZE_TOKENS = 400
 CHUNK_OVERLAP_TOKENS = 80
 CHUNK_SEPARATORS = ["\n\n", "\n", ". ", " ", ""]
@@ -71,6 +74,36 @@ def _extract_markdown_with_docling(file_path: str) -> str:
     return markdown_text
 
 
+def _extract_text_with_pypdf(file_path: str) -> str:
+    reader = PdfReader(file_path)
+    page_texts = []
+    for page_number, page in enumerate(reader.pages, start=1):
+        text = page.extract_text() or ""
+        text = text.strip()
+        if text:
+            page_texts.append(f"## Page {page_number}\n\n{text}")
+
+    markdown_text = "\n\n".join(page_texts).strip()
+    if len(markdown_text) < MIN_FALLBACK_TEXT_LENGTH:
+        raise ValueError("PyPDF2 fallback could not extract enough text from the PDF.")
+
+    return markdown_text
+
+
+def _extract_markdown_with_fallback(file_path: str, docling_error: Exception) -> str:
+    if Path(file_path).suffix.lower() != ".pdf":
+        raise RuntimeError(
+            "Docling extraction failed and no fallback is available."
+        ) from docling_error
+
+    logger.warning(
+        "Docling extraction failed for %s. Falling back to PyPDF2 text extraction.",
+        file_path,
+        exc_info=(type(docling_error), docling_error, docling_error.__traceback__),
+    )
+    return _extract_text_with_pypdf(file_path)
+
+
 # Extract the markdown with retry
 def _extract_markdown_with_retry(file_path: str) -> str:
     last_error = None
@@ -88,12 +121,17 @@ def _extract_markdown_with_retry(file_path: str) -> str:
                 attempt,
                 MAX_DOCLING_ATTEMPTS,
                 delay_seconds,
+                exc_info=(type(exc), exc, exc.__traceback__),
             )
             time.sleep(delay_seconds)
 
-    raise RuntimeError(
-        f"Docling extraction failed after {MAX_DOCLING_ATTEMPTS} attempts."
-    ) from last_error
+    try:
+        return _extract_markdown_with_fallback(file_path, last_error)
+    except Exception as fallback_error:
+        raise RuntimeError(
+            f"Docling extraction failed after {MAX_DOCLING_ATTEMPTS} attempts "
+            f"and PDF fallback failed: {fallback_error}"
+        ) from last_error
 
 
 def _resolve_file_path(stored_path: str) -> str:
@@ -224,8 +262,14 @@ def _build_metadata_for_chunks(
     ]
 
 
+def _processing_status_value(status) -> str:
+    return getattr(status, "value", str(status))
+
+
 # Process and embed document
-def process_and_embed_document(db: Session, file_id: int):
+def process_and_embed_document(
+    db: Session, file_id: int, *, raise_on_failure: bool = False
+):
     """
     The core function to process a single uploaded file.
     This is designed to be called from a background task.
@@ -238,7 +282,7 @@ def process_and_embed_document(db: Session, file_id: int):
         return
 
     # Prevent reprocessing
-    if str(file_record.status) == ProcessingStatus.SUCCESS.value:
+    if _processing_status_value(file_record.status) == ProcessingStatus.SUCCESS.value:
         logger.warning(
             f"File {file_id} has already been processed successfully. Skipping."
         )
@@ -305,6 +349,8 @@ def process_and_embed_document(db: Session, file_id: int):
         setattr(file_record, "status", ProcessingStatus.FAILED.value)
         setattr(file_record, "error_message", str(e)[:500])
         db.commit()
+        if raise_on_failure:
+            raise
     finally:
         # Clean up temp files downloaded from R2 to free /tmp space on Lambda
         if local_path and local_path != str(file_record.stored_path):

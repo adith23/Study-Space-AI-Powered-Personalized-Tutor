@@ -18,7 +18,6 @@ import traceback
 os.environ["HF_HOME"] = "/tmp/huggingface"
 os.environ["TORCH_HOME"] = "/tmp/torch"
 os.environ["XDG_CACHE_HOME"] = "/tmp/cache"
-os.environ["DOCLING_ARTIFACTS_PATH"] = "/tmp/docling-artifacts"
 os.environ["TIKTOKEN_CACHE_DIR"] = "/tmp/tiktoken_cache"
 
 # Load secrets from SSM at cold start (before importing app modules)
@@ -96,7 +95,9 @@ def _route_task(task_name: str, payload: dict, db):
     if task_name == "process_document":
         from app.services.document_processor import process_and_embed_document
 
-        return process_and_embed_document(db=db, file_id=payload["file_id"])
+        return process_and_embed_document(
+            db=db, file_id=payload["file_id"], raise_on_failure=True
+        )
 
     elif task_name == "generate_quiz":
         from app.services.quiz_service import generate_quiz_for_id

@@ -51,6 +51,10 @@ def _create_pending_file(db_session, user, stored_path="/fake/test.pdf"):
     return f
 
 
+def _status_value(status) -> str:
+    return getattr(status, "value", str(status))
+
+
 # ==========================================================================
 # DOCPROC-INT-001 through 006
 # ==========================================================================
@@ -70,12 +74,12 @@ class TestProcessAndEmbedDocument:
         mock_index_fn.return_value = mock_index
 
         file_record = _create_pending_file(db_session, test_user)
-        assert str(file_record.status) == ProcessingStatus.PENDING.value
+        assert _status_value(file_record.status) == ProcessingStatus.PENDING.value
 
         process_and_embed_document(db=db_session, file_id=file_record.id)
 
         db_session.refresh(file_record)
-        assert str(file_record.status) == ProcessingStatus.SUCCESS.value
+        assert _status_value(file_record.status) == ProcessingStatus.SUCCESS.value
 
     @patch("app.services.document_processor.get_pinecone_index")
     @patch("app.services.document_processor._extract_markdown_with_retry")
@@ -136,9 +140,28 @@ class TestProcessAndEmbedDocument:
         process_and_embed_document(db=db_session, file_id=file_record.id)
 
         db_session.refresh(file_record)
-        assert str(file_record.status) == ProcessingStatus.FAILED.value
+        assert _status_value(file_record.status) == ProcessingStatus.FAILED.value
         assert file_record.error_message is not None
         assert "failed" in file_record.error_message.lower()
+
+    @patch("app.services.document_processor.get_pinecone_index")
+    @patch("app.services.document_processor._extract_markdown_with_retry")
+    def test_failed_processing_can_raise_for_worker_retry(
+        self, mock_extract, mock_index_fn, db_session, test_user
+    ):
+        """Worker callers can re-raise after status update so SQS retries/DLQ work."""
+        mock_extract.side_effect = RuntimeError("Docling unavailable")
+        mock_index_fn.return_value = MagicMock()
+
+        file_record = _create_pending_file(db_session, test_user)
+        with pytest.raises(RuntimeError, match="Docling unavailable"):
+            process_and_embed_document(
+                db=db_session, file_id=file_record.id, raise_on_failure=True
+            )
+
+        db_session.refresh(file_record)
+        assert _status_value(file_record.status) == ProcessingStatus.FAILED.value
+        assert "Docling unavailable" in file_record.error_message
 
     @patch("app.services.document_processor.get_pinecone_index")
     @patch("app.services.document_processor._extract_markdown_with_retry")
