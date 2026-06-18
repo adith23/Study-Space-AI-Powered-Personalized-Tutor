@@ -160,14 +160,20 @@ class VideoPipelineOrchestrator:
             thumbnail_uri = str(assembly.thumbnail_path)
 
             from app.core.config import settings
+
             if settings.STORAGE_BACKEND == "r2":
                 logger.info("Uploading video artifacts to R2...")
                 from app.services.video.workspace import upload_final_artifacts
+
                 upload_res = upload_final_artifacts(workspace)
                 if "video_key" in upload_res:
-                    video_uri = f"r2://{settings.R2_BUCKET_NAME}/{upload_res['video_key']}"
+                    video_uri = (
+                        f"r2://{settings.R2_BUCKET_NAME}/{upload_res['video_key']}"
+                    )
                 if "thumbnail_key" in upload_res:
-                    thumbnail_uri = f"r2://{settings.R2_BUCKET_NAME}/{upload_res['thumbnail_key']}"
+                    thumbnail_uri = (
+                        f"r2://{settings.R2_BUCKET_NAME}/{upload_res['thumbnail_key']}"
+                    )
 
             _update_status(
                 self.db,
@@ -189,6 +195,7 @@ class VideoPipelineOrchestrator:
             self._fail(video, str(exc), artifacts, stage_timings, workspace)
         finally:
             from app.services.video.workspace import cleanup_workspace
+
             cleanup_workspace(workspace)
 
     def _load_video(self, video_id: int) -> GeneratedVideo | None:
