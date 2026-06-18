@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir --prefix=/install -r requirements-prod.txt
 FROM public.ecr.aws/lambda/python:3.12 AS runtime
 
 # Install runtime deps
-RUN dnf install -y postgresql-libs tar xz cairo pango && dnf clean all
+RUN dnf install -y postgresql-libs tar xz cairo pango mesa-libGL && dnf clean all
 
 # Install FFmpeg from static docker image (much more reliable than downloading from the web)
 COPY --from=mwader/static-ffmpeg:latest /ffmpeg /usr/local/bin/
