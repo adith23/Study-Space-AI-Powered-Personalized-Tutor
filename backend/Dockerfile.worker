@@ -3,19 +3,10 @@ FROM public.ecr.aws/lambda/python:3.12 AS builder
 
 WORKDIR /app
 
-RUN dnf install -y gcc gcc-c++ postgresql-devel libffi-devel cairo-devel pango-devel mesa-libGL
+RUN dnf install -y gcc gcc-c++ postgresql-devel libffi-devel cairo-devel pango-devel
 
 COPY requirements-prod.txt .
 RUN pip install --no-cache-dir --prefix=/install -r requirements-prod.txt
-
-# Use a Hugging Face mirror to avoid HTTP 429 Rate Limit errors on shared GitHub Action runner IPs
-ENV HF_ENDPOINT=https://hf-mirror.com
-
-# Pre-download all default Docling and RapidOCR models (both PyTorch and ONNX models for English/Chinese)
-RUN PYTHONPATH=/install/lib/python3.12/site-packages python -m docling.cli.models download --output-dir /install/docling-artifacts
-
-# Pre-download tiktoken encoding cache to avoid runtime internet download latency
-RUN TIKTOKEN_CACHE_DIR=/install/tiktoken_cache PYTHONPATH=/install/lib/python3.12/site-packages python -c "import tiktoken; [tiktoken.get_encoding(enc) for enc in ['cl100k_base', 'p50k_base', 'r50k_base']]"
 
 # ── Stage 2: Runtime (Lambda Python base image) ──────────────
 FROM public.ecr.aws/lambda/python:3.12 AS runtime
@@ -31,16 +22,9 @@ COPY --from=mwader/static-ffmpeg:latest /ffprobe /usr/local/bin/
 COPY --from=builder /install/lib/python3.12/site-packages/ /var/lang/lib/python3.12/site-packages/
 COPY --from=builder /install/bin/ /var/lang/bin/
 
-# Copy pre-downloaded Docling models
-COPY --from=builder /install/docling-artifacts/ /var/task/docling-artifacts/
-
-# Copy pre-downloaded tiktoken cache
-COPY --from=builder /install/tiktoken_cache/ /var/task/tiktoken_cache/
-
 # Copy application code
 COPY app/ ${LAMBDA_TASK_ROOT}/app/
 COPY lambda_worker.py ${LAMBDA_TASK_ROOT}/
 
 # Lambda handler: lambda_worker.handler
 CMD ["lambda_worker.handler"]
-

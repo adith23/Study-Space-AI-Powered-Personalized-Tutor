@@ -145,3 +145,30 @@ resource "aws_lambda_function_event_invoke_config" "worker" {
   function_name          = aws_lambda_function.worker.function_name
   maximum_retry_attempts = 2 # Allow 2 retries for failed tasks (before DLQ)
 }
+
+# ── EventBridge Schedule (Keep SQS Worker Warm) ──────────────
+# Pings the worker Lambda once every 12 minutes to keep the container
+# active, ensuring that /tmp cached Docling and tiktoken models persist.
+resource "aws_cloudwatch_event_rule" "keep_worker_warm" {
+  name                = "${var.project}-${var.environment}-keep-worker-warm"
+  description         = "Keep the SQS Worker Lambda warm to preserve cached models in /tmp"
+  schedule_expression = "rate(10 minutes)"
+}
+
+resource "aws_cloudwatch_event_target" "keep_worker_warm_target" {
+  rule      = aws_cloudwatch_event_rule.keep_worker_warm.name
+  target_id = "keep_worker_warm"
+  arn       = aws_lambda_function.worker.arn
+  input     = jsonencode({
+    "task_name" : "keep_warm",
+    "payload"   : {}
+  })
+}
+
+resource "aws_lambda_permission" "allow_cloudwatch" {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.worker.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.keep_worker_warm.arn
+}

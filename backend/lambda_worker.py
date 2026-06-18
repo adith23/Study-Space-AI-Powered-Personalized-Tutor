@@ -18,8 +18,8 @@ import traceback
 os.environ["HF_HOME"] = "/tmp/huggingface"
 os.environ["TORCH_HOME"] = "/tmp/torch"
 os.environ["XDG_CACHE_HOME"] = "/tmp/cache"
-os.environ["DOCLING_ARTIFACTS_PATH"] = "/var/task/docling-artifacts"
-os.environ["TIKTOKEN_CACHE_DIR"] = "/var/task/tiktoken_cache"
+os.environ["DOCLING_ARTIFACTS_PATH"] = "/tmp/docling-artifacts"
+os.environ["TIKTOKEN_CACHE_DIR"] = "/tmp/tiktoken_cache"
 
 # Load secrets from SSM at cold start (before importing app modules)
 os.environ.setdefault("ENVIRONMENT", "production")
@@ -53,6 +53,11 @@ def handler(event, context):
     Returns:
         Summary dict of processed tasks.
     """
+    # Check if this is an EventBridge keep-warm ping (invoked directly, not via SQS)
+    if event.get("task_name") == "keep_warm":
+        logger.info("Keep-warm ping received. Container is warm.")
+        return {"status": "warm"}
+
     from app.core.database import SessionLocal
 
     results = []
