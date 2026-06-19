@@ -1,7 +1,5 @@
-# ============================================================
 # CI Pipeline — Runs on every PR and push to main
 # Lint, type-check, test backend & frontend
-# ============================================================
 
 name: CI
 
@@ -16,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ── Backend Checks ─────────────────────────────────────────
+  # Backend Checks
   backend-lint:
     name: Backend Lint & Type Check
     runs-on: ubuntu-latest
@@ -94,7 +92,7 @@ jobs:
         run: |
           pytest tests/ -v --tb=short --cov=app --cov-report=term-missing || true
 
-  # ── Frontend Checks ────────────────────────────────────────
+  # Frontend Checks
   frontend-lint:
     name: Frontend Lint & Type Check
     runs-on: ubuntu-latest
@@ -140,7 +138,7 @@ jobs:
       - name: Verify standalone output
         run: test -d .next/standalone
 
-  # ── Docker Build Verification ──────────────────────────────
+  # Docker Build Verification
   docker-build:
     name: Docker Build Check
     runs-on: ubuntu-latest
@@ -157,7 +155,7 @@ jobs:
       - name: Build Frontend image
         run: docker build -t study-space-frontend:test ./frontend
 
-  # ── Security Audit ─────────────────────────────────────────
+  # Security Audit
   security-audit:
     name: Dependency Security Audit
     runs-on: ubuntu-latest

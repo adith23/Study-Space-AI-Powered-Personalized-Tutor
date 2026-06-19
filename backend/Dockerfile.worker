@@ -1,4 +1,4 @@
-# ── Stage 1: Builder ──────────────────────────────────────────
+# Stage 1: Builder 
 FROM public.ecr.aws/lambda/python:3.12 AS builder
 
 WORKDIR /app
@@ -8,7 +8,7 @@ RUN dnf install -y gcc gcc-c++ postgresql-devel libffi-devel cairo-devel pango-d
 COPY requirements-prod.txt .
 RUN pip install --no-cache-dir --prefix=/install -r requirements-prod.txt
 
-# ── Stage 2: Runtime (Lambda Python base image) ──────────────
+# Stage 2: Runtime (Lambda Python base image) 
 FROM public.ecr.aws/lambda/python:3.12 AS runtime
 
 # Install runtime deps

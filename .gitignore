@@ -95,6 +95,7 @@ backend/storage/cache/*
 !backend/storage/processed/.gitkeep
 !backend/storage/generated/.gitkeep
 !backend/storage/cache/.gitkeep
+uploads/
 
 # Databases and local data
 *.sqlite3
