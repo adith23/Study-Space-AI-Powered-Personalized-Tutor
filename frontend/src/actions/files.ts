@@ -4,9 +4,9 @@ import { api } from "@/lib/api/index.server";
 import { isNextRedirectError } from "@/lib/api/transport.server";
 
 
-export async function uploadFileAction(formData: FormData) {
+export async function uploadFileAction(spaceId: number, formData: FormData) {
   try {
-    const data = await api.files.upload(formData);
+    const data = await api.spaces.uploadFile(spaceId, formData);
     return { error: null, data };
   } catch (err) {
     if (isNextRedirectError(err)) throw err;
@@ -40,3 +40,4 @@ export async function deleteFileAction(fileId: number) {
     return { error: err instanceof Error ? err.message : "Delete failed" };
   }
 }
+

@@ -24,6 +24,7 @@ import type { FlashcardDeckSummary } from "@/types/flashcard";
 import type { VideoListItem } from "@/types/video";
 
 interface StudySpaceProps {
+  spaceId: number;
   spaceName: string;
   initialFiles: UploadedFileListResponse[];
   initialSessions: ChatSession[];
@@ -33,6 +34,7 @@ interface StudySpaceProps {
 }
 
 export default function StudySpace({
+  spaceId,
   spaceName,
   initialFiles,
   initialSessions,
@@ -65,10 +67,10 @@ export default function StudySpace({
     handleRenameFile,
     handleDeleteFile,
     handleDismissFile,
-  } = useFiles(initialFiles, setMiddleColumnView);
+  } = useFiles(spaceId, initialFiles, setMiddleColumnView);
 
   const { sessions, activeSessionId, setActiveSessionId, handleCreateSession } =
-    useChatSessions(initialSessions);
+    useChatSessions(spaceId, initialSessions);
 
   const {
     quizzes,
@@ -80,6 +82,7 @@ export default function StudySpace({
     handleCreateQuiz,
     handleCreateFlashcards,
   } = useAIGeneration(
+    spaceId,
     initialQuizzes,
     initialDecks,
     selectedFileIds,
@@ -87,7 +90,7 @@ export default function StudySpace({
   );
 
   const { videos, activeVideoMeta, setActiveVideoId, handleGenerateVideo } =
-    useVideoGeneration(initialVideos, selectedFileIds);
+    useVideoGeneration(spaceId, initialVideos, selectedFileIds);
 
   return (
     <div className="flex flex-col h-screen bg-black text-white font-sans overflow-hidden">

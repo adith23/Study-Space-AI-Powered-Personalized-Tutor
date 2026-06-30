@@ -82,11 +82,24 @@ def download_file_content(
         file_id=file_id, db=db, current_user=current_user
     )
 
-    if not file_record.stored_path or not os.path.exists(file_record.stored_path):
+    if not file_record.stored_path:
+        raise HTTPException(status_code=404, detail="File content path not found")
+
+    stored_path = str(file_record.stored_path)
+    if stored_path.startswith("r2://") or stored_path.startswith("s3://"):
+        from fastapi.responses import RedirectResponse
+        from app.core.storage import get_storage
+
+        storage = get_storage()
+        key = stored_path.split("//", 1)[1].split("/", 1)[1]
+        presigned_url = storage.get_presigned_url(key, expires_in=3600)
+        return RedirectResponse(url=presigned_url)
+
+    if not os.path.exists(stored_path):
         raise HTTPException(status_code=404, detail="File content not found on disk")
 
     return FileResponse(
-        path=file_record.stored_path,
+        path=stored_path,
         filename=file_record.name or "document",
         media_type="application/octet-stream",
     )

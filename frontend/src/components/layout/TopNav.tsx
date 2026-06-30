@@ -1,5 +1,6 @@
 import React from "react";
 import { Settings, Share2, Menu, User } from "lucide-react";
+import { BookLogo } from "@/components/ui/BookLogo";
 
 interface TopNavProps {
   title: string;
@@ -9,10 +10,12 @@ const TopNav: React.FC<TopNavProps> = ({ title }) => {
   return (
     <header className="flex h-16 items-center justify-between border-b border-zinc-800 bg-black px-6 text-white shrink-0">
       <div className="flex items-center gap-3 w-1/3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800">
-          <div className="h-5 w-5 rounded-full border-2 border-white opacity-80" style={{ borderTopColor: 'transparent', transform: 'rotate(45deg)' }} />
+        <div className="flex items-center gap-2 cursor-pointer">
+          <BookLogo className="w-8 h-8 text-white" bookClassName="w-8 h-8" />
+          <span className="font-semibold text-xl mb-1 tracking-wide text-zinc-100">
+            Study Space
+          </span>
         </div>
-        <span className="text-lg font-bold tracking-tight">Study Space</span>
       </div>
 
       <div className="flex justify-center w-1/3">

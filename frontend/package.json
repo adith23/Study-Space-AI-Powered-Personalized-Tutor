@@ -18,7 +18,7 @@
     "typescript": "~5.8.3"
   },
   "dependencies": {
-    "@docmentis/udoc-viewer": "^0.6.27",
+    "@docmentis/udoc-viewer": "^0.7.5",
     "@types/axios": "^0.9.36",
     "axios": "^1.9.0",
     "lucide-react": "^0.518.0",

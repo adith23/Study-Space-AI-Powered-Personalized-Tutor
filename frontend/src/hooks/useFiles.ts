@@ -37,6 +37,7 @@ export function normalizeUploadedFile(
 }
 
 export function useFiles(
+  spaceId: number,
   initialFiles: UploadedFileListResponse[],
   setMiddleColumnView: (view: "document" | "quiz" | "flashcard") => void,
 ) {
@@ -105,7 +106,7 @@ export function useFiles(
     formData.append("name", file.name);
 
     try {
-      const result = await uploadFileAction(formData);
+      const result = await uploadFileAction(spaceId, formData);
 
       if (result.error || !result.data) {
         setFiles((prev) => {
