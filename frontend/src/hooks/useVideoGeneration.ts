@@ -28,6 +28,7 @@ function normalizeVideoMeta(video: VideoMeta): VideoMeta {
 }
 
 export function useVideoGeneration(
+  spaceId: number,
   initialVideos: VideoListItem[],
   selectedFileIds: Set<number>,
 ) {
@@ -107,7 +108,7 @@ export function useVideoGeneration(
 
       try {
         setIsGenerating(true);
-        const result = await generateVideoAction({
+        const result = await generateVideoAction(spaceId, {
           file_ids: fileIds,
           renderer: config.renderer,
           style: config.style,
@@ -130,7 +131,7 @@ export function useVideoGeneration(
         setIsGenerating(false);
       }
     },
-    [selectedFileIds],
+    [selectedFileIds, spaceId],
   );
 
   const handleDeleteVideo = useCallback(

@@ -4,8 +4,8 @@ import { api } from "@/lib/api/index.server";
 import { isNextRedirectError } from "@/lib/api/transport.server";
 import type { VideoGenerateRequest } from "@/types/video";
 
-export async function generateVideoAction(payload: VideoGenerateRequest) {
-  return api.video.generate(payload);
+export async function generateVideoAction(spaceId: number, payload: VideoGenerateRequest) {
+  return api.spaces.generateVideo(spaceId, payload);
 }
 
 export async function deleteVideoAction(videoId: number) {

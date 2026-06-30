@@ -1,4 +1,3 @@
-# ============================================================
 # CD Pipeline — Deploy to AWS Lambda on push to main
 #
 # Builds Docker images, pushes to ECR Private, updates Lambda
@@ -12,14 +11,13 @@
 #   ECR_WORKER_REPO_URI
 #   ECR_FRONTEND_REPO_URI
 #   CLOUDFRONT_DISTRIBUTION_ID
-# ============================================================
 
 name: CD
 
 on:
   push:
     branches: [main]
-  workflow_dispatch: # Manual trigger
+  workflow_dispatch:
 
 concurrency:
   group: cd-production
@@ -29,10 +27,11 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
-  # ── Build & Push API Image ─────────────────────────────────
+  # Build & Push API Image
   deploy-api:
     name: Deploy API Lambda
     runs-on: ubuntu-latest
+    environment: development
     steps:
       - uses: actions/checkout@v4
 
@@ -66,7 +65,7 @@ jobs:
           aws lambda wait function-updated-v2 \
             --function-name study-space-production-api
 
-  # ── Build & Push Worker Image ──────────────────────────────
+  # Build & Push Worker Image
   deploy-worker:
     name: Deploy Worker Lambda
     runs-on: ubuntu-latest
@@ -103,7 +102,7 @@ jobs:
           aws lambda wait function-updated-v2 \
             --function-name study-space-production-worker
 
-  # ── Build & Push Frontend Image ────────────────────────────
+  # Build & Push Frontend Image
   deploy-frontend:
     name: Deploy Frontend Lambda
     runs-on: ubuntu-latest
@@ -143,7 +142,7 @@ jobs:
           aws lambda wait function-updated-v2 \
             --function-name study-space-production-frontend
 
-  # ── Post-Deploy ────────────────────────────────────────────
+  # Post-Deploy
   post-deploy:
     name: Invalidate CloudFront Cache
     runs-on: ubuntu-latest

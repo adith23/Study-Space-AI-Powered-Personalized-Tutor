@@ -196,6 +196,7 @@ sudo service redis-server start
 cd backend
 source venv/bin/activate
 venv\Scripts\activate
+uvicorn app.main:app --reload --reload-dir app
 python -m uvicorn app.main:app --reload
 
 API: http://127.0.0.1:8000

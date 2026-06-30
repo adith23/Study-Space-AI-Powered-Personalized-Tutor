@@ -3,8 +3,8 @@
 import { api } from "@/lib/api/index.server";
 import type { CreateQuizPayload, SubmitQuizAttemptPayload } from "@/types/quiz";
 
-export async function createQuizAction(payload: CreateQuizPayload) {
-  return api.quiz.create(payload);
+export async function createQuizAction(spaceId: number, payload: CreateQuizPayload) {
+  return api.spaces.createQuiz(spaceId, payload);
 }
 
 export async function submitQuizAttemptAction(

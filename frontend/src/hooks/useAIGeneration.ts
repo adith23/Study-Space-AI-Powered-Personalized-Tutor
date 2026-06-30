@@ -5,6 +5,7 @@ import type { QuizSummary } from "@/types/quiz";
 import type { FlashcardDeckSummary } from "@/types/flashcard";
 
 export function useAIGeneration(
+  spaceId: number,
   initialQuizzes: QuizSummary[],
   initialDecks: FlashcardDeckSummary[],
   selectedFileIds: Set<number>,
@@ -27,7 +28,7 @@ export function useAIGeneration(
     if (config.questionCount === "More") count = 10;
 
     try {
-      const quiz = await createQuizAction({
+      const quiz = await createQuizAction(spaceId, {
         file_ids: fileIds,
         number_of_questions: count,
         difficulty_level: config.difficulty.toLowerCase() as any,
@@ -55,7 +56,7 @@ export function useAIGeneration(
     if (config.questionCount === "More") count = 20;
 
     try {
-      const deck = await createFlashcardDeckAction({
+      const deck = await createFlashcardDeckAction(spaceId, {
         file_ids: fileIds,
         number_of_cards: count,
         difficulty_level: config.difficulty.toLowerCase() as any,

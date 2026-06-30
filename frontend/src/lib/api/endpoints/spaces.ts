@@ -11,10 +11,21 @@ import type {
   SpaceCreatePayload,
   SpaceUpdatePayload,
 } from "@/types/space";
-import type { UploadedFileListResponse, ChatSession } from "@/types/dashboard";
-import type { QuizSummary } from "@/types/quiz";
-import type { FlashcardDeckSummary } from "@/types/flashcard";
-import type { VideoListItem } from "@/types/video";
+import type {
+  UploadedFileListResponse,
+  UploadedFileUploadResponse,
+  ChatSession,
+} from "@/types/dashboard";
+import type { CreateQuizPayload, QuizSummary } from "@/types/quiz";
+import type {
+  CreateFlashcardDeckPayload,
+  FlashcardDeckSummary,
+} from "@/types/flashcard";
+import type {
+  VideoGenerateRequest,
+  VideoGenerateResponse,
+  VideoListItem,
+} from "@/types/video";
 
 export function createSpacesApi(fetcher: Fetcher) {
   return {
@@ -77,5 +88,42 @@ export function createSpacesApi(fetcher: Fetcher) {
     /** GET /spaces/{spaceId}/videos — List videos for a space */
     listVideos: (spaceId: number) =>
       fetcher<VideoListItem[]>(`/spaces/${spaceId}/videos`),
+
+    // ── Space-scoped resource creation ──────────
+
+    /** POST /spaces/{spaceId}/materials/file — Upload a file to a space */
+    uploadFile: (spaceId: number, formData: FormData) =>
+      fetcher<UploadedFileUploadResponse>(`/spaces/${spaceId}/materials/file`, {
+        method: "POST",
+        body: formData,
+        headers: {},
+      }),
+
+    /** POST /spaces/{spaceId}/materials/chat/sessions — Create chat session in a space */
+    createChatSession: (spaceId: number) =>
+      fetcher<ChatSession>(`/spaces/${spaceId}/materials/chat/sessions`, {
+        method: "POST",
+      }),
+
+    /** POST /spaces/{spaceId}/materials/quizzes — Create a quiz in a space */
+    createQuiz: (spaceId: number, payload: CreateQuizPayload) =>
+      fetcher<QuizSummary>(`/spaces/${spaceId}/materials/quizzes`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+
+    /** POST /spaces/{spaceId}/materials/flashcards — Create flashcard deck in a space */
+    createFlashcardDeck: (spaceId: number, payload: CreateFlashcardDeckPayload) =>
+      fetcher<FlashcardDeckSummary>(`/spaces/${spaceId}/materials/flashcards`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+
+    /** POST /spaces/{spaceId}/videos/generate — Generate a video in a space */
+    generateVideo: (spaceId: number, payload: VideoGenerateRequest) =>
+      fetcher<VideoGenerateResponse>(`/spaces/${spaceId}/videos/generate`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
   };
 }

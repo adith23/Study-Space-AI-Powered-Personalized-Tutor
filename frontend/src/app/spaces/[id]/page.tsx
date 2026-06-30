@@ -28,6 +28,7 @@ export default async function SpacePage({ params }: Props) {
 
     return (
       <StudySpace
+        spaceId={spaceId}
         spaceName={space.name}
         initialFiles={files}
         initialSessions={sessions}

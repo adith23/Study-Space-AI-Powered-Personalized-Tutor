@@ -1,4 +1,4 @@
-# ── Stage 1: Builder ──────────────────────────────────────────
+#  Stage 1: Builder 
 FROM python:3.11-slim AS builder
 
 WORKDIR /app
@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements-prod.txt .
 RUN pip install --no-cache-dir --prefix=/install -r requirements-prod.txt
 
-# ── Stage 2: Runtime (Lambda-compatible) ─────────────────────
+# Stage 2: Runtime (Lambda-compatible) 
 FROM python:3.11-slim AS runtime
 
 WORKDIR /app

@@ -57,7 +57,7 @@ class Settings(BaseSettings):
     FFPROBE_PATH: str = os.getenv("FFPROBE_PATH", "ffprobe")
     VIDEO_MAX_SCENES: int = int(os.getenv("VIDEO_MAX_SCENES", "3"))
     VIDEO_IMAGE_MODEL: str = os.getenv("VIDEO_IMAGE_MODEL", "gemini-2.5-flash-image")
-    VIDEO_TTS_MODEL: str = os.getenv("VIDEO_TTS_MODEL", "gemini-3.1-flash-tts-preview")
+    VIDEO_TTS_MODEL: str = os.getenv("VIDEO_TTS_MODEL", "gemini-2.5-flash-preview-tts")
     VIDEO_TTS_VOICE: str = os.getenv("VIDEO_TTS_VOICE", "Kore")
 
     MANIM_PYTHON_BIN: str = os.getenv("MANIM_PYTHON_BIN", "python")
