@@ -41,6 +41,26 @@ class LocalStorage:
     def get_url(self, key: str) -> str:
         return str(Path(key))
 
+    def get_presigned_url(self, key: str, expires_in: int = 3600) -> str:
+        """Return a presigned URL. Delegated to R2Storage if credentials exist, otherwise falls back to local path."""
+        if settings.R2_ACCESS_KEY_ID and settings.R2_SECRET_ACCESS_KEY:
+            try:
+                r2 = R2Storage()
+                return r2.get_presigned_url(key, expires_in)
+            except Exception as e:
+                logger.warning("Failed to delegate get_presigned_url to R2Storage: %s", e)
+        return self.get_url(key)
+
+    def get_public_url(self, key: str) -> str:
+        """Return a public URL. Delegated to R2Storage if credentials exist, otherwise falls back to local path."""
+        if settings.R2_ACCESS_KEY_ID and settings.R2_SECRET_ACCESS_KEY:
+            try:
+                r2 = R2Storage()
+                return r2.get_public_url(key)
+            except Exception as e:
+                logger.warning("Failed to delegate get_public_url to R2Storage: %s", e)
+        return self.get_url(key)
+
     def exists(self, key: str) -> bool:
         return Path(key).exists()
 

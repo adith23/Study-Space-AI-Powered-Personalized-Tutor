@@ -49,6 +49,13 @@ async def get_current_user(request: Request, db: Session = Depends(get_db)) -> U
 
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)):
-    # The current User model does not include an is_active flag yet.
-    # Returning the authenticated user avoids a silent no-op check.
+    """Enforce that the authenticated user's account is active.
+
+    Raises 403 Forbidden if the account has been deactivated by an admin.
+    """
+    if not current_user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is deactivated. Contact support.",
+        )
     return current_user
