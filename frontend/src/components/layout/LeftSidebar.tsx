@@ -56,7 +56,7 @@ export default function LeftSidebar({
         <nav className="flex flex-col gap-1.5 -ml-3 w-[calc(100%+12px)]">
           <button
             onClick={() => onNavigate?.("home")}
-            className={`flex items-center gap-3 w-full pl-4 pr-3 py-2 rounded-lg text-lg font-normal transition-all ${
+            className={`flex items-center gap-3 w-full pl-4 pr-3 py-2 rounded-lg text-[17px] font-normal transition-all ${
               currentPath === "home"
                 ? "bg-[#202024]/60 text-white font-semibold"
                 : "text-zinc-400 hover:text-zinc-100 hover:bg-[#202024]/20"
@@ -68,7 +68,7 @@ export default function LeftSidebar({
 
           <button
             onClick={() => onNavigate?.("search")}
-            className={`flex items-center gap-3 w-full pl-4 pr-3 py-2 rounded-lg text-lg font-normal transition-all ${
+            className={`flex items-center gap-3 w-full pl-4 pr-3 py-2 rounded-lg text-[17px] font-normal transition-all ${
               currentPath === "search"
                 ? "bg-[#202024]/60 text-white font-semibold"
                 : "text-zinc-400 hover:text-zinc-100 hover:bg-[#202024]/20"
@@ -80,7 +80,7 @@ export default function LeftSidebar({
 
           <button
             onClick={() => onNavigate?.("new-space")}
-            className={`flex items-center gap-3 w-full pl-4 pr-3 py-2 rounded-lg text-lg font-normal transition-all ${
+            className={`flex items-center gap-3 w-full pl-4 pr-3 py-2 rounded-lg text-[17px] font-normal transition-all ${
               currentPath === "new-space"
                 ? "bg-[#202024]/60 text-white font-semibold"
                 : "text-zinc-400 hover:text-zinc-100 hover:bg-[#202024]/20"
@@ -101,7 +101,7 @@ export default function LeftSidebar({
               <button
                 key={space.id}
                 onClick={() => onSpaceSelect?.(space.id)}
-                className={`flex items-center gap-3 w-full pl-4 pr-3 py-0.5 rounded-xl text-lg transition-all ${
+                className={`flex items-center gap-3 w-full pl-4 pr-3 py-0.5 rounded-xl text-[17px] transition-all ${
                   space.isActive
                     ? "bg-[#1d1d1f] border border-zinc-800/80 text-white font-medium"
                     : "text-zinc-400 border border-transparent hover:text-zinc-100 hover:bg-[#202024]/20"

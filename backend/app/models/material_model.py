@@ -41,7 +41,7 @@ class UploadedFile(Base):
         Enum(ProcessingStatus), default=ProcessingStatus.PENDING, nullable=False
     )
     error_message = Column(String, nullable=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     space_id = Column(
         Integer, ForeignKey("spaces.id", ondelete="CASCADE"), nullable=True, index=True
     )
@@ -64,5 +64,7 @@ class DocumentChunk(Base):
 
     metadata_ = Column(JSON, name="metadata", nullable=True)
 
-    source_file_id = Column(Integer, ForeignKey("uploaded_files.id"), nullable=False)
+    source_file_id = Column(
+        Integer, ForeignKey("uploaded_files.id"), nullable=False, index=True
+    )
     source_file = relationship("UploadedFile", back_populates="chunks")

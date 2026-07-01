@@ -7,6 +7,8 @@ export interface FetcherOptions {
   method?: string;
   body?: BodyInit | null;
   headers?: Record<string, string>;
+  timeout?: number;
+  retries?: number;
 }
 
 export type Fetcher = <T>(

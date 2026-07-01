@@ -37,7 +37,7 @@ class GeneratedVideo(Base):
     __tablename__ = "generated_videos"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     space_id = Column(
         Integer, ForeignKey("spaces.id", ondelete="CASCADE"), nullable=True, index=True
     )

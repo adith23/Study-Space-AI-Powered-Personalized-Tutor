@@ -3,8 +3,9 @@
 import { api } from "@/lib/api/index.server";
 import { isNextRedirectError } from "@/lib/api/transport.server";
 import type { SpaceCreatePayload, SpaceUpdatePayload } from "@/types/space";
+import type { ActionResult } from "@/types";
 
-export async function listSpacesAction() {
+export async function listSpacesAction(): Promise<ActionResult<any>> {
   try {
     const data = await api.spaces.list();
     return { error: null, data };
@@ -17,7 +18,7 @@ export async function listSpacesAction() {
   }
 }
 
-export async function createSpaceAction(payload: SpaceCreatePayload) {
+export async function createSpaceAction(payload: SpaceCreatePayload): Promise<ActionResult<any>> {
   try {
     const data = await api.spaces.create(payload);
     return { error: null, data };
@@ -30,7 +31,7 @@ export async function createSpaceAction(payload: SpaceCreatePayload) {
   }
 }
 
-export async function getSpaceAction(spaceId: number) {
+export async function getSpaceAction(spaceId: number): Promise<ActionResult<any>> {
   try {
     const data = await api.spaces.get(spaceId);
     return { error: null, data };
@@ -46,7 +47,7 @@ export async function getSpaceAction(spaceId: number) {
 export async function updateSpaceAction(
   spaceId: number,
   payload: SpaceUpdatePayload,
-) {
+): Promise<ActionResult<any>> {
   try {
     const data = await api.spaces.update(spaceId, payload);
     return { error: null, data };
@@ -59,19 +60,20 @@ export async function updateSpaceAction(
   }
 }
 
-export async function deleteSpaceAction(spaceId: number) {
+export async function deleteSpaceAction(spaceId: number): Promise<ActionResult<void>> {
   try {
     await api.spaces.delete(spaceId);
-    return { error: null };
+    return { error: null, data: null };
   } catch (err) {
     if (isNextRedirectError(err)) throw err;
     return {
       error: err instanceof Error ? err.message : "Failed to delete space",
+      data: null,
     };
   }
 }
 
-export async function exploreSpacesAction(query?: string) {
+export async function exploreSpacesAction(query?: string): Promise<ActionResult<any>> {
   try {
     const data = await api.spaces.explore(query);
     return { error: null, data };

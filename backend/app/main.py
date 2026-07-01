@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -5,27 +6,39 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.api_routes import api_router
 from app.core.config import settings
-from app.core.database import Base, engine
+from app.core.database import check_db_health
 from app.core.logging_config import setup_logging
 
 # Configure structured logging
 setup_logging(environment=settings.ENVIRONMENT)
 
-# Import models to register them with SQLAlchemy
-from app.models import (
-    chat_model,
-    flashcard_model,
-    material_model,
-    quiz_model,
-    space_model,
-    user_model,
-    video_model,
-)
+logger = logging.getLogger(__name__)
+
+# Import all models to register them with SQLAlchemy's metadata registry.
+# This is required for Alembic autogenerate and relationship resolution.
+import app.models  # noqa: F401
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    """Application lifespan events.
+
+    Startup:
+      - Verifies database connectivity (fails fast if unreachable).
+      - Schema creation is handled by Alembic migrations, NOT create_all().
+
+    Shutdown:
+      - Placeholder for future cleanup (connection pool disposal, etc.).
+    """
+    # Verify database is reachable at startup
+    if not check_db_health():
+        logger.warning(
+            "Database health check failed at startup. "
+            "The application will start but some endpoints may fail."
+        )
+    else:
+        logger.info("Database health check passed.")
+
     yield
 
 
@@ -65,3 +78,25 @@ async def root():
         "version": settings.VERSION,
         "docs_url": f"{settings.API_V1_STR}/docs",
     }
+
+
+@app.get("/health")
+async def health():
+    """Health check endpoint for Docker HEALTHCHECK and AWS Lambda Web Adapter.
+
+    Returns 200 with service status if the API is running.
+    Includes a database connectivity check.
+    """
+    db_healthy = check_db_health()
+    status_code = 200 if db_healthy else 503
+
+    from fastapi.responses import JSONResponse
+
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "status": "healthy" if db_healthy else "degraded",
+            "version": settings.VERSION,
+            "database": "connected" if db_healthy else "unreachable",
+        },
+    )

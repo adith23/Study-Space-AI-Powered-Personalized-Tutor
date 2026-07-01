@@ -307,3 +307,17 @@ class TestProtectedEndpoints:
         client.cookies.set("access_token", token)
         response = client.get("/api/v1/materials/files")
         assert response.status_code != 401
+
+    def test_protected_endpoint_deactivated_user_returns_403(self, client, test_user, db_session):
+        """Verify that a deactivated user receives a 403 Forbidden response."""
+        test_user.is_active = False
+        db_session.commit()
+
+        token = create_access_token(
+            data={"sub": test_user.email, "user_id": str(test_user.id)}
+        )
+        headers = {"Authorization": f"Bearer {token}"}
+        response = client.get("/api/v1/materials/files", headers=headers)
+        assert response.status_code == 403
+        assert "deactivated" in response.json()["detail"].lower()
+

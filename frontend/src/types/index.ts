@@ -37,3 +37,8 @@ export interface StatusResponse {
   status: "pending" | "processing" | "success" | "failed";
   error_message?: string;
 }
+
+export interface ActionResult<T = void> {
+  error: string | null;
+  data: T | null;
+}

@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { clientApi } from "@/lib/api/index.client";
 import { generateVideoAction, deleteVideoAction } from "@/actions/video";
-import { DEFAULT_VIDEO_RENDERER, getVideoRenderer } from "@/lib/videoPresentation";
+import {
+  DEFAULT_VIDEO_RENDERER,
+  getVideoRenderer,
+} from "@/lib/videoPresentation";
 import type {
   VideoListItem,
   VideoMeta,
@@ -37,7 +40,7 @@ export function useVideoGeneration(
   );
   const [activeVideoId, setActiveVideoId] = useState<number | null>(null);
   const [activeVideoMeta, setActiveVideoMeta] = useState<VideoMeta | null>(
-    null
+    null,
   );
   const [isGenerating, setIsGenerating] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -73,8 +76,8 @@ export function useVideoGeneration(
                       meta.duration_seconds ?? v.duration_seconds,
                     renderer: meta.renderer ?? v.renderer,
                   }
-                : v
-            )
+                : v,
+            ),
           );
         }
       } catch (err) {
@@ -115,15 +118,23 @@ export function useVideoGeneration(
           focus_prompt: config.focus.trim() || null,
         });
 
+        if (result.error || !result.data) {
+          alert(result.error || "Failed to start video generation.");
+          setIsGenerating(false);
+          return;
+        }
+
+        const data = result.data;
+
         // Add to list
         const newItem = normalizeVideoListItem({
-          id: result.id,
-          status: result.status as VideoStatusType,
+          id: data.id,
+          status: data.status as VideoStatusType,
           created_at: new Date().toISOString(),
-          renderer: result.renderer ?? config.renderer ?? DEFAULT_VIDEO_RENDERER,
+          renderer: data.renderer ?? config.renderer ?? DEFAULT_VIDEO_RENDERER,
         });
         setVideos((prev) => [newItem, ...prev]);
-        setActiveVideoId(result.id);
+        setActiveVideoId(data.id);
         setActiveVideoMeta(null);
       } catch (err) {
         console.error("Failed to start video generation:", err);
@@ -137,17 +148,19 @@ export function useVideoGeneration(
   const handleDeleteVideo = useCallback(
     async (videoId: number) => {
       try {
-        await deleteVideoAction(videoId);
-        setVideos((prev) => prev.filter((v) => v.id !== videoId));
-        if (activeVideoId === videoId) {
-          setActiveVideoId(null);
-          setActiveVideoMeta(null);
+        const res = await deleteVideoAction(videoId);
+        if (!res.error) {
+          setVideos((prev) => prev.filter((v) => v.id !== videoId));
+          if (activeVideoId === videoId) {
+            setActiveVideoId(null);
+            setActiveVideoMeta(null);
+          }
         }
       } catch (err) {
         console.error("Failed to delete video:", err);
       }
     },
-    [activeVideoId]
+    [activeVideoId],
   );
 
   return {

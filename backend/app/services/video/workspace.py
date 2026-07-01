@@ -128,6 +128,7 @@ def upload_final_artifacts(workspace: VideoWorkspace) -> dict:
 def cleanup_workspace(workspace: VideoWorkspace) -> None:
     """Remove the local workspace after R2 upload to free /tmp."""
     import shutil
+
     from app.core.config import settings
 
     if settings.STORAGE_BACKEND == "r2" and workspace.root.exists():

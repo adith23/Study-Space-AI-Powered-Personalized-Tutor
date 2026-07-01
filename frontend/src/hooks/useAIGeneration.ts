@@ -16,7 +16,11 @@ export function useAIGeneration(
   const [activeQuizId, setActiveQuizId] = useState<number | null>(null);
   const [activeDeckId, setActiveDeckId] = useState<number | null>(null);
 
-  const handleCreateQuiz = async (config: { questionCount: string, difficulty: string, focus: string }) => {
+  const handleCreateQuiz = async (config: {
+    questionCount: string;
+    difficulty: string;
+    focus: string;
+  }) => {
     const fileIds = Array.from(selectedFileIds);
     if (fileIds.length === 0) {
       alert("Select at least one processed source for quiz generation.");
@@ -28,14 +32,24 @@ export function useAIGeneration(
     if (config.questionCount === "More") count = 10;
 
     try {
-      const quiz = await createQuizAction(spaceId, {
+      const result = await createQuizAction(spaceId, {
         file_ids: fileIds,
         number_of_questions: count,
         difficulty_level: config.difficulty.toLowerCase() as any,
         focus_prompt: config.focus.trim() || null,
         title: null,
       });
-      setQuizzes((prev) => [quiz, ...prev.filter((item) => item.id !== quiz.id)]);
+
+      if (result.error || !result.data) {
+        alert(result.error || "Failed to create quiz.");
+        return;
+      }
+
+      const quiz = result.data as QuizSummary;
+      setQuizzes((prev) => [
+        quiz,
+        ...prev.filter((item) => item.id !== quiz.id),
+      ]);
       setActiveQuizId(quiz.id);
       setMiddleColumnView("quiz");
     } catch (error) {
@@ -44,7 +58,11 @@ export function useAIGeneration(
     }
   };
 
-  const handleCreateFlashcards = async (config: { questionCount: string, difficulty: string, focus: string }) => {
+  const handleCreateFlashcards = async (config: {
+    questionCount: string;
+    difficulty: string;
+    focus: string;
+  }) => {
     const fileIds = Array.from(selectedFileIds);
     if (fileIds.length === 0) {
       alert("Select at least one processed source for flashcard generation.");
@@ -56,13 +74,20 @@ export function useAIGeneration(
     if (config.questionCount === "More") count = 20;
 
     try {
-      const deck = await createFlashcardDeckAction(spaceId, {
+      const result = await createFlashcardDeckAction(spaceId, {
         file_ids: fileIds,
         number_of_cards: count,
         difficulty_level: config.difficulty.toLowerCase() as any,
         focus_prompt: config.focus.trim() || null,
         title: null,
       });
+
+      if (result.error || !result.data) {
+        alert(result.error || "Failed to create flashcards.");
+        return;
+      }
+
+      const deck = result.data as FlashcardDeckSummary;
       setDecks((prev) => [deck, ...prev.filter((item) => item.id !== deck.id)]);
       setActiveDeckId(deck.id);
       setMiddleColumnView("flashcard");
@@ -80,6 +105,6 @@ export function useAIGeneration(
     activeDeckId,
     setActiveDeckId,
     handleCreateQuiz,
-    handleCreateFlashcards
+    handleCreateFlashcards,
   };
 }
