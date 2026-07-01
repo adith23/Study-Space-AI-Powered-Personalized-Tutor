@@ -2,7 +2,10 @@ import { useState } from "react";
 import { createChatSessionAction } from "@/actions/chat";
 import type { ChatSession } from "@/types/dashboard";
 
-export function useChatSessions(spaceId: number, initialSessions: ChatSession[]) {
+export function useChatSessions(
+  spaceId: number,
+  initialSessions: ChatSession[],
+) {
   const [sessions, setSessions] = useState<ChatSession[]>(initialSessions);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(
     initialSessions.length > 0 ? initialSessions[0].id : null,
@@ -10,9 +13,15 @@ export function useChatSessions(spaceId: number, initialSessions: ChatSession[])
 
   const handleCreateSession = async () => {
     try {
-      const response = await createChatSessionAction(spaceId);
-      setSessions((prev) => [response, ...prev]);
-      setActiveSessionId(response.id);
+      const result = await createChatSessionAction(spaceId);
+      if (result.error || !result.data) {
+        console.error("Failed to create session:", result.error);
+        return;
+      }
+
+      const newSession = result.data as ChatSession;
+      setSessions((prev) => [newSession, ...prev]);
+      setActiveSessionId(newSession.id);
     } catch (error) {
       console.error("Failed to create session", error);
     }
@@ -22,6 +31,6 @@ export function useChatSessions(spaceId: number, initialSessions: ChatSession[])
     sessions,
     activeSessionId,
     setActiveSessionId,
-    handleCreateSession
+    handleCreateSession,
   };
 }

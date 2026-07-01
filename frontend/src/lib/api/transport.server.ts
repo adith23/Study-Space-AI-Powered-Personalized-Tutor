@@ -29,6 +29,56 @@ export function isNextRedirectError(error: unknown) {
 }
 
 /**
+ * Fetch helper with AbortController timeout and exponential backoff retry.
+ */
+async function fetchWithTimeoutAndRetry(
+  url: string,
+  init: RequestInit,
+  retries = 3,
+  timeoutMs = 15000,
+): Promise<Response> {
+  let attempt = 0;
+  while (true) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const res = await fetch(url, {
+        ...init,
+        signal: controller.signal,
+      });
+      clearTimeout(id);
+
+      // Only retry on transient server-side errors (5xx)
+      if (res.status >= 500 && attempt < retries) {
+        console.warn(`[API Server Transport] Transient 5xx response (${res.status}) on attempt ${attempt + 1} for URL: ${url}. Retrying...`);
+        attempt++;
+        const backoffDelay = Math.pow(2, attempt) * 1000 + Math.random() * 200;
+        await new Promise((resolve) => setTimeout(resolve, backoffDelay));
+        continue;
+      }
+
+      return res;
+    } catch (err: any) {
+      clearTimeout(id);
+      const isAbort = err.name === "AbortError";
+      // Fetch throws a TypeError for network connectivity/CORS errors
+      const isNetwork = err instanceof TypeError;
+
+      console.error(`[API Server Transport] Fetch failed on attempt ${attempt + 1} to URL: ${url}. Error:`, err.message || err);
+
+      if ((isAbort || isNetwork) && attempt < retries) {
+        attempt++;
+        const backoffDelay = Math.pow(2, attempt) * 1000 + Math.random() * 200;
+        await new Promise((resolve) => setTimeout(resolve, backoffDelay));
+        continue;
+      }
+      throw err;
+    }
+  }
+}
+
+/**
  * Authenticated server-side fetcher.
  * Satisfies the Fetcher interface — can be passed to any endpoint factory.
  */
@@ -55,12 +105,20 @@ export async function serverTransport<T>(
     headers.set("Content-Type", "application/json");
   }
 
-  const res = await fetch(`${BACKEND_URL}${path}`, {
-    method: options.method || "GET",
-    headers,
-    body: options.body,
-    cache: "no-store",
-  });
+  const timeout = options.timeout ?? 30000;
+  const retries = options.retries ?? 2;
+
+  const res = await fetchWithTimeoutAndRetry(
+    `${BACKEND_URL}${path}`,
+    {
+      method: options.method || "GET",
+      headers,
+      body: options.body,
+      cache: "no-store" as RequestCache,
+    },
+    retries,
+    timeout,
+  );
 
   if (res.status === 401) {
     redirect(LOGIN_EXPIRED_URL);
@@ -96,9 +154,17 @@ export async function serverTransportRaw(
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  return fetch(`${BACKEND_URL}${path}`, {
-    method: options.method || "GET",
-    headers,
-    body: options.body,
-  });
+  const timeout = options.timeout ?? 30000;
+  const retries = options.retries ?? 2;
+
+  return fetchWithTimeoutAndRetry(
+    `${BACKEND_URL}${path}`,
+    {
+      method: options.method || "GET",
+      headers,
+      body: options.body,
+    },
+    retries,
+    timeout,
+  );
 }

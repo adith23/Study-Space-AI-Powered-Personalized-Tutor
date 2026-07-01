@@ -10,7 +10,7 @@ from fastapi import (
     HTTPException,
     UploadFile,
 )
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -59,6 +59,47 @@ def get_files(
     current_user: User = Depends(get_current_active_user),
 ):
     return list_user_files(db=db, current_user=current_user)
+
+
+# Stream file status updates for real-time frontend monitoring using SSE
+@router.get("/files/status/stream")
+async def stream_file_statuses(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Stream file status updates for the current user using Server-Sent Events (SSE).
+    """
+    import asyncio
+    import json
+
+    async def event_generator():
+        try:
+            while True:
+                files = list_user_files(db=db, current_user=current_user)
+                payload = [
+                    {
+                        "id": f.id,
+                        "name": f.name,
+                        "status": f.status,
+                        "error_message": getattr(f, "error_message", None),
+                    }
+                    for f in files
+                ]
+                yield f"data: {json.dumps(payload)}\n\n"
+                await asyncio.sleep(2)
+        except asyncio.CancelledError:
+            pass
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 # Get the status of a file
