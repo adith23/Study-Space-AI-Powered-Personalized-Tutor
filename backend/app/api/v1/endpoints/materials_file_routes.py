@@ -88,6 +88,7 @@ def download_file_content(
     stored_path = str(file_record.stored_path)
     if stored_path.startswith("r2://") or stored_path.startswith("s3://"):
         from fastapi.responses import RedirectResponse
+
         from app.core.storage import get_storage
 
         storage = get_storage()

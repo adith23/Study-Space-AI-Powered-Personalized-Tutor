@@ -199,7 +199,7 @@ export default function Home() {
 
         {/* Recent Spaces Section */}
         <section className="mb-10 w-full max-w-5xl mx-auto">
-          <h3 className="text-zinc-200 text-sm font-semibold tracking-wider mb-4">
+          <h3 className="text-zinc-200 text-lg font-medium tracking-wider mb-4">
             Recent Spaces
           </h3>
 
@@ -220,13 +220,13 @@ export default function Home() {
         </section>
 
         {/* Explore Spaces Section */}
-        <section className="w-full max-w-5xl mx-auto mb-12">
-          <h3 className="text-zinc-200 text-sm font-semibold tracking-wider mb-3">
+        <section className="mb-10 w-full max-w-5xl mx-auto">
+          <h3 className="text-zinc-200 text-lg font-medium tracking-wider mb-4">
             Explore Spaces
           </h3>
 
           {/* Search and Explore input */}
-          <div className="w-full max-w-xs relative mb-5">
+          <div className="w-full max-w-[220px] relative mb-5">
             <input
               type="text"
               placeholder="Search and Explore Spaces"
@@ -239,7 +239,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {exploreSpaces.length > 0 ? (
               exploreSpaces.map((space) => (
                 <ExploreSpaceCard
@@ -249,7 +249,7 @@ export default function Home() {
                 />
               ))
             ) : (
-              <div className="col-span-3 py-8 text-center text-zinc-600 text-xs">
+              <div className="col-span-full py-8 text-center text-zinc-600 text-xs">
                 {spacesQuery
                   ? "No spaces match your search."
                   : "No public spaces available yet."}
